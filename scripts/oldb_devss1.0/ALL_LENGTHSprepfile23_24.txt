@@ -1,0 +1,23 @@
+
+export OMP_NUM_THREADS=1
+
+# Now use alphaz=1.0
+# move to parent dir.
+cd ../../
+
+for t in 0.1 0.01 0.001 0.0001
+do
+for K in K1_L8 K1_L16 K1_L32 K1_L64 K2_Kx1Ky2_L8 K2_Kx1Ky2_L16 K2_Kx1Ky2_L32 K2_Kx1Ky2_L64 K2_Kx2Ky1_L8 K2_Kx2Ky1_L16 K2_Kx2Ky1_L32 K2_Kx2Ky1_L64 K4_Kx2Ky2_L8 K4_Kx2Ky2_L16 K4_Kx2Ky2_L32 K4_Kx2Ky2_L64                
+
+do
+for N in 4 6 8
+do
+
+outfile_screen=${outpath}newt${prob_num}_Re${re}_dt${t}_${K}_N${N}.out
+outfile=${outpath}newt${prob_num}_Re${re}_dt${t}_${K}_N${N}
+infile=${inpath}${K}.dat
+
+./vesemd -input ${infile} -output ${outfile} -prob ${prob_num} -N ${N} -alphaz 1.0 -deltat ${t} -re ${re} > ${outfile_screen}
+done
+done
+done

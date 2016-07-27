@@ -1,0 +1,30 @@
+#!/bin/bash
+#PBS -q workq
+#PBS -N stokes_14
+#PBS -o stokes_14-out.txt
+#PBS -e stokes_14-err.txt
+#PBS -l select=1:ncpus=8:mpiprocs=8
+#PBS -l place=scatter:excl
+#PBS -l walltime=12:00:00
+
+#PROJECT=PR58
+module load compiler/intel-13
+export OMP_NUM_THREADS=1
+cd $PBS_O_WORKDIR
+
+
+cd ../../
+
+for a in 0.0 0.001 0.01 0.1 1.0
+do
+
+rm output/stokes_14/alphaz_${a}/stokes_14_alphaz_${a}.out
+
+for K in 5 8 10 16
+do
+for N in 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+do
+./vesemd -input input/model_cyl/fixedcylindermeshK${K}.dat -prob 14 -output output/stokes_14/alphaz_${a}/stokes_14_K${K}_N${N} -N ${N} -alphaz ${a} >> output/stokes_14/alphaz_${a}/stokes_14_alphaz_${a}.out
+done
+done
+done

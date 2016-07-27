@@ -1,0 +1,139 @@
+Input data file:
+
+numnp = 16
+numelm = 7
+rad_sphere = 1.0
+centreX = 0.0
+centreY = 0.0
+coordflag = 0
+preconflag = 1
+movingmesh = 0
+
+
+Node   Co-ordinates
+1	-4.0	0.0
+2	-1.0	0.0
+3	-0.5	0.866025403784438
+4	-4.0	2.0
+5	0.5	0.866025403784438
+6	4.0	2.0
+7	1.0	0.0
+8	4.0	0.0
+9	-2.309401076758503	0.0
+10	-1.154700538379252	2.0
+11	1.154700538379252	2.0
+12	2.309401076758503		0.0
+13	-20.0	0.0
+14	-20.0	2.0
+15	20.0	0.0
+16	20.0	2.0
+END
+
+
+element  nodes
+1	1 9 10 4
+2	2 3 10 9
+3	3 5 11 10
+4	5 7 12 11
+5	12 8 6 11
+6	13 1 4 14
+7	8 15 16 6
+END
+
+
+boundary nodes
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+END
+
+
+neumann neumann nodes x=1 or y=2
+1	1	0
+2	1	0
+7	1	0
+8	1	0
+9	1	0
+12	1	0
+13	1	0
+15	1	0
+END
+
+
+wall nodes
+4
+6
+10
+11
+14
+16
+END
+
+
+inflow nodes
+13
+14
+END
+
+
+outflow nodes
+15
+16
+END
+
+
+wallsymm nodes
+1
+2
+7
+8
+9
+12
+13
+15
+END
+
+
+circular element theta1 theta2
+2	180	120
+3	120	60
+4	60	0
+END
+
+
+fixed nodes
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+END
+
+
+accordian elements
+END
+
