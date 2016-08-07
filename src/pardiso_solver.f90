@@ -164,7 +164,7 @@ MODULE pardiso_solver
     INTEGER :: i, nrhs, mnum, maxfct, msglvl, mtype, phase, idum, error
     DOUBLE PRECISION :: ddum
     
-!     CALL mkl_set_num_threads(1)
+    CALL mkl_set_num_threads(1)
     CALL calc_global_symmetric_non_zeroes(global_non_zeros)
     
     CALL assign_pardiso_memory      
