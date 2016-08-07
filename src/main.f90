@@ -109,7 +109,7 @@ PROGRAM main
     time_limit=20d0
   ELSE
 ! All others:
-    time_limit = 50d0
+    time_limit = 40d0
   ENDIF
   
 
