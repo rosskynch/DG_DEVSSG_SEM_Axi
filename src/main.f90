@@ -264,12 +264,14 @@ PROGRAM main
 ! Check if solution has converged:
     IF (movingmeshflag.eq.0) THEN 
       IF ((stopping_criteria.lt.stopping_tol.and.drag_criteria.lt.stopping_tol) &
-						  .or.timeN.gt.time_limit) THEN
-      EXIT
-
+	                                    .or.timeN.gt.time_limit) THEN
+	IF (printoutcount.ne.print_threshold) THEN
+	  CALL output_to_tecplot
+        ENDIF
+        EXIT
       ENDIF
     ELSEIF (movingmeshflag.eq.1) THEN
-      IF ((stopping_criteria.lt.stopping_tol.and.drag_criteria.lt.stopping_tol)&
+      IF ((stopping_criteria.lt.stopping_tol.and.drag_criteria.lt.stopping_tol) &
 					    .or.timeN.gt.time_limit) THEN
 	IF (printoutcount.ne.print_threshold) THEN
 	  CALL output_to_tecplot

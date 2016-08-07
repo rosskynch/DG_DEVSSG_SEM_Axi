@@ -516,7 +516,7 @@ END SUBROUTINE read_input
     
       write(tecplot_output_fileid,*) 'VARIABLES = "x","y","V_x","V_y","P",', & ! 1 2 3 4 5
 			'"GradUxx","GradUyx","GradUxy","GradUyy","GradUzz",', & ! 6 7 8 9 10 ! components of gradient of velocity
-			'"Gxy",',& ! 11 ! xy component of rate of strain (= 0.5*(GradU + GradU^(T)))
+			!'"Gxy",',& ! 11 ! xy component of rate of strain (= 0.5*(GradU + GradU^(T)))
 			'"Tao_xx","Tao_xy","Tao_yy","Tao_zz"' ! 12 13 14 15 components of elastic stress
       DO el=1,numelm
 	write(tecplot_output_fileid,*) 'ZONE T="time:',timeN,'" I =', NP1,', J =', NP1,',F=POINT'
@@ -526,7 +526,7 @@ END SUBROUTINE read_input
 ! VELOCITY GRADIENT
 		    localGradUxx(ij,el),localGradUyx(ij,el),localGradUxy(ij,el),localGradUyy(ij,el),localGradUzz(ij,el),&
 ! RATE OF STRAIN:
-		    5d-1*(localGradUxy(ij,el) + localGradUyx(ij,el)),&
+		    !5d-1*(localGradUxy(ij,el) + localGradUyx(ij,el)),&
 ! ELASTIC STRESS:
 		    localTxx(ij,el),localTxy(ij,el),localTyy(ij,el),localTzz(ij,el)
 	ENDDO
