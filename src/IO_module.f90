@@ -1016,26 +1016,18 @@ END SUBROUTINE read_input
 
   END SUBROUTINE parse_command_line_arguments  
   
-  SUBROUTINE create_cross_stream_points
-    IMPLICIT NONE
-    INTEGER :: i,j,el,k
-    DOUBLE PRECISION :: fixed_x, y_coords(1:25),temp_x,temp_y,temp_xi,temp_eta,
-  
-    fixed_x=2d0
-    DO i=1:25
-      temp_x=fixed_x
-      temp_y=y_coords(i)
+!  SUBROUTINE create_cross_stream_points
+!    IMPLICIT NONE
+!    INTEGER :: i,j,el,k
+!    DOUBLE PRECISION :: fixed_x, y_coords(1:25),temp_x,temp_y,temp_xi,temp_eta,
+!
+!    fixed_x=2d0
+!    DO i=1:25
+!      temp_x=fixed_x
+!      temp_y=y_coords(i)
 ! Find local element and xi/eta co-ordinate from x/y co-ord :
-      CALL map_x_y_to_xi_eta(temp_x, temp_y, el_out, temp_xi, temp_eta)
-      
-            
-      
-    ENDDO
-    
-    
-  
-  END SUBROUTINE create_cross_stream_points
-  
-  
-  
+!      CALL map_x_y_to_xi_eta(temp_x, temp_y, el_out, temp_xi, temp_eta)
+!    ENDDO
+!  END SUBROUTINE create_cross_stream_points
+ 
 END MODULE IO_module
