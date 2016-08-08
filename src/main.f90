@@ -122,10 +122,11 @@ PROGRAM main
     
   
 ! Open tecplot output file & write the ICs set.
-  IF (movingmeshflag.eq.1) THEN
-    OPEN(tecplot_output_fileid,FILE=tecplot_output_filename,IOSTAT=ierror)
-    CALL output_to_tecplot
-  ENDIF
+! MODIFIED TO PRINT OUT FOR BOTH MOVING AND NON-MOVING
+! TODO: Add an input parameter to turn this on/off (see at end of time loop too).
+  OPEN(tecplot_output_fileid,FILE=tecplot_output_filename,IOSTAT=ierror)
+  CALL output_to_tecplot
+
   printoutcount=print_threshold ! Forces code to print first timestep.
 
   
