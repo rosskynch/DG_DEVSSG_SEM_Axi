@@ -253,12 +253,12 @@ PROGRAM main
 ! OUTPUT SECTION:
     CALL cpu_time(cputime_total)
     CALL output_to_screen ! Always wanted.
-    IF (movingmeshflag.eq.1) THEN 
-      printoutcount=printoutcount+1
-      IF (printoutcount.ge.print_threshold) THEN 
-	CALL output_to_tecplot
-	printoutcount=0	
-      ENDIF
+! Added output to tecplot (non-fine) for all runs
+! TODO: Add an input parameter (via CLI or input file) which turns this output on/off.
+    printoutcount=printoutcount+1
+    IF (printoutcount.ge.print_threshold) THEN 
+      CALL output_to_tecplot
+      printoutcount=0	
     ENDIF
 
 ! Check if solution has converged:
