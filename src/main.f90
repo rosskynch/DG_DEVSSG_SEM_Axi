@@ -35,6 +35,7 @@ PROGRAM main
 	     print_threshold,ierror
   DOUBLE PRECISION :: time_limit,test,msqe,temp1,temp2,cputime_temp1,cputime_temp2,cputime_section1,cputime_section2,&
 		      V_xH1norm,V_yH1norm,pressure_L2norm,stopping_tol,stopcheck,xi_out,eta_out,drag_criteria
+  LOGICAL :: printed_to_tecplot
 
 ! Read in values (This will assign required memory)
   CALL read_input
@@ -69,7 +70,14 @@ PROGRAM main
 
   stopping_tol = 1d-6*deltat ! should be timestep-dependent ?? 
   
-  print_threshold = INT(5d-2/deltat)
+! Set the threshold iterations between printing to tecplot.
+! The aim is to print 10 per time unit for a fixed mesh and
+! 20 per time unit for a moving mesh simulation.
+  if (movingmeshflag.eq.1) THEN
+    print_threshold = INT(5d-2/deltat)
+  ELSE
+    print_threshold = INT(1d-1/deltat)
+  ENDIF
  
   RK4_timesteps=8
   h_RK4=deltat/dfloat(RK4_timesteps)
@@ -257,16 +265,18 @@ PROGRAM main
 ! Added output to tecplot (non-fine) for all runs
 ! TODO: Add an input parameter (via CLI or input file) which turns this output on/off.
     printoutcount=printoutcount+1
+    printed_to_tecplot = .FALSE.
     IF (printoutcount.ge.print_threshold) THEN 
       CALL output_to_tecplot
-      printoutcount=0	
+      printed_to_tecplot = .TRUE.
+      printoutcount=0
     ENDIF
 
 ! Check if solution has converged:
     IF (movingmeshflag.eq.0) THEN 
       IF ((stopping_criteria.lt.stopping_tol.and.drag_criteria.lt.stopping_tol) &
 	                                    .or.timeN.gt.time_limit) THEN
-	IF (printoutcount.ne.print_threshold) THEN
+	IF (.NOT.printed_to_tecplot) THEN
 	  CALL output_to_tecplot
         ENDIF
         EXIT
@@ -274,7 +284,7 @@ PROGRAM main
     ELSEIF (movingmeshflag.eq.1) THEN
       IF ((stopping_criteria.lt.stopping_tol.and.drag_criteria.lt.stopping_tol) &
 					    .or.timeN.gt.time_limit) THEN
-	IF (printoutcount.ne.print_threshold) THEN
+	IF (.NOT.printed_to_tecplot) THEN
 	  CALL output_to_tecplot
 	ENDIF
 	EXIT
