@@ -293,6 +293,8 @@ MODULE result_analysis
       a = model_soln_vel_x(i)
     ELSEIF (param_function_choice.eq.4) THEN ! known cylinder
       a = cylinder_soln_vel_x(i)
+	ELSEIF (param_function_choice.eq.10) THEN ! known model 2 (Tim/Tom paper)
+      a = model_soln2_vel_x(i)
     ELSEIF (param_waters) THEN ! known transient poiseuille flow
       a = transient_u(i)
     ELSE
@@ -311,6 +313,8 @@ MODULE result_analysis
       a = model_soln_Grad_vel_xx(i)
     ELSEIF (param_function_choice.eq.4) THEN
       a = cylinder_soln_Grad_vel_xx(i)
+	ELSEIF (param_function_choice.eq.10) THEN ! known model 2 (Tim/Tom paper)
+      a = model_soln2_Grad_vel_xx(i)
     ELSEIF (param_waters) THEN ! known transient poiseuille flow
       a = 0d0
     ELSE
@@ -331,6 +335,8 @@ MODULE result_analysis
       a = model_soln_Grad_vel_yx(i)
     ELSEIF (param_function_choice.eq.4) THEN
       a = cylinder_soln_Grad_vel_yx(i)
+	ELSEIF (param_function_choice.eq.10) THEN ! known model 2 (Tim/Tom paper)
+      a = model_soln2_Grad_vel_yx(i)
     ELSEIF (param_waters) THEN ! known transient poiseuille flow
       a = transient_gradUyx(i)
     ELSE
@@ -349,6 +355,8 @@ MODULE result_analysis
       a = model_soln_vel_y(i)
     ELSEIF (param_function_choice.eq.4) THEN
       a = cylinder_soln_vel_y(i)
+	ELSEIF (param_function_choice.eq.10) THEN ! known model 2 (Tim/Tom paper)
+      a = model_soln2_vel_y(i)
     ELSEIF (param_waters) THEN ! known transient poiseuille flow
       a = 0d0
     ELSE
@@ -367,6 +375,8 @@ MODULE result_analysis
       a = model_soln_Grad_vel_xy(i)
     ELSEIF (param_function_choice.eq.4) THEN
       a = cylinder_soln_Grad_vel_xy(i)
+	ELSEIF (param_function_choice.eq.10) THEN ! known model 2 (Tim/Tom paper)
+      a = model_soln2_Grad_vel_xy(i)
     ELSEIF (param_waters) THEN ! known transient poiseuille flow
       a = 0d0
     ELSE
@@ -385,6 +395,8 @@ MODULE result_analysis
       a = model_soln_Grad_vel_yy(i)
     ELSEIF (param_function_choice.eq.4) THEN
       a = cylinder_soln_Grad_vel_yy(i)
+	ELSEIF (param_function_choice.eq.10) THEN ! known model 2 (Tim/Tom paper)
+      a = model_soln2_Grad_vel_yy(i)
     ELSEIF (param_waters) THEN ! known transient poiseuille flow
       a = 0d0
     ELSE
@@ -411,6 +423,8 @@ MODULE result_analysis
       a = -8d0*nodeCoord(i,1) ! MAYBE WRONG ??? !
     ELSEIF (param_function_choice.eq.8) THEN ! known transient poiseuille flow
       a = -4d0*nodeCoord(i,1) ! MAYBE WRONG ??? !
+	ELSEIF (param_function_choice.eq.10) THEN ! known model 2 (Tim/Tom paper)
+      a = model_soln2_pressure(i)
     ELSE
       a = -999d0
 ! ADD MORE AS APPROPRIATE.
@@ -744,10 +758,12 @@ MODULE result_analysis
 ! Always want velocity error norm.
     
 ! Now calculate appropriate error measures depending on problem.
-    IF (param_function_choice.eq.3.or.param_function_choice.eq.4) THEN
+    IF (param_function_choice.eq.3.or.param_function_choice.eq.4.or.param_function_choice.eq.10) THEN
 ! Stokes model soln. h1-norm of velocity error. L2-norm of pressure error.
 ! AND
 ! Stokes 2d cylinder. h1-norm of velocity error. L2-norm of pressure error.
+! AND
+! Stokes model soln2 For Tim/Tom paper. l2norm and H1-norm of velocity error. L2-norm of pressure error.
     L2norm_vel_err = L2Norm_vector_field_globalinput(V_x_error,V_y_error)
     H1norm_vel_err = H1Norm_vector_field_localinput(V_x_error,V_y_error,gradUxx_error,gradUyx_error,gradUxy_error,gradUyy_error)
     L2norm_press_err = L2Norm_scalar_field_localinput(pressure_error)

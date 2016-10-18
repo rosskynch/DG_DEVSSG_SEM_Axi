@@ -350,6 +350,13 @@ MODULE initial_conditions_module
       ENDIF
       param_function_choice = 4
       param_error=.true.
+	ELSEIF (param_problem_choice.eq.15) THEN ! Stokes Model solution 2: Request from Tim.
+	  IF (coordflag.eq.1) THEN
+		write(*,*) 'ERROR: coordflag inconsistent with problem style'
+	    STOP
+	  ENDIF
+	  param_function_choice = 10
+	  param_error=.true.
 ! THESE ARE YET TO BE MADE FINAL:
     ELSEIF (param_problem_choice.eq.23) THEN ! Newtonian 2-D Transient Waters solution
       IF (coordflag.eq.1) THEN

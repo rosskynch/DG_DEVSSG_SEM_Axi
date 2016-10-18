@@ -124,6 +124,8 @@ MODULE functions_module
 ! ADD MORE AS APPROPRIATE.    
     IF     (param_function_choice.eq.3) THEN
       a = model_soln_f_x(i)
+	ELSEIF (param_function_choice.eq.10) THEN
+	  a = model_soln2_f_x(i)
     ELSE ! ALL OTHERS HAVE NO BODY FORCE
       a = 0d0
     ENDIF
@@ -136,6 +138,8 @@ MODULE functions_module
 ! ADD MORE AS APPROPRIATE.    
     IF     (param_function_choice.eq.3) THEN
       a = model_soln_f_y(i)
+	ELSEIF (param_function_choice.eq.10) THEN
+	  a = model_soln2_f_y(i)
     ELSE ! ALL OTHERS HAVE NO BODY FORCE
       a = 0d0
     ENDIF
@@ -1702,6 +1706,96 @@ MODULE functions_module
     out = -PI*cos(PI*nodeCoord(glob_i_in,1))*cos(PI*nodeCoord(glob_i_in,2))
     
   END FUNCTION model_soln_Grad_vel_yy
+  
+! Model Solution 2 for Tim:
+! u = -sin(2*PI*y)*(cos(2*PI*x) - 1)
+! v = sin(2*PI*x)*(cos(2*PI*y) - 1)
+! p = sin(PI*x*y)
+!
+! f_x = PI*y*cos(PI*x*y) + 4*PI^2*sin(2*PI*y)*(2*cos(2*PI*x) - 1)
+! f_y = PI*x*cos(PI*x*y) - 4*PI^2*sin(2*PI*x)*(2*cos(2*PI*y) - 1)
+
+  DOUBLE PRECISION FUNCTION model_soln2_vel_x(glob_i_in) RESULT(out)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: glob_i_in
+    
+	out = -sin(2d0*PI*nodeCoord(glob_i_in,2))*(cos(2d0*PI*nodeCoord(glob_i_in,1)) - 1d0)
+    
+  END FUNCTION model_soln2_vel_x
+  
+  DOUBLE PRECISION FUNCTION model_soln2_vel_y(glob_i_in) RESULT(out)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: glob_i_in
+    
+    out = sin(2d0*PI*nodeCoord(glob_i_in,1))*(cos(2d0*PI*nodeCoord(glob_i_in,2)) - 1d0)
+    
+  END FUNCTION model_soln2_vel_y
+  
+  DOUBLE PRECISION FUNCTION model_soln2_f_x(glob_i_in) RESULT(out)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: glob_i_in
+    DOUBLE PRECISION :: x,y
+    
+    x=nodeCoord(glob_i_in,1)
+    y=nodeCoord(glob_i_in,2)
+    
+    out = PI*y*cos(PI*x*y) + 4d0*PI*PI*sin(2d0*PI*y)*(2d0*cos(2d0*PI*x) - 1d0)
+    
+  END FUNCTION model_soln2_f_x
+  
+  DOUBLE PRECISION FUNCTION model_soln2_f_y(glob_i_in) RESULT(out)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: glob_i_in
+    DOUBLE PRECISION :: x,y
+    
+    x=nodeCoord(glob_i_in,1)
+    y=nodeCoord(glob_i_in,2)
+    
+    out = PI*x*cos(PI*x*y) - 4d0*PI*PI*sin(2d0*PI*x)*(2d0*cos(2d0*PI*y) - 1d0)
+    
+  END FUNCTION model_soln2_f_y
+  
+  DOUBLE PRECISION FUNCTION model_soln2_pressure(glob_i_in) RESULT(out)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: glob_i_in
+    
+    out = sin(PI*nodeCoord(glob_i_in,1)*nodeCoord(glob_i_in,2))
+    
+  END FUNCTION model_soln2_pressure
+  
+!	GRADIENTS
+
+  DOUBLE PRECISION FUNCTION model_soln2_Grad_vel_xx(glob_i_in) RESULT(out)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: glob_i_in
+    
+    out = 2d0*PI*sin(2d0*PI*nodeCoord(glob_i_in,1))*sin(2d0*PI*nodeCoord(glob_i_in,2))
+    
+  END FUNCTION model_soln2_Grad_vel_xx
+  
+  DOUBLE PRECISION FUNCTION model_soln2_Grad_vel_yx(glob_i_in) RESULT(out)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: glob_i_in
+    
+    out = -2d0*PI*cos(2d0*PI*nodeCoord(glob_i_in,2))*(cos(2d0*PI*nodeCoord(glob_i_in,1)) - 1d0)
+    
+  END FUNCTION model_soln2_Grad_vel_yx
+ 
+  DOUBLE PRECISION FUNCTION model_soln2_Grad_vel_xy(glob_i_in) RESULT(out)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: glob_i_in
+    
+    out = 2d0*PI*cos(2d0*PI*nodeCoord(glob_i_in,1))*(cos(2d0*PI*nodeCoord(glob_i_in,2)) - 1d0)
+    
+  END FUNCTION model_soln2_Grad_vel_xy
+  
+  DOUBLE PRECISION FUNCTION model_soln2_Grad_vel_yy(glob_i_in) RESULT(out)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: glob_i_in
+    
+    out = -2d0*PI*sin(2d0*PI*nodeCoord(glob_i_in,1))*cos(2d0*PI*nodeCoord(glob_i_in,2))
+    
+  END FUNCTION model_soln2_Grad_vel_yy
   
 ! END FUNCTIONS FOR STOKES MODEL SOLUTION
 

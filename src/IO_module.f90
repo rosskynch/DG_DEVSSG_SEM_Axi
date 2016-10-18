@@ -386,7 +386,7 @@ END SUBROUTINE read_input
       ENDDO  
 
 
-    ELSEIF (param_problem_choice.eq.13.or.param_problem_choice.eq.14) THEN ! Stokes 2-D Model solutions.
+    ELSEIF (param_problem_choice.eq.13.or.param_problem_choice.eq.14.or.param_problem_choice.eq.15) THEN ! Stokes 2-D Model solutions.
     
     
       write(tecplot_output_fileid,*) 'VARIABLES = "x","y","V_x","V_y","P",', & ! 1 2 3 4 5
@@ -784,7 +784,7 @@ END SUBROUTINE read_input
 	WRITE(*,*) numelm, N, drag, drag_star, & 
 		    cputime_initialise, cputime_setup, cputime_solve, cputime_total, global_dim
 		    
-    ELSEIF (param_problem_choice.eq.13) THEN
+    ELSEIF (param_problem_choice.eq.13.or.param_problem_choice.eq.15) THEN
 ! Model problem.
 ! Want numelm, N, H1norm(velocity), L2norm(pressure), cputime_initialise, cputime_setup, cputime_solve, cputime_total, global_dim   
 	WRITE(*,*) numelm, N, L2norm_vel_err, H1norm_vel_err, L2norm_press_err, & 
