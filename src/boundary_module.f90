@@ -253,6 +253,8 @@ MODULE boundary_module
       a = model_soln_vel_x(i)
     ELSEIF (param_function_choice.eq.4) THEN
       a = cylinder_soln_vel_x(i)
+    ELSEIF (param_function_choice.eq.10) THEN
+      a = model_soln2_vel_x(i)
     ELSE
       a = 0d0 ! Includes 1 5 6 7 8 9.
 ! ADD MORE AS APPROPRIATE.
@@ -269,6 +271,8 @@ MODULE boundary_module
       a = model_soln_vel_y(i)
     ELSEIF (param_function_choice.eq.4) THEN
       a = cylinder_soln_vel_y(i)
+    ELSEIF (param_function_choice.eq.10) THEN
+      a = model_soln2_vel_y(i)
     ELSE
       a = 0d0 ! Includes 1 2 5 6 7 8.
 ! ADD MORE AS APPROPRIATE.
@@ -287,6 +291,8 @@ MODULE boundary_module
       a = model_soln_vel_x(i)
     ELSEIF (param_function_choice.eq.4) THEN
       a = cylinder_soln_vel_x(i) ! SHOULD BE ZERO?!?!?!
+    ELSEIF (param_function_choice.eq.10) THEN
+      a = model_soln2_vel_x(i)
     ELSE
       a = 0d0 ! Includes 1 2 5 6 7 8.
 
@@ -304,6 +310,8 @@ MODULE boundary_module
       a = model_soln_vel_y(i)
     ELSEIF (param_function_choice.eq.4) THEN
       a = cylinder_soln_vel_y(i)
+    ELSEIF (param_function_choice.eq.10) THEN
+      a = model_soln2_vel_y(i)
     ELSE
       a = 0d0 ! Includes 1 2 5 6 7 8.
 ! ADD MORE AS APPROPRIATE.
@@ -324,6 +332,8 @@ MODULE boundary_module
       a = model_soln_vel_x(i)
     ELSEIF (param_function_choice.eq.4) THEN
       a = cylinder_soln_vel_x(i)
+    ELSEIF (param_function_choice.eq.10) THEN
+      a = model_soln2_vel_x(i)
     ELSEIF (param_waters) THEN ! Includes 5 6 7 8.
       a = transient_u(i)
     ELSE
@@ -345,6 +355,8 @@ MODULE boundary_module
       a = model_soln_vel_y(i)
     ELSEIF (param_function_choice.eq.4) THEN
       a = cylinder_soln_vel_y(i)
+    ELSEIF (param_function_choice.eq.10) THEN
+      a = model_soln2_vel_y(i)
     ELSE
       a = 0d0 ! Includes 1 2 5 6 7 8.   
 ! ADD MORE AS APPROPRIATE.
@@ -365,6 +377,8 @@ MODULE boundary_module
       a = model_soln_vel_x(i)
     ELSEIF (param_function_choice.eq.4) THEN
       a = cylinder_soln_vel_x(i)
+    ELSEIF (param_function_choice.eq.10) THEN
+      a = model_soln2_vel_x(i)
     ELSEIF (param_waters) THEN ! Includes 5 6 7 8.
       a = transient_u(i)
     ELSE
@@ -383,6 +397,8 @@ MODULE boundary_module
       a = model_soln_vel_y(i)
     ELSEIF (param_function_choice.eq.4) THEN
       a = cylinder_soln_vel_y(i)
+    ELSEIF (param_function_choice.eq.10) THEN
+      a = model_soln2_vel_y(i)
     ELSE
       a = 0d0 ! Includes 1 2 5 6 7 8.
 ! ADD MORE AS APPROPRIATE.
@@ -400,6 +416,8 @@ END FUNCTION FIXEDoutflowterm_y
       a = model_soln_vel_x(i)
     ELSEIF (param_function_choice.eq.4) THEN
       a = cylinder_soln_vel_x(i)
+    ELSEIF (param_function_choice.eq.10) THEN
+      a = model_soln2_vel_x(i)
     ELSE
       a = 0d0 ! Includes 1 2 5 6 7 8.
 ! ADD MORE AS APPROPRIATE.
@@ -417,6 +435,8 @@ END FUNCTION FIXEDoutflowterm_y
       a = model_soln_vel_y(i)
     ELSEIF (param_function_choice.eq.4) THEN
       a = cylinder_soln_vel_y(i)
+    ELSEIF (param_function_choice.eq.10) THEN
+      a = model_soln2_vel_y(i)
     ELSE
       a = 0d0 ! Includes 1 2 5 6 7 8.
 ! ADD MORE AS APPROPRIATE.
