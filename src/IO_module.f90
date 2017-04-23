@@ -921,12 +921,14 @@ END SUBROUTINE read_input
 	print*, '-beta_s [double]   | DEVSS artificial viscosity parameter (default: 0.0 / OFF)'
 	print*, '-prob [integer]    | problem choice - use -prob_help for more info'
 	print*, '-output [filename] | output leading filename (3 will be produced), do not include suffix'
+	print*, '-enable_output [integer] | disable file output. 0 = OFF, any other value = ON (default: ON)'
 	print*, '-deltat [double]   | timestep size (default: 0.001)'
 	print*, '-alphaz [double]   | Co-efficient of integral of pressure in conservation of mass equation (default: 0.0 / OFF)'
 	print*, '-con_it [double]   | Choose the treatment of the convective term in the constituitive equation. 0 = EX2, 1=semi-iterative (default: 1 / semi-iterative)'
 	print*, '-time_order [integer]   | Choose the time-order of the numerical scheme. Available options: 1=1st-order, 2=2nd-order (default), 3=3rd-order'
 	print*, '-rho_f [double]   | density of fluid (default: 0.868)'
 	print*, '-rho_s [double]   | density of sphere (default: 3.581)'
+	
 	STOP
       ELSEIF (arg_in.eq.'-prob_help'.or.arg_in.eq.'-probhelp') THEN
             
@@ -943,6 +945,7 @@ END SUBROUTINE read_input
 	print*,'x2 = Uniform flow (past sphere)'
 	print*,'x3 = Stokes: model solution | Newt/Visco: transient Poiseuille (2-D)'
 	print*,'x4 = Stokes: known cylinder solution | Newt/Visco: transient Poiseuille (Axisymm 3-D)'
+	print*,'x5 = Stokes: alternative model solution'
 	STOP
       ENDIF
       i=i+1
@@ -981,6 +984,11 @@ END SUBROUTINE read_input
 	tecplot_fine_output_filename = trim(output_filename)//'_tec_fine.dat'
 	wallsymm_output_filename = trim(output_filename)//'_wallsymm.txt'
 	
+	  ELSEIF (arg_in.eq.'-enable_output') THEN
+	    READ(temp,*) temp_int
+	    IF(temp_int.eq.0) THEN
+	      enable_output_to_file=.false.
+	    ENDIF
       ELSEIF (arg_in.eq.'-deltat'.or.arg_in.eq.'-Deltat') THEN      
 	READ(temp,*) deltat
       ELSEIF (arg_in.eq.'-alphaz'.or.arg_in.eq.'-alphaZ' &

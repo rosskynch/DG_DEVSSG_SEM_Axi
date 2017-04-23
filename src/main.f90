@@ -132,8 +132,10 @@ PROGRAM main
 ! Open tecplot output file & write the ICs set.
 ! MODIFIED TO PRINT OUT FOR BOTH MOVING AND NON-MOVING
 ! TODO: Add an input parameter to turn this on/off (see at end of time loop too).
-  OPEN(tecplot_output_fileid,FILE=tecplot_output_filename,IOSTAT=ierror)
-  CALL output_to_tecplot
+  IF(enable_output_to_file) THEN
+    OPEN(tecplot_output_fileid,FILE=tecplot_output_filename,IOSTAT=ierror)
+    CALL output_to_tecplot
+  ENDIF
 
   printoutcount=print_threshold ! Forces code to print first timestep.
 
@@ -266,7 +268,7 @@ PROGRAM main
 ! TODO: Add an input parameter (via CLI or input file) which turns this output on/off.
     printoutcount=printoutcount+1
     printed_to_tecplot = .FALSE.
-    IF (printoutcount.ge.print_threshold) THEN 
+    IF (enable_output_to_file.AND.printoutcount.ge.print_threshold) THEN 
       CALL output_to_tecplot
       printed_to_tecplot = .TRUE.
       printoutcount=0
@@ -276,18 +278,18 @@ PROGRAM main
     IF (movingmeshflag.eq.0) THEN 
       IF ((stopping_criteria.lt.stopping_tol.and.drag_criteria.lt.stopping_tol) &
 	                                    .or.timeN.gt.time_limit) THEN
-	IF (.NOT.printed_to_tecplot) THEN
-	  CALL output_to_tecplot
+	    IF (enable_output_to_file.AND..NOT.printed_to_tecplot) THEN
+	      CALL output_to_tecplot
         ENDIF
         EXIT
       ENDIF
     ELSEIF (movingmeshflag.eq.1) THEN
       IF ((stopping_criteria.lt.stopping_tol.and.drag_criteria.lt.stopping_tol) &
 					    .or.timeN.gt.time_limit) THEN
-	IF (.NOT.printed_to_tecplot) THEN
-	  CALL output_to_tecplot
-	ENDIF
-	EXIT
+	    IF (enable_output_to_file.AND..NOT.printed_to_tecplot) THEN
+	      CALL output_to_tecplot
+	    ENDIF
+	    EXIT
       ENDIF
     ENDIF
 
@@ -331,7 +333,9 @@ PROGRAM main
 !   IF (movingmeshflag.eq.0) THEN
     CALL initialise_fine_grid ! setup fine node points
     CALL create_fine_solution ! generate solution(s) on these points
-    CALL final_stage_output ! output to tecplot and along central axis for matlab.
+	IF(enable_output_to_file) THEN
+		CALL final_stage_output ! output to tecplot and along central axis for matlab.
+	ENDIF
 !   ENDIF
   
 
@@ -346,8 +350,9 @@ PROGRAM main
 !   CALL output_to_tecplot_finegrid
 !   CALL output_along_wallsymm
 
-
-  CLOSE(tecplot_output_fileid) 
+  IF(enable_output_to_file) THEN
+	CLOSE(tecplot_output_fileid)
+  ENDIF
  
 ! Memory release
   CALL release_pardiso_memory  
