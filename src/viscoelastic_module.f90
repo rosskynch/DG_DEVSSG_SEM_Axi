@@ -734,139 +734,139 @@ MODULE viscoelastic_module
         convective_contrib_yy = time_beta_0*temp_contrib_yy + time_beta_1*temp_contrib_yyNm1! + time_beta_2*temp_contrib_yyNm2
         convective_contrib_zz = time_beta_0*temp_contrib_zz + time_beta_1*temp_contrib_zzNm1! + time_beta_2*temp_contrib_zzNm2
 
-      DO el=1,numelm
+        DO el=1,numelm
 
 ! Now loop over all stress nodes and compute solutions or apply boundary conditions, etc.
-        DO ij=0,NP1SQM1
-          i=mapg(ij,el)
-          IF (inflowflag(i)) THEN 
+          DO ij=0,NP1SQM1
+            i=mapg(ij,el)
+            IF (inflowflag(i)) THEN 
 !  Apply inflow boundary conditions on stress.
-            tempTxxNext(ij,el) = boundary_stress_xx(i)
-            tempTxyNext(ij,el) = boundary_stress_xy(i)
-            tempTyyNext(ij,el) = boundary_stress_yy(i)
-            tempTzzNext(ij,el) = boundary_stress_yy(i)
-            CYCLE
-          ENDIF
+              tempTxxNext(ij,el) = boundary_stress_xx(i)
+              tempTxyNext(ij,el) = boundary_stress_xy(i)
+              tempTyyNext(ij,el) = boundary_stress_yy(i)
+              tempTzzNext(ij,el) = boundary_stress_yy(i)
+              CYCLE
+            ENDIF
 ! Calculate entries of the matrix for OldroydB:
 
 ! DEVSS-G:
 ! Where G tensor is used for deformation terms as well as Strain Rate.
 
-          a11 = (1d0 + Wetime_constant1 - 2d0*We*localGradUxx(ij,el))
-          a22 = (1d0 + Wetime_constant1 - We*(localGradUxx(ij,el) + localGradUyy(ij,el)))
-          a33 = (1d0 + Wetime_constant1 - 2d0*We*localGradUyy(ij,el)) 
-          a44 = (1d0 + Wetime_constant1 - 2d0*We*localGradUzz(ij,el))! - 2d0*We*V_y(k)*jac(i,j,el)*w(i)*w(j) !
-        
-          a12 = -2d0*We*localGradUyx(ij,el)
-          a21 = -We*localGradUxy(ij,el)
-          a23 = -We*localGradUyx(ij,el)
-          a32 = -2d0*We*localGradUxy(ij,el)
+            a11 = (1d0 + Wetime_constant1 - 2d0*We*localGradUxx(ij,el))
+            a22 = (1d0 + Wetime_constant1 - We*(localGradUxx(ij,el) + localGradUyy(ij,el)))
+            a33 = (1d0 + Wetime_constant1 - 2d0*We*localGradUyy(ij,el)) 
+            a44 = (1d0 + Wetime_constant1 - 2d0*We*localGradUzz(ij,el))! - 2d0*We*V_y(k)*jac(i,j,el)*w(i)*w(j) !
+
+            a12 = -2d0*We*localGradUyx(ij,el)
+            a21 = -We*localGradUxy(ij,el)
+            a23 = -We*localGradUyx(ij,el)
+            a32 = -2d0*We*localGradUxy(ij,el)
 
 ! Calculate RHS entries
 ! BDFJ:
-          temp12sq = time_beta_0*localTxy(ij,el)**2 + time_beta_1*localTxyNm1(ij,el)**2
-  
-          r1 = 2d0*(1d0-param_beta)*localGradUxx(ij,el) &
-            + Wetime_constant2*( time_alpha_0*localTxx(ij,el) + time_alpha_1*localTxxNm1(ij,el) ) &! + time_alpha_2*localTxxNm2(ij,el) ) &
-            - We*convective_contrib_xx(ij,el) &
-            - temp_giesekus_const*(time_beta_0*localTxx(ij,el)**2 + time_beta_1*localTxxNm1(ij,el)**2 + temp12sq)
-        
-          r2 = (1d0-param_beta)*( localGradUyx(ij,el) + localGradUxy(ij,el) ) &
-            + Wetime_constant2*( time_alpha_0*localTxy(ij,el) + time_alpha_1*localTxyNm1(ij,el) ) &! + time_alpha_2*localTxyNm2(ij,el) ) &
-            - We*convective_contrib_xy(ij,el) &
-            - temp_giesekus_const*(time_beta_0*(localTxx(ij,el)*localTxy(ij,el) + localTxy(ij,el)*localTyy(ij,el)) &
-            + time_beta_1*(localTxxNm1(ij,el)*localTxyNm1(ij,el) + localTxyNm1(ij,el)*localTyyNm1(ij,el)) )
-        
-          r3 = 2d0*(1d0-param_beta)*localGradUyy(ij,el) &
-            + Wetime_constant2*( time_alpha_0*localTyy(ij,el) + time_alpha_1*localTyyNm1(ij,el) ) &! + time_alpha_2*localTyyNm2(ij,el) ) &
-            - We*convective_contrib_yy(ij,el) &
-            - temp_giesekus_const*(temp12sq + time_beta_0*localTyy(ij,el)**2 + time_beta_1*localTyyNm1(ij,el)**2)
-        
-          r4 =  2d0*(1d0-param_beta)*localGradUzz(ij,el) &
-            + Wetime_constant2*( time_alpha_0*localTzz(ij,el) + time_alpha_1*localTzzNm1(ij,el) ) &! + time_alpha_2*localTzzNm2(ij,el) ) &
-            - We*convective_contrib_zz(ij,el) &
-            - temp_giesekus_const*(time_beta_0*localTzz(ij,el)**2 + time_beta_1*localTzzNm1(ij,el)**2)
-        
+            temp12sq = time_beta_0*localTxy(ij,el)**2 + time_beta_1*localTxyNm1(ij,el)**2
+
+            r1 = 2d0*(1d0-param_beta)*localGradUxx(ij,el) &
+              + Wetime_constant2*( time_alpha_0*localTxx(ij,el) + time_alpha_1*localTxxNm1(ij,el) ) &! + time_alpha_2*localTxxNm2(ij,el) ) &
+              - We*convective_contrib_xx(ij,el) &
+              - temp_giesekus_const*(time_beta_0*localTxx(ij,el)**2 + time_beta_1*localTxxNm1(ij,el)**2 + temp12sq)
+
+            r2 = (1d0-param_beta)*( localGradUyx(ij,el) + localGradUxy(ij,el) ) &
+              + Wetime_constant2*( time_alpha_0*localTxy(ij,el) + time_alpha_1*localTxyNm1(ij,el) ) &! + time_alpha_2*localTxyNm2(ij,el) ) &
+              - We*convective_contrib_xy(ij,el) &
+              - temp_giesekus_const*(time_beta_0*(localTxx(ij,el)*localTxy(ij,el) + localTxy(ij,el)*localTyy(ij,el)) &
+              + time_beta_1*(localTxxNm1(ij,el)*localTxyNm1(ij,el) + localTxyNm1(ij,el)*localTyyNm1(ij,el)) )
+
+            r3 = 2d0*(1d0-param_beta)*localGradUyy(ij,el) &
+              + Wetime_constant2*( time_alpha_0*localTyy(ij,el) + time_alpha_1*localTyyNm1(ij,el) ) &! + time_alpha_2*localTyyNm2(ij,el) ) &
+              - We*convective_contrib_yy(ij,el) &
+              - temp_giesekus_const*(temp12sq + time_beta_0*localTyy(ij,el)**2 + time_beta_1*localTyyNm1(ij,el)**2)
+
+            r4 =  2d0*(1d0-param_beta)*localGradUzz(ij,el) &
+              + Wetime_constant2*( time_alpha_0*localTzz(ij,el) + time_alpha_1*localTzzNm1(ij,el) ) &! + time_alpha_2*localTzzNm2(ij,el) ) &
+              - We*convective_contrib_zz(ij,el) &
+              - temp_giesekus_const*(time_beta_0*localTzz(ij,el)**2 + time_beta_1*localTzzNm1(ij,el)**2)
+
 
 ! Using LAPACK instead:
-          temp_matrix=0d0
-          temp_matrix(1,1)=a11
-          temp_matrix(1,2)=a12
-          temp_matrix(2,1)=a21
-          temp_matrix(2,2)=a22
-          temp_matrix(2,3)=a23
-          temp_matrix(3,2)=a32
-          temp_matrix(3,3)=a33
-          temp_matrix(4,4)=a44
-          temp_rhs(1)=r1
-          temp_rhs(2)=r2
-          temp_rhs(3)=r3
-          temp_rhs(4)=r4
-  
-!            anorm=0d0
-!           do ii=1,4
-!              temp1=temp_matrix(ii,1)
-!              do jj=2,4
-!                if (temp_matrix(ii,jj).gt.temp1) temp1=temp_matrix(ii,jj)
+            temp_matrix=0d0
+            temp_matrix(1,1)=a11
+            temp_matrix(1,2)=a12
+            temp_matrix(2,1)=a21
+            temp_matrix(2,2)=a22
+            temp_matrix(2,3)=a23
+            temp_matrix(3,2)=a32
+            temp_matrix(3,3)=a33
+            temp_matrix(4,4)=a44
+            temp_rhs(1)=r1
+            temp_rhs(2)=r2
+            temp_rhs(3)=r3
+            temp_rhs(4)=r4
+
+!             anorm=0d0
+!            do ii=1,4
+!               temp1=temp_matrix(ii,1)
+!               do jj=2,4
+!                 if (temp_matrix(ii,jj).gt.temp1) temp1=temp_matrix(ii,jj)
+!              enddo
+!               anorm=anorm+temp1
 !             enddo
-!              anorm=anorm+temp1
-!            enddo
-  
-          call dgetrf( 4, 4, temp_matrix, 4, ipiv, info )
-          IF (info.ne.0) THEN
-            write(*,*) 'Error in calcStress_weakform:',el,info
-            STOP
-          ENDIF
-  
-    
+
+            call dgetrf( 4, 4, temp_matrix, 4, ipiv, info )
+            IF (info.ne.0) THEN
+              write(*,*) 'Error in calcStress_weakform:',el,info
+              STOP
+            ENDIF
+
+
 !            call dgecon( '1', 4, temp_matrix, 4, anorm, rcond, work, iwork, info )
 !            IF (info.ne.0) THEN
 !           write(*,*) 'Error in calcStress_weakform:',el,info
 !           STOP
 !           ENDIF
 !           IF (el.eq.2.and.ij.eq.273) print*,'rcond: ',rcond
-  
-          call dgetrs( 'N', 4, 1, temp_matrix, 4, ipiv, temp_rhs, 4, info )  
-          IF (info.ne.0) THEN
-            write(*,*) 'Error in calcStress_weakform:',el,info
-            STOP
-          ENDIF
+
+            call dgetrs( 'N', 4, 1, temp_matrix, 4, ipiv, temp_rhs, 4, info )  
+            IF (info.ne.0) THEN
+              write(*,*) 'Error in calcStress_weakform:',el,info
+              STOP
+            ENDIF
 
 ! Calculate stress components from Inverse*RHS
-!           tempTxxNext(ij,el) = idetA*(i11*r1 + i12*r2 + i13*r3)
-!           tempTxyNext(ij,el) = idetA*(i21*r1 + i22*r2 + i23*r3)
-!           tempTyyNext(ij,el) = idetA*(i31*r1 + i32*r2 + i33*r3)
-!           tempTzzNext(ij,el) = r4/a44  
+!            tempTxxNext(ij,el) = idetA*(i11*r1 + i12*r2 + i13*r3)
+!            tempTxyNext(ij,el) = idetA*(i21*r1 + i22*r2 + i23*r3)
+!            tempTyyNext(ij,el) = idetA*(i31*r1 + i32*r2 + i33*r3)
+!            tempTzzNext(ij,el) = r4/a44  
 
 ! LAPACK instead:
-          tempTxxNext(ij,el) = temp_rhs(1)
-          tempTxyNext(ij,el) = temp_rhs(2)
-          tempTyyNext(ij,el) = temp_rhs(3)
-          tempTzzNext(ij,el) = temp_rhs(4)
-  
+            tempTxxNext(ij,el) = temp_rhs(1)
+            tempTxyNext(ij,el) = temp_rhs(2)
+            tempTyyNext(ij,el) = temp_rhs(3)
+            tempTzzNext(ij,el) = temp_rhs(4)
+
+          ENDDO
         ENDDO
-      ENDDO
-      tempTxx=tempTxxNext
-      tempTxy=tempTxyNext
-      tempTyy=tempTyyNext
-      tempTzz=tempTzzNext
-    ENDIF
+        tempTxx=tempTxxNext
+        tempTxy=tempTxyNext
+        tempTyy=tempTyyNext
+        tempTzz=tempTzzNext
+      ENDIF
 ! Update stored valeus of Tpq 
 ! ie move time along by one for these, so that localTpq now hold the current stress values
-    localTxxNm2=localTxxNm1
-    localTxyNm2=localTxyNm1
-    localTyyNm2=localTyyNm1
-    localTzzNm2=localTzzNm1
-    
-    localTxxNm1=localTxx
-    localTxyNm1=localTxy
-    localTyyNm1=localTyy
-    localTzzNm1=localTzz
-    
-    localTxx=tempTxx
-    localTxy=tempTxy
-    localTyy=tempTyy
-    localTzz=tempTzz
+      localTxxNm2=localTxxNm1
+      localTxyNm2=localTxyNm1
+      localTyyNm2=localTyyNm1
+      localTzzNm2=localTzzNm1
+      
+      localTxxNm1=localTxx
+      localTxyNm1=localTxy
+      localTyyNm1=localTyy
+      localTzzNm1=localTzz
+      
+      localTxx=tempTxx
+      localTxy=tempTxy
+      localTyy=tempTyy
+      localTzz=tempTzz
 
     ELSE
       print*, 'Error: No co-ordinate system specified...'

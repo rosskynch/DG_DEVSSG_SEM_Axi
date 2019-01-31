@@ -24,11 +24,12 @@ PROGRAM main
   USE pardiso_solver
   USE OIFS_module
   USE viscoelastic_module
+  USE fene_p_mp_module
   USE devss_module
   USE IO_module
   USE result_analysis
   USE movingSphere_module
-  USE fene_p_mp_module
+  
   
   IMPLICIT NONE
   INTEGER :: edge,i,j,ij,k,l,kl,ijkl,el,tempint,minresconv=0,internalij,kk,ll,&
