@@ -19,15 +19,15 @@ MODULE fene_p_mp_module
   USE functions_module
   USE IO_module
   USE viscoelastic_module
-  
+
   IMPLICIT NONE
   CONTAINS
-  
+
   SUBROUTINE applyElasticStress_FENE_PMP
     IMPLICIT NONE
     stress_cont_to_stokes_xNm1=stress_cont_to_stokes_x
     stress_cont_to_stokes_yNm1=stress_cont_to_stokes_y
-    
+
     CALL calcStress_weakform_FENE_PMP
     CALL integrate_divergence_of_local_stress
 
@@ -36,14 +36,13 @@ MODULE fene_p_mp_module
     f_y = f_y + time_beta_0*stress_cont_to_stokes_y + time_beta_1*stress_cont_to_stokes_yNm1
 
   END SUBROUTINE applyElasticStress_FENE_PMP
-  
- 
+
   SUBROUTINE calcStress_weakform_FENE_PMP
     IMPLICIT NONE
     INTEGER :: i,j,k,l,ij,p,pj,ip,el,kl,meh,fromel,edge,fromij,localp,&
 ! LAPACK bits:
     info,ipiv(4),iwork(4),ii,jj,sum_counter
-    
+
     DOUBLE PRECISION :: a11,a22,a33,a44,a12,a21,a23,a32,idetA,&
       r1,r2,r3,r4,&
       i11,i12,i13,i21,i22,i23,i31,i32,i33,i44,&
@@ -52,7 +51,7 @@ MODULE fene_p_mp_module
 ! LAPACK bits:
       temp_matrix(4,4),temp_rhs(4),temp1,temp2,temp3,temp4,&
       work(16),anorm,rcond
-      
+
     DOUBLE PRECISION :: convective_contrib_xx(0:NP1SQM1,numelm),&
       convective_contrib_xy(0:NP1SQM1,numelm),&
       convective_contrib_yy(0:NP1SQM1,numelm),&
@@ -99,7 +98,10 @@ MODULE fene_p_mp_module
 
     IF (coordflag.eq.0) THEN
 ! CARTESIAN CASE !
-! Not implemented. Will need to base it on the OldroydB/Giesekus version within the main viscoelastic_module.    
+! Not implemented. Will need to base it on the OldroydB/Giesekus version within the main viscoelastic_module.
+      print*, 'Error: The FENE-P-MP model is not yet implemented for Cartesian co-ordinates...'
+      print*, 'Stopping'
+      STOP
     ELSEIF (coordflag.eq.1) THEN 
 ! CYLINDERICAL POLAR (AXISYMMETRIC) CASE !
 !
@@ -110,7 +112,6 @@ MODULE fene_p_mp_module
 !
 ! Semi-Implicit iteration.
       IF (param_iterative_convection) THEN
-! Not implemented. Will need to base it on the OldroydB/Giesekus version within the main viscoelastic_module.    
         sum_counter=0
         DO WHILE (sum_temp.gt.1d-9) 
           sum_counter=sum_counter+1
@@ -141,31 +142,31 @@ MODULE fene_p_mp_module
               a22 = (1d0 + Wetime_constant1 - We*(localGradUxx(ij,el) + localGradUyy(ij,el)))
               a33 = (1d0 + Wetime_constant1 - 2d0*We*localGradUyy(ij,el)) 
               a44 = (1d0 + Wetime_constant1 - 2d0*We*localGradUzz(ij,el))! - 2d0*We*V_y(k)*jac(i,j,el)*w(i)*w(j) !
-          
+
               a12 = -2d0*We*localGradUyx(ij,el)
               a21 = -We*localGradUxy(ij,el)
               a23 = -We*localGradUyx(ij,el)
               a32 = -2d0*We*localGradUxy(ij,el)
-              
+
 ! Calculate RHS entries
 ! BDFJ:
               temp12sq = tempTxy(ij,el)**2
-  
+
               r1 = 2d0*(1d0-param_beta)*localGradUxx(ij,el) &
                 + Wetime_constant2*( time_alpha_0*localTxx(ij,el) + time_alpha_1*localTxxNm1(ij,el) ) &! + time_alpha_2*localTxxNm2(ij,el) ) &
                 - We*convective_contrib_xx(ij,el) &
                 - temp_giesekus_const*(tempTxx(ij,el)**2 + temp12sq)
-        
+
               r2 = (1d0-param_beta)*( localGradUyx(ij,el) + localGradUxy(ij,el) ) &
                 + Wetime_constant2*( time_alpha_0*localTxy(ij,el) + time_alpha_1*localTxyNm1(ij,el) ) &! + time_alpha_2*localTxyNm2(ij,el) ) &
                 - We*convective_contrib_xy(ij,el) &
                 - temp_giesekus_const*(tempTxx(ij,el)*tempTxy(ij,el) + tempTxy(ij,el)*tempTyy(ij,el))
-        
+
               r3 = 2d0*(1d0-param_beta)*localGradUyy(ij,el) &
                 + Wetime_constant2*( time_alpha_0*localTyy(ij,el) + time_alpha_1*localTyyNm1(ij,el) ) &! + time_alpha_2*localTyyNm2(ij,el) ) &
                 - We*convective_contrib_yy(ij,el) &
                 - temp_giesekus_const*(temp12sq + tempTyy(ij,el)**2)
-        
+
               r4 =  2d0*(1d0-param_beta)*localGradUzz(ij,el) &
                 + Wetime_constant2*( time_alpha_0*localTzz(ij,el) + time_alpha_1*localTzzNm1(ij,el) ) &! + time_alpha_2*localTzzNm2(ij,el) ) &
                 - We*convective_contrib_zz(ij,el) &
@@ -185,14 +186,13 @@ MODULE fene_p_mp_module
               temp_rhs(2)=r2
               temp_rhs(3)=r3
               temp_rhs(4)=r4
-  
+
               call dgetrf( 4, 4, temp_matrix, 4, ipiv, info )
               IF (info.ne.0) THEN
                 write(*,*) 'Error in calcStress_weakform:',el,info
                 STOP
               ENDIF
 
-  
               call dgetrs( 'N', 4, 1, temp_matrix, 4, ipiv, temp_rhs, 4, info )  
               IF (info.ne.0) THEN
                 write(*,*) 'Error in calcStress_weakform:',el,info
@@ -204,10 +204,10 @@ MODULE fene_p_mp_module
               tempTxyNext(ij,el) = temp_rhs(2)
               tempTyyNext(ij,el) = temp_rhs(3)
               tempTzzNext(ij,el) = temp_rhs(4)
-  
+
             ENDDO
           ENDDO
-    
+
           sum_temp=0d0
           sumxx=0d0
           sumxy=0d0
@@ -225,9 +225,9 @@ MODULE fene_p_mp_module
           sumxy=sumxy/(numelm*NP1SQ)
           sumyy=sumyy/(numelm*NP1SQ)
           sumzz=sumzz/(numelm*NP1SQ)
-    
+
           sum_temp=(sumxx+sumxy+sumyy+sumzz)/4d0
-      
+
           IF(sum_temp.gt.1d10.or.sum_counter.gt.1000) THEN
             print*,'Iterative scheme in constitutive equation failed to converge! Sum counter = ',sum_counter
             STOP
@@ -237,7 +237,7 @@ MODULE fene_p_mp_module
           tempTxy = tempTxyNext
           tempTyy = tempTyyNext
           tempTzz = tempTzzNext
-    
+
         ENDDO
       ELSE
 ! EXJ VERSION
