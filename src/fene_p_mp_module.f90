@@ -37,6 +37,7 @@ MODULE fene_p_mp_module
 
   END SUBROUTINE applyElasticStress_FENE_PMP
 
+
   SUBROUTINE calcStress_weakform_FENE_PMP
     IMPLICIT NONE
     INTEGER :: i,j,k,l,ij,p,pj,ip,el,kl,meh,fromel,edge,fromij,localp,&
@@ -64,14 +65,14 @@ MODULE fene_p_mp_module
       temp_contrib_xyNm1(0:NP1SQM1,numelm),&
       temp_contrib_yyNm1(0:NP1SQM1,numelm),&
       temp_contrib_zzNm1(0:NP1SQM1,numelm),&
-      tempTxx(0:NP1SQM1,numelm),&
-      tempTxy(0:NP1SQM1,numelm),&
-      tempTyy(0:NP1SQM1,numelm),&
-      tempTzz(0:NP1SQM1,numelm),&
-      tempTxxNext(0:NP1SQM1,numelm),&
-      tempTxyNext(0:NP1SQM1,numelm),&
-      tempTyyNext(0:NP1SQM1,numelm),&
-      tempTzzNext(0:NP1SQM1,numelm)
+      tempCxx(0:NP1SQM1,numelm),&
+      tempCxy(0:NP1SQM1,numelm),&
+      tempCyy(0:NP1SQM1,numelm),&
+      tempCzz(0:NP1SQM1,numelm),&
+      tempCxxNext(0:NP1SQM1,numelm),&
+      tempCxyNext(0:NP1SQM1,numelm),&
+      tempCyyNext(0:NP1SQM1,numelm),&
+      tempCzzNext(0:NP1SQM1,numelm)
 
     temp_giesekus_const=param_giesekus/(1d0-param_beta)
     sum_temp=1d0
@@ -94,6 +95,15 @@ MODULE fene_p_mp_module
     tempTxyNext = localTxy
     tempTyyNext = localTyy
     tempTzzNext = localTzz
+    
+    tempCxx = localCxx
+    tempCxy = localCxy
+    tempCyy = localCyy
+    tempCzz = localCzz
+    tempCxxNext = localCxx
+    tempCxyNext = localCxy
+    tempCyyNext = localCyy
+    tempCzzNext = localCzz
 
 
     IF (coordflag.eq.0) THEN
@@ -264,75 +274,62 @@ MODULE fene_p_mp_module
             i=mapg(ij,el)
             IF (inflowflag(i)) THEN 
 !  Apply inflow boundary conditions on stress.
-              tempTxxNext(ij,el) = boundary_stress_xx(i)
-              tempTxyNext(ij,el) = boundary_stress_xy(i)
-              tempTyyNext(ij,el) = boundary_stress_yy(i)
-              tempTzzNext(ij,el) = boundary_stress_yy(i)
+              tempCxxNext(ij,el) = boundary_stress_xx(i)
+              tempCxyNext(ij,el) = boundary_stress_xy(i)
+              tempCyyNext(ij,el) = boundary_stress_yy(i)
+              tempCzzNext(ij,el) = boundary_stress_yy(i)
               CYCLE
             ENDIF
 ! Calculate entries of the matrix for OldroydB:
 
 ! DEVSS-G:
 ! Where G tensor is used for deformation terms as well as Strain Rate.
+! We copy this into a matrix and solve with LAPACK.
+            temp_matrix=0d0
 
-            a11 = (1d0 + Wetime_constant1 - 2d0*We*localGradUxx(ij,el))
-            a22 = (1d0 + Wetime_constant1 - We*(localGradUxx(ij,el) + localGradUyy(ij,el)))
-            a33 = (1d0 + Wetime_constant1 - 2d0*We*localGradUyy(ij,el)) 
-            a44 = (1d0 + Wetime_constant1 - 2d0*We*localGradUzz(ij,el))
+            temp_matrix(1,1) = (1d0 + Wetime_constant1 - 2d0*We*localGradUxx(ij,el))
+            temp_matrix(2,2) = (1d0 + Wetime_constant1 - We*(localGradUxx(ij,el) + localGradUyy(ij,el)))
+            temp_matrix(3,3) = (1d0 + Wetime_constant1 - 2d0*We*localGradUyy(ij,el)) 
+            temp_matrix(4,4) = (1d0 + Wetime_constant1 - 2d0*We*localGradUzz(ij,el))
 
-            a12 = -2d0*We*localGradUyx(ij,el)
-            a21 = -We*localGradUxy(ij,el)
-            a23 = -We*localGradUyx(ij,el)
-            a32 = -2d0*We*localGradUxy(ij,el)
+            temp_matrix(1,2) = -2d0*We*localGradUyx(ij,el)
+            temp_matrix(2,1) = -We*localGradUxy(ij,el)
+            temp_matrix(2,3) = -We*localGradUyx(ij,el)
+            temp_matrix(3,2) = -2d0*We*localGradUxy(ij,el)
 
 ! Calculate RHS entries
 ! BDFJ:
-            temp12sq = time_beta_0*localTxy(ij,el)**2 + time_beta_1*localTxyNm1(ij,el)**2
+            temp12sq = time_beta_0*localCxy(ij,el)**2 + time_beta_1*localCxyNm1(ij,el)**2
 
-            r1 = 2d0*(1d0-param_beta)*localGradUxx(ij,el) &
-              + Wetime_constant2*( time_alpha_0*localTxx(ij,el) + time_alpha_1*localTxxNm1(ij,el) ) &
+            temp_rhs(1) = 2d0*(1d0-param_beta)*localGradUxx(ij,el) &
+              + Wetime_constant2*( time_alpha_0*localCxx(ij,el) + time_alpha_1*localCxxNm1(ij,el) ) &
               - We*convective_contrib_xx(ij,el) &
-              - temp_giesekus_const*(time_beta_0*localTxx(ij,el)**2 + time_beta_1*localTxxNm1(ij,el)**2 + temp12sq)
+              - temp_giesekus_const*(time_beta_0*localCxx(ij,el)**2 + time_beta_1*localCxxNm1(ij,el)**2 + temp12sq)
 
-            r2 = (1d0-param_beta)*( localGradUyx(ij,el) + localGradUxy(ij,el) ) &
-              + Wetime_constant2*( time_alpha_0*localTxy(ij,el) + time_alpha_1*localTxyNm1(ij,el) ) &
+            temp_rhs(2) = (1d0-param_beta)*( localGradUyx(ij,el) + localGradUxy(ij,el) ) &
+              + Wetime_constant2*( time_alpha_0*localCxy(ij,el) + time_alpha_1*localCxyNm1(ij,el) ) &
               - We*convective_contrib_xy(ij,el) &
-              - temp_giesekus_const*(time_beta_0*(localTxx(ij,el)*localTxy(ij,el) + localTxy(ij,el)*localTyy(ij,el)) &
-              + time_beta_1*(localTxxNm1(ij,el)*localTxyNm1(ij,el) + localTxyNm1(ij,el)*localTyyNm1(ij,el)) )
+              - temp_giesekus_const*(time_beta_0*(localCxx(ij,el)*localCxy(ij,el) + localCxy(ij,el)*localCyy(ij,el)) &
+              + time_beta_1*(localCxxNm1(ij,el)*localCxyNm1(ij,el) + localCxyNm1(ij,el)*localCyyNm1(ij,el)) )
 
-            r3 = 2d0*(1d0-param_beta)*localGradUyy(ij,el) &
-              + Wetime_constant2*( time_alpha_0*localTyy(ij,el) + time_alpha_1*localTyyNm1(ij,el) ) &
+            temp_rhs(3) = 2d0*(1d0-param_beta)*localGradUyy(ij,el) &
+              + Wetime_constant2*( time_alpha_0*localCyy(ij,el) + time_alpha_1*localCyyNm1(ij,el) ) &
               - We*convective_contrib_yy(ij,el) &
-              - temp_giesekus_const*(temp12sq + time_beta_0*localTyy(ij,el)**2 + time_beta_1*localTyyNm1(ij,el)**2)
+              - temp_giesekus_const*(temp12sq + time_beta_0*localCyy(ij,el)**2 + time_beta_1*localCyyNm1(ij,el)**2)
 
-            r4 =  2d0*(1d0-param_beta)*localGradUzz(ij,el) &
-              + Wetime_constant2*( time_alpha_0*localTzz(ij,el) + time_alpha_1*localTzzNm1(ij,el) ) &
+            temp_rhs(4) =  2d0*(1d0-param_beta)*localGradUzz(ij,el) &
+              + Wetime_constant2*( time_alpha_0*localCzz(ij,el) + time_alpha_1*localCzzNm1(ij,el) ) &
               - We*convective_contrib_zz(ij,el) &
-              - temp_giesekus_const*(time_beta_0*localTzz(ij,el)**2 + time_beta_1*localTzzNm1(ij,el)**2)
+              - temp_giesekus_const*(time_beta_0*localCzz(ij,el)**2 + time_beta_1*localCzzNm1(ij,el)**2)
 
 
-! Using LAPACK to solve 4x4:
-            temp_matrix=0d0
-            temp_matrix(1,1)=a11
-            temp_matrix(1,2)=a12
-            temp_matrix(2,1)=a21
-            temp_matrix(2,2)=a22
-            temp_matrix(2,3)=a23
-            temp_matrix(3,2)=a32
-            temp_matrix(3,3)=a33
-            temp_matrix(4,4)=a44
-            temp_rhs(1)=r1
-            temp_rhs(2)=r2
-            temp_rhs(3)=r3
-            temp_rhs(4)=r4
-
-
+! Using LAPACK to solve the 4x4 matrix:
             call dgetrf( 4, 4, temp_matrix, 4, ipiv, info )
             IF (info.ne.0) THEN
               write(*,*) 'Error in calcStress_weakform:',el,info
               STOP
             ENDIF
-    
+
             call dgetrs( 'N', 4, 1, temp_matrix, 4, ipiv, temp_rhs, 4, info )  
             IF (info.ne.0) THEN
               write(*,*) 'Error in calcStress_weakform:',el,info
@@ -340,36 +337,50 @@ MODULE fene_p_mp_module
             ENDIF
 
 ! Copy solution from lapack:
-            tempTxxNext(ij,el) = temp_rhs(1)
-            tempTxyNext(ij,el) = temp_rhs(2)
-            tempTyyNext(ij,el) = temp_rhs(3)
-            tempTzzNext(ij,el) = temp_rhs(4)
-  
+            tempCxxNext(ij,el) = temp_rhs(1)
+            tempCxyNext(ij,el) = temp_rhs(2)
+            tempCyyNext(ij,el) = temp_rhs(3)
+            tempCzzNext(ij,el) = temp_rhs(4)
+
           ENDDO
         ENDDO
-        tempTxx=tempTxxNext
-        tempTxy=tempTxyNext
-        tempTyy=tempTyyNext
-        tempTzz=tempTzzNext
+        tempCxx=tempCxxNext
+        tempCxy=tempCxyNext
+        tempCyy=tempCyyNext
+        tempCzz=tempCzzNext
       ENDIF
 
 ! Update stored valeus of Tpq 
-! ie move time along by one for these, so that localTpq now hold the current stress values
+! ie move time along by one for these, so that localTpq and localCpw now hold the current stress/conformation values
+      localCxxNm2=localCxxNm1
+      localCxyNm2=localCxyNm1
+      localCyyNm2=localCyyNm1
+      localCzzNm2=localCzzNm1
+
+      localCxxNm1=localCxx
+      localCxyNm1=localCxy
+      localCyyNm1=localCyy
+      localCzzNm1=localCzz
+
+      localCxx=tempCxx
+      localCxy=tempCxy
+      localCyy=tempCyy
+      localCzz=tempCzz
+
       localTxxNm2=localTxxNm1
       localTxyNm2=localTxyNm1
       localTyyNm2=localTyyNm1
       localTzzNm2=localTzzNm1
-      
+
       localTxxNm1=localTxx
       localTxyNm1=localTxy
       localTyyNm1=localTyy
       localTzzNm1=localTzz
-      
+
       localTxx=tempTxx
       localTxy=tempTxy
       localTyy=tempTyy
       localTzz=tempTzz
-
     ELSE
       print*, 'Error: No co-ordinate system specified...'
       print*, 'Stopping'

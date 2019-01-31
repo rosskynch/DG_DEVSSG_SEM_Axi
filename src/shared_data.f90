@@ -263,18 +263,18 @@ MODULE shared_data
 				   localTxyNm2(:,:),&
 				   localTyyNm2(:,:),&
 				   localTzzNm2(:,:),&
-				   localConformationxx(:,:),&
-				   localConformationxy(:,:),&
-				   localConformationyy(:,:),&
-				   localConformationzz(:,:),&
-				   localConformationxxNm1(:,:),&
-				   localConformationxyNm1(:,:),&
-				   localConformationyyNm1(:,:),&
-				   localConformationzzNm1(:,:),&
-				   localConformationxxNm2(:,:),&
-				   localConformationxyNm2(:,:),&
-				   localConformationyyNm2(:,:),&
-				   localConformationzzNm2(:,:),&
+				   localCxx(:,:),&
+				   localCxy(:,:),&
+				   localCyy(:,:),&
+				   localCzz(:,:),&
+				   localCxxNm1(:,:),&
+				   localCxyNm1(:,:),&
+				   localCyyNm1(:,:),&
+				   localCzzNm1(:,:),&
+				   localCxxNm2(:,:),&
+				   localCxyNm2(:,:),&
+				   localCyyNm2(:,:),&
+				   localCzzNm2(:,:),&
 				   norm_to_edge_node(:,:,:,:),&
 				   jac_on_edge(:,:),&
 				   jac_wallsymm_edge_1d(:,:),&
@@ -543,18 +543,18 @@ MODULE shared_data
       localTxyNm2(0:NP1SQM1,1:numelm),&
       localTyyNm2(0:NP1SQM1,1:numelm),&
       localTzzNm2(0:NP1SQM1,1:numelm),&
-      localConformationxx(0:NP1SQM1,1:numelm),&
-      localConformationxy(0:NP1SQM1,1:numelm),&
-      localConformationyy(0:NP1SQM1,1:numelm),&
-      localConformationzz(0:NP1SQM1,1:numelm),&
-      localConformationxxNm1(0:NP1SQM1,1:numelm),&
-      localConformationxyNm1(0:NP1SQM1,1:numelm),&
-      localConformationyyNm1(0:NP1SQM1,1:numelm),&
-      localConformationzzNm1(0:NP1SQM1,1:numelm),&
-      localConformationxxNm2(0:NP1SQM1,1:numelm),&
-      localConformationxyNm2(0:NP1SQM1,1:numelm),&
-      localConformationyyNm2(0:NP1SQM1,1:numelm),&
-      localConformationzzNm2(0:NP1SQM1,1:numelm),&
+      localCxx(0:NP1SQM1,1:numelm),&
+      localCxy(0:NP1SQM1,1:numelm),&
+      localCyy(0:NP1SQM1,1:numelm),&
+      localCzz(0:NP1SQM1,1:numelm),&
+      localCxxNm1(0:NP1SQM1,1:numelm),&
+      localCxyNm1(0:NP1SQM1,1:numelm),&
+      localCyyNm1(0:NP1SQM1,1:numelm),&
+      localCzzNm1(0:NP1SQM1,1:numelm),&
+      localCxxNm2(0:NP1SQM1,1:numelm),&
+      localCxyNm2(0:NP1SQM1,1:numelm),&
+      localCyyNm2(0:NP1SQM1,1:numelm),&
+      localCzzNm2(0:NP1SQM1,1:numelm),&
       norm_to_edge_node(2,0:N,1:4,numelm),&
       jac_on_edge(4,numelm) &
 !       param_beta_a(numelm)&
@@ -796,12 +796,12 @@ MODULE shared_data
 !     DEALLOCATE(M_stress)
 !     DEALLOCATE(C_x,C_y,Cb)
     DEALLOCATE(localTxx, localTxy, localTyy, localTzz,&
-    localTxxNm1, localTxyNm1, localTyyNm1, localTzzNm1,&
-    localTxxNm2, localTxyNm2, localTyyNm2, localTzzNm2)
+      localTxxNm1, localTxyNm1, localTyyNm1, localTzzNm1,&
+      localTxxNm2, localTxyNm2, localTyyNm2, localTzzNm2)
     
-    DEALLOCATE(localConformationxx, localConformationxy, localConformationyy, localConformationzz,&
-    localConformationxxNm1, localConformationxyNm1, localConformationyyNm1, localConformationzzNm1,&
-    localConformationxxNm2, localConformationxyNm2, localConformationyyNm2, localConformationzzNm2)
+    DEALLOCATE(localCxx, localCxy, localCyy, localCzz,&
+      localCxxNm1, localCxyNm1, localCyyNm1, localCzzNm1,&
+      localCxxNm2, localCxyNm2, localCyyNm2, localCzzNm2)
 
     DEALLOCATE(storeA_x, storeA_y, storeB_x, storeB_y, &
 	      storef_x, storef_y, storeg_p, storeZ_p, &
