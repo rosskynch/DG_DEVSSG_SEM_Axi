@@ -37,6 +37,49 @@ MODULE fene_p_mp_module
 
   END SUBROUTINE applyElasticStress_FENE_PMP
 
+  DOUBLE PRECISION FUNCTION calculatePsi_FENE_PMP(lambdaD, localGradUxx_in, localGradUxy_in, &
+    localGradUyx_in, localGradUyy_in, localGradUzz_in)
+    IMPLICIT NONE
+    DOUBLE PRECISION :: I2, I3, extensionRate
+    DOUBLE PRECISION, INTENT(IN) :: lambdaD, localGradUxx_in, localGradUxy_in, &
+      localGradUyx_in, localGradUyy_in, localGradUzz_in
+! Psi(e) = (cosh(lamda_d*e) - 1) / 2
+!
+! e = 3I_3(D) / I_2(D)
+!
+! where D = (1/2)*(gradU + gradU') (' denotes transpose).
+! Note Dxx = gradUxx, Dyy = gradUyy, Dzz = gradUzz
+! but Dxy = Dyx = (1/2)*(gradUxy+gradUyx)
+!
+! with principal invariants:
+! I1(D) = tr(D) = Dxx + Dyy + Dzz (not required)
+! I2(D) = (1/2)*(tr(D)^2 - tr(D^2)) = Dxx*Dyy + Dxx*Dzz + Dyy*Dzz - Dxy*Dxy 
+! I3(D) = det(D) = Dxx*Dyy*Dzz - Dxy*Dyx*Dzz
+!
+! tr denotes trace, det denotes determinant, ' denotes transpose.
+
+    Dxy = 0.5*(localGradUxy_in + localGradUyx_in)
+    I2 = localGradUxx_in*localGradUyy_in + localGradUxx_in*localGradUzz_in + localGradUyy_in*localGradUzz_in - Dxy*Dxy
+    I3 = localGradUxx_in*localGradUyy_in*localGradUzz_in - Dxy*Dxy*localGradUzz_in
+
+    extensionRate = 3d0*I3 / I2
+
+    calculatePsi_FENE_PMP = 0.5(cosh(lambdaD*extensionRate) - 1d0)  
+
+  END FUNCTION calculatePsi_FENE_PMP
+
+  DOUBLE PRECISION FUNCTION calculateF_FENE_PMP(bValue, Cxx_in, Cyy_in, Czz_in, &
+    localGradUyx_in, localGradUyy_in, localGradUzz_in)
+    IMPLICIT NONE
+    DOUBLE PRECISION, INTENT(IN) :: bValue, Cxx_in, Cyy_in, Czz_in
+! F(tr(C)) = 1 / (1 - (tr(C)/b^2))
+!
+! where b is the square of the maximum extension of the dumbbell (considered in the model).
+
+    calculateF_FENE_PMP = 1d0 / (1d0 - (Cxx_in + Cyy_in + Czz_in) / (bValue*bValue))
+
+  END FUNCTION calculateF_FENE_PMP
+  
 
   SUBROUTINE calcStress_weakform_FENE_PMP
     IMPLICIT NONE
@@ -49,6 +92,8 @@ MODULE fene_p_mp_module
       i11,i12,i13,i21,i22,i23,i31,i32,i33,i44,&
       sum_temp,total_points,sumxx,sumxy,sumyy,sumzz,&
       temp12sq,temp_giesekus_const,tempVx(1:nptot),&
+      Cxx_approx, Cxy_approx, Cyy_approx, Czz_approx, &
+      TauWeConstant, WePsiValue, Dxy
 ! LAPACK bits:
       temp_matrix(4,4),temp_rhs(4),temp1,temp2,temp3,temp4,&
       work(16),anorm,rcond
@@ -85,25 +130,29 @@ MODULE fene_p_mp_module
     temp_contrib_yyNm1=0d0
 
 
-! Will iterate with tempTpq as the solution at time N+1, and localTpq as Tpq at time N, and localTpqNm1 as Txx at time N-1
-! We then update Txx with the converged value.
-    tempTxx = localTxx
-    tempTxy = localTxy
-    tempTyy = localTyy
-    tempTzz = localTzz
-    tempTxxNext = localTxx
-    tempTxyNext = localTxy
-    tempTyyNext = localTyy
-    tempTzzNext = localTzz
-    
-    tempCxx = localCxx
-    tempCxy = localCxy
-    tempCyy = localCyy
-    tempCzz = localCzz
-    tempCxxNext = localCxx
-    tempCxyNext = localCxy
-    tempCyyNext = localCyy
-    tempCzzNext = localCzz
+! If using the semi-implicit iterative method, then we will iterate with tempTpq as the solution at time N+1,
+! and localTpq as Tpq at time N, and localTpqNm1 as Txx at time N-1. We then update Txx with the converged value.
+    IF (param_iterative_convection)
+      tempTxx = localTxx
+      tempTxy = localTxy
+      tempTyy = localTyy
+      tempTzz = localTzz
+
+      tempTxxNext = localTxx
+      tempTxyNext = localTxy
+      tempTyyNext = localTyy
+      tempTzzNext = localTzz
+
+      tempCxx = localCxx
+      tempCxy = localCxy
+      tempCyy = localCyy
+      tempCzz = localCzz
+
+      tempCxxNext = localCxx
+      tempCxyNext = localCxy
+      tempCyyNext = localCyy
+      tempCzzNext = localCzz
+    END
 
 
     IF (coordflag.eq.0) THEN
@@ -122,146 +171,23 @@ MODULE fene_p_mp_module
 !
 ! Semi-Implicit iteration.
       IF (param_iterative_convection) THEN
-        sum_counter=0
-        DO WHILE (sum_temp.gt.1d-9) 
-          sum_counter=sum_counter+1
-          tempVx=V_x-mesh_velocity
-          CALL calc_axisymm_convective_term(tempVx,V_y,tempTxx,tempTxy,tempTyy, tempTzz, &
-            convective_contrib_xx,convective_contrib_xy, &
-            convective_contrib_yy,convective_contrib_zz)
-
-          DO el=1,numelm
-! Now loop over all stress nodes and compute solutions or apply boundary conditions, etc.
-            DO ij=0,NP1SQM1
-              i=mapg(ij,el)
-              IF (inflowflag(i)) THEN 
-!  Apply inflow boundary conditions on stress.
-                tempTxxNext(ij,el) = boundary_stress_xx(i)
-                tempTxyNext(ij,el) = boundary_stress_xy(i)
-                tempTyyNext(ij,el) = boundary_stress_yy(i)
-                tempTzzNext(ij,el) = boundary_stress_yy(i)
-                CYCLE
-              ENDIF
-
-! Calculate entries of the matrix for OldroydB:
-
-! DEVSS-G:
-! Where G tensor is used for deformation terms as well as Strain Rate.
-
-              a11 = (1d0 + Wetime_constant1 - 2d0*We*localGradUxx(ij,el))
-              a22 = (1d0 + Wetime_constant1 - We*(localGradUxx(ij,el) + localGradUyy(ij,el)))
-              a33 = (1d0 + Wetime_constant1 - 2d0*We*localGradUyy(ij,el)) 
-              a44 = (1d0 + Wetime_constant1 - 2d0*We*localGradUzz(ij,el))! - 2d0*We*V_y(k)*jac(i,j,el)*w(i)*w(j) !
-
-              a12 = -2d0*We*localGradUyx(ij,el)
-              a21 = -We*localGradUxy(ij,el)
-              a23 = -We*localGradUyx(ij,el)
-              a32 = -2d0*We*localGradUxy(ij,el)
-
-! Calculate RHS entries
-! BDFJ:
-              temp12sq = tempTxy(ij,el)**2
-
-              r1 = 2d0*(1d0-param_beta)*localGradUxx(ij,el) &
-                + Wetime_constant2*( time_alpha_0*localTxx(ij,el) + time_alpha_1*localTxxNm1(ij,el) ) &! + time_alpha_2*localTxxNm2(ij,el) ) &
-                - We*convective_contrib_xx(ij,el) &
-                - temp_giesekus_const*(tempTxx(ij,el)**2 + temp12sq)
-
-              r2 = (1d0-param_beta)*( localGradUyx(ij,el) + localGradUxy(ij,el) ) &
-                + Wetime_constant2*( time_alpha_0*localTxy(ij,el) + time_alpha_1*localTxyNm1(ij,el) ) &! + time_alpha_2*localTxyNm2(ij,el) ) &
-                - We*convective_contrib_xy(ij,el) &
-                - temp_giesekus_const*(tempTxx(ij,el)*tempTxy(ij,el) + tempTxy(ij,el)*tempTyy(ij,el))
-
-              r3 = 2d0*(1d0-param_beta)*localGradUyy(ij,el) &
-                + Wetime_constant2*( time_alpha_0*localTyy(ij,el) + time_alpha_1*localTyyNm1(ij,el) ) &! + time_alpha_2*localTyyNm2(ij,el) ) &
-                - We*convective_contrib_yy(ij,el) &
-                - temp_giesekus_const*(temp12sq + tempTyy(ij,el)**2)
-
-              r4 =  2d0*(1d0-param_beta)*localGradUzz(ij,el) &
-                + Wetime_constant2*( time_alpha_0*localTzz(ij,el) + time_alpha_1*localTzzNm1(ij,el) ) &! + time_alpha_2*localTzzNm2(ij,el) ) &
-                - We*convective_contrib_zz(ij,el) &
-                - temp_giesekus_const*tempTzz(ij,el)**2
-
-! Using LAPACK to solve 4x4:
-              temp_matrix=0d0
-              temp_matrix(1,1)=a11
-              temp_matrix(1,2)=a12
-              temp_matrix(2,1)=a21
-              temp_matrix(2,2)=a22
-              temp_matrix(2,3)=a23
-              temp_matrix(3,2)=a32
-              temp_matrix(3,3)=a33
-              temp_matrix(4,4)=a44
-              temp_rhs(1)=r1
-              temp_rhs(2)=r2
-              temp_rhs(3)=r3
-              temp_rhs(4)=r4
-
-              call dgetrf( 4, 4, temp_matrix, 4, ipiv, info )
-              IF (info.ne.0) THEN
-                write(*,*) 'Error in calcStress_weakform:',el,info
-                STOP
-              ENDIF
-
-              call dgetrs( 'N', 4, 1, temp_matrix, 4, ipiv, temp_rhs, 4, info )  
-              IF (info.ne.0) THEN
-                write(*,*) 'Error in calcStress_weakform:',el,info
-                STOP
-              ENDIF
-
-! Copy solution from lapack:
-              tempTxxNext(ij,el) = temp_rhs(1)
-              tempTxyNext(ij,el) = temp_rhs(2)
-              tempTyyNext(ij,el) = temp_rhs(3)
-              tempTzzNext(ij,el) = temp_rhs(4)
-
-            ENDDO
-          ENDDO
-
-          sum_temp=0d0
-          sumxx=0d0
-          sumxy=0d0
-          sumyy=0d0
-          sumzz=0d0
-          DO el=1,numelm
-            DO ij=0,NP1SQM1
-              sumxx=sumxx+abs(tempTxxNext(ij,el)-tempTxx(ij,el))
-              sumxy=sumxy+abs(tempTxyNext(ij,el)-tempTxy(ij,el))
-              sumyy=sumyy+abs(tempTyyNext(ij,el)-tempTyy(ij,el))
-              sumzz=sumzz+abs(tempTzzNext(ij,el)-tempTzz(ij,el))
-            ENDDO
-          ENDDO
-          sumxx=sumxx/(numelm*NP1SQ)
-          sumxy=sumxy/(numelm*NP1SQ)
-          sumyy=sumyy/(numelm*NP1SQ)
-          sumzz=sumzz/(numelm*NP1SQ)
-
-          sum_temp=(sumxx+sumxy+sumyy+sumzz)/4d0
-
-          IF(sum_temp.gt.1d10.or.sum_counter.gt.1000) THEN
-            print*,'Iterative scheme in constitutive equation failed to converge! Sum counter = ',sum_counter
-            STOP
-          ENDIF
-
-          tempTxx = tempTxxNext
-          tempTxy = tempTxyNext
-          tempTyy = tempTyyNext
-          tempTzz = tempTzzNext
-
-        ENDDO
+! Not implemented. Will need to base it on the OldroydB/Giesekus version within the main viscoelastic_module.
+        print*, 'Error: The FENE-P-MP model is not yet implemented for semi-implicit iterative scheme...'
+        print*, 'Stopping'
+        STOP
       ELSE
 ! EXJ VERSION
         tempVx=V_x-mesh_velocity
-        CALL calc_axisymm_convective_term(tempVx,V_y,localTxx,localTxy,localTyy, localTzz, &
+        CALL calc_axisymm_convective_term(tempVx,V_y,localCxx,localCxy,localCyy, localCzz, &
           temp_contrib_xx,temp_contrib_xy, &
           temp_contrib_yy,temp_contrib_zz)
         IF (param_time_order.eq.2) THEN
           tempVx=V_xNm1-mesh_velocityNm1
-          CALL calc_axisymm_convective_term(tempVx,V_yNm1,localTxxNm1,localTxyNm1,localTyyNm1, localTzzNm1, &
+          CALL calc_axisymm_convective_term(tempVx,V_yNm1,localCxxNm1,localCxyNm1,localCyyNm1,localCzzNm1, &
             temp_contrib_xxNm1,temp_contrib_xyNm1, &
             temp_contrib_yyNm1,temp_contrib_zzNm1)
         ENDIF
-              
+
         convective_contrib_xx = time_beta_0*temp_contrib_xx + time_beta_1*temp_contrib_xxNm1
         convective_contrib_xy = time_beta_0*temp_contrib_xy + time_beta_1*temp_contrib_xyNm1
         convective_contrib_yy = time_beta_0*temp_contrib_yy + time_beta_1*temp_contrib_yyNm1
@@ -274,10 +200,10 @@ MODULE fene_p_mp_module
             i=mapg(ij,el)
             IF (inflowflag(i)) THEN 
 !  Apply inflow boundary conditions on stress.
-              tempCxxNext(ij,el) = boundary_stress_xx(i)
-              tempCxyNext(ij,el) = boundary_stress_xy(i)
-              tempCyyNext(ij,el) = boundary_stress_yy(i)
-              tempCzzNext(ij,el) = boundary_stress_yy(i)
+              tempCxx(ij,el) = boundary_stress_xx(i)
+              tempCxy(ij,el) = boundary_stress_xy(i)
+              tempCyy(ij,el) = boundary_stress_yy(i)
+              tempCzz(ij,el) = boundary_stress_yy(i)
               CYCLE
             ENDIF
 ! Calculate entries of the matrix for OldroydB:
@@ -287,40 +213,68 @@ MODULE fene_p_mp_module
 ! We copy this into a matrix and solve with LAPACK.
             temp_matrix=0d0
 
-            temp_matrix(1,1) = (1d0 + Wetime_constant1 - 2d0*We*localGradUxx(ij,el))
-            temp_matrix(2,2) = (1d0 + Wetime_constant1 - We*(localGradUxx(ij,el) + localGradUyy(ij,el)))
-            temp_matrix(3,3) = (1d0 + Wetime_constant1 - 2d0*We*localGradUyy(ij,el)) 
-            temp_matrix(4,4) = (1d0 + Wetime_constant1 - 2d0*We*localGradUzz(ij,el))
+            Cxx_approx = time_beta_0*localCxx(ij,el) + time_beta_*localCxxNm1(ij,el)
+            Cyy_approx = time_beta_0*localCyy(ij,el) + time_beta_1*localCyyNm1(ij,el)
+            Czz_approx = time_beta_0*localCzz(ij,el) + time_beta_1*localCzzNm1(ij,el)
+            Cxy_approx = time_beta_0*localCxy(ij,el) + time_beta_1*localCxyNm1(ij,el)
+            Cyz_approx = time_beta_0*localCyx(ij,el) + time_beta_1*localCyxNm1(ij,el)
 
-            temp_matrix(1,2) = -2d0*We*localGradUyx(ij,el)
+! TODO: Ask Tim where these values should be defined?
+            bValue = 1d0; 
+            lambdaD = 1d0;
+
+            f_of_trC = calculateF_FENE_PMP(bValue, Cxx_approx, Czz_approx, Czz_approx)
+            psiValue = calculatePsi_FENE_PMP(lambdaD, localGradUxx(ij,el), localGradUxy(ij,el), &
+              localGradUyx(ij,el), localGradUyy(ij,el), localGradUzz(ij,el))
+
+            WePsiValue = We*psiValue
+
+! TODO The extra terms for FENE P-MP can be simplified and combined in the terms used for OldB/Giesekus.
+! Have not done for now so readability isn't harmed.
+            temp_matrix(1,1) = f_of_trC + Wetime_constant1 + 2d0*We*localGradUxx(ij,el) &
+              + WePsiValue*2d0*localGradUxx(ij,el) !Dxx
+
+            temp_matrix(2,2) = f_of_trC + Wetime_constant1 -  We*(localGradUxx(ij,el) + localGradUyy(ij,el)) &
+              + WePsiValue*(localGradUxx(ij,el) + localGradUyy(ij,el)) !Dxx + Dyy
+
+            temp_matrix(3,3) = f_of_trC + Wetime_constant1 - 2d0*We*localGradUyy(ij,el) &
+              + WePsiValue*2d0*localGradUyy(ij,el) !Dyy
+
+            temp_matrix(4,4) = f_of_trC + Wetime_constant1 - 2d0*We*localGradUzz(ij,el) &
+              + WePsiValue*2d0*localGradUzz(ij,el) !Dzz
+
+! We make use of both gradU and D = (1/2)*(gradU + gradU') (' = transpose), but they're identical
+! in all components except the Dxy and Dyx components (and Dxy==Dyx), so we only need to compute 
+! Dxy for use below, all other uses of D will be replaced by the gradU component which is already stored.
+
+            Dxy = 0.5*(localGradUxy(ij,el) + localGradUyx(ij,el))
+
+            temp_matrix(1,2) = -2d0*We*localGradUyx(ij,el) &
+              + 2d0*WePsiValue*Dxy
+              
             temp_matrix(2,1) = -We*localGradUxy(ij,el)
+             + WePsiValue*Dxy
+
             temp_matrix(2,3) = -We*localGradUyx(ij,el)
+              + WePsiValue*Dxy
+
             temp_matrix(3,2) = -2d0*We*localGradUxy(ij,el)
+              + 2d0*WePsiValue*Dxy
 
 ! Calculate RHS entries
 ! BDFJ:
-            temp12sq = time_beta_0*localCxy(ij,el)**2 + time_beta_1*localCxyNm1(ij,el)**2
+            temp_rhs(1) = 1d0 + Wetime_constant2*( time_alpha_0*localCxx(ij,el) + time_alpha_1*localCxxNm1(ij,el) ) &
+              - We*convective_contrib_xx(ij,el)
 
-            temp_rhs(1) = 2d0*(1d0-param_beta)*localGradUxx(ij,el) &
-              + Wetime_constant2*( time_alpha_0*localCxx(ij,el) + time_alpha_1*localCxxNm1(ij,el) ) &
-              - We*convective_contrib_xx(ij,el) &
-              - temp_giesekus_const*(time_beta_0*localCxx(ij,el)**2 + time_beta_1*localCxxNm1(ij,el)**2 + temp12sq)
+            temp_rhs(2) = Wetime_constant2*( time_alpha_0*localCxy(ij,el) + time_alpha_1*localCxyNm1(ij,el) ) &
+              - We*convective_contrib_xy(ij,el)
+              
 
-            temp_rhs(2) = (1d0-param_beta)*( localGradUyx(ij,el) + localGradUxy(ij,el) ) &
-              + Wetime_constant2*( time_alpha_0*localCxy(ij,el) + time_alpha_1*localCxyNm1(ij,el) ) &
-              - We*convective_contrib_xy(ij,el) &
-              - temp_giesekus_const*(time_beta_0*(localCxx(ij,el)*localCxy(ij,el) + localCxy(ij,el)*localCyy(ij,el)) &
-              + time_beta_1*(localCxxNm1(ij,el)*localCxyNm1(ij,el) + localCxyNm1(ij,el)*localCyyNm1(ij,el)) )
-
-            temp_rhs(3) = 2d0*(1d0-param_beta)*localGradUyy(ij,el) &
-              + Wetime_constant2*( time_alpha_0*localCyy(ij,el) + time_alpha_1*localCyyNm1(ij,el) ) &
+            temp_rhs(3) = 1d0 + Wetime_constant2*( time_alpha_0*localCyy(ij,el) + time_alpha_1*localCyyNm1(ij,el) ) &
               - We*convective_contrib_yy(ij,el) &
-              - temp_giesekus_const*(temp12sq + time_beta_0*localCyy(ij,el)**2 + time_beta_1*localCyyNm1(ij,el)**2)
 
-            temp_rhs(4) =  2d0*(1d0-param_beta)*localGradUzz(ij,el) &
-              + Wetime_constant2*( time_alpha_0*localCzz(ij,el) + time_alpha_1*localCzzNm1(ij,el) ) &
+            temp_rhs(4) = 1d0 + Wetime_constant2*( time_alpha_0*localCzz(ij,el) + time_alpha_1*localCzzNm1(ij,el) ) &
               - We*convective_contrib_zz(ij,el) &
-              - temp_giesekus_const*(time_beta_0*localCzz(ij,el)**2 + time_beta_1*localCzzNm1(ij,el)**2)
 
 
 ! Using LAPACK to solve the 4x4 matrix:
@@ -337,21 +291,28 @@ MODULE fene_p_mp_module
             ENDIF
 
 ! Copy solution from lapack:
-            tempCxxNext(ij,el) = temp_rhs(1)
-            tempCxyNext(ij,el) = temp_rhs(2)
-            tempCyyNext(ij,el) = temp_rhs(3)
-            tempCzzNext(ij,el) = temp_rhs(4)
-
+            tempCxx(ij,el) = temp_rhs(1)
+            tempCxy(ij,el) = temp_rhs(2)
+            tempCyy(ij,el) = temp_rhs(3)
+            tempCzz(ij,el) = temp_rhs(4)
           ENDDO
         ENDDO
-        tempCxx=tempCxxNext
-        tempCxy=tempCxyNext
-        tempCyy=tempCyyNext
-        tempCzz=tempCzzNext
       ENDIF
+      
+! Calculate the new value of tau from the conformation tensor that's just been computed (currently stored as temp).
+      TauWeConstant = (1d0 - param_beta)/We
+      DO el=1,numelm
+        DO ij=0,NP1SQM1
+          f_of_trC = calculateF_FENE_PMP(bValue, tempCxx(ij,el), tempCzz(ij,el), tempCzz(ij,el))
+          tempTxx(ij,el) = TauWeConstant*(f_of_trC*tempCxx(ij,el) - 1d0)
+          tempTxy(ij,el) = TauWeConstant*f_of_trC*tempCxy(ij,el)
+          tempTyy(ij,el) = TauWeConstant*(f_of_trC*tempCyy(ij,el) - 1d0)
+          tempTzz(ij,el) = TauWeConstant*(f_of_trC*tempCzz(ij,el) - 1d0)
+        ENDDO        
+      ENDDO
 
-! Update stored valeus of Tpq 
-! ie move time along by one for these, so that localTpq and localCpw now hold the current stress/conformation values
+! Update stored valeus of Cpq and Tpq 
+! ie move time along by one for these, so that localTpq and localCpq now hold the current stress/conformation values
       localCxxNm2=localCxxNm1
       localCxyNm2=localCxyNm1
       localCyyNm2=localCyyNm1
@@ -366,7 +327,7 @@ MODULE fene_p_mp_module
       localCxy=tempCxy
       localCyy=tempCyy
       localCzz=tempCzz
-
+      
       localTxxNm2=localTxxNm1
       localTxyNm2=localTxyNm1
       localTyyNm2=localTyyNm1
