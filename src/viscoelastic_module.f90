@@ -313,7 +313,7 @@ MODULE viscoelastic_module
     temp_contrib_xxNm1=0d0
     temp_contrib_xyNm1=0d0
     temp_contrib_yyNm1=0d0
-!     temp_contrib_zzNm1=0d0
+    temp_contrib_zzNm1=0d0
 !     temp_contrib_xxNm2=0d0
 !     temp_contrib_xyNm2=0d0
 !     temp_contrib_yyNm2=0d0

@@ -40,7 +40,7 @@ MODULE fene_p_mp_module
   DOUBLE PRECISION FUNCTION calculatePsi_FENE_PMP(lambdaD, localGradUxx_in, localGradUxy_in, &
     localGradUyx_in, localGradUyy_in, localGradUzz_in)
     IMPLICIT NONE
-    DOUBLE PRECISION :: I2, I3, extensionRate
+    DOUBLE PRECISION :: Dxy, I2, I3, extensionRate
     DOUBLE PRECISION, INTENT(IN) :: lambdaD, localGradUxx_in, localGradUxy_in, &
       localGradUyx_in, localGradUyy_in, localGradUzz_in
 ! Psi(e) = (cosh(lamda_d*e) - 1) / 2
@@ -64,12 +64,12 @@ MODULE fene_p_mp_module
 
     extensionRate = 3d0*I3 / I2
 
-    calculatePsi_FENE_PMP = 0.5(cosh(lambdaD*extensionRate) - 1d0)  
+    calculatePsi_FENE_PMP = 0.5*(cosh(lambdaD*extensionRate) - 1d0)  
+    RETURN
 
   END FUNCTION calculatePsi_FENE_PMP
 
-  DOUBLE PRECISION FUNCTION calculateF_FENE_PMP(bValue, Cxx_in, Cyy_in, Czz_in, &
-    localGradUyx_in, localGradUyy_in, localGradUzz_in)
+  DOUBLE PRECISION FUNCTION calculateF_FENE_PMP(bValue, Cxx_in, Cyy_in, Czz_in)
     IMPLICIT NONE
     DOUBLE PRECISION, INTENT(IN) :: bValue, Cxx_in, Cyy_in, Czz_in
 ! F(tr(C)) = 1 / (1 - (tr(C)/b^2))
@@ -77,28 +77,24 @@ MODULE fene_p_mp_module
 ! where b is the square of the maximum extension of the dumbbell (considered in the model).
 
     calculateF_FENE_PMP = 1d0 / (1d0 - (Cxx_in + Cyy_in + Czz_in) / (bValue*bValue))
+    RETURN
 
   END FUNCTION calculateF_FENE_PMP
   
 
   SUBROUTINE calcStress_weakform_FENE_PMP
     IMPLICIT NONE
-    INTEGER :: i,j,k,l,ij,p,pj,ip,el,kl,meh,fromel,edge,fromij,localp,&
+    INTEGER :: i,ij,el,&
 ! LAPACK bits:
-    info,ipiv(4),iwork(4),ii,jj,sum_counter
+    info,ipiv(4)
 
-    DOUBLE PRECISION :: a11,a22,a33,a44,a12,a21,a23,a32,idetA,&
-      r1,r2,r3,r4,&
-      i11,i12,i13,i21,i22,i23,i31,i32,i33,i44,&
-      sum_temp,total_points,sumxx,sumxy,sumyy,sumzz,&
-      temp12sq,temp_giesekus_const,tempVx(1:nptot),&
-      Cxx_approx, Cxy_approx, Cyy_approx, Czz_approx, &
-      TauWeConstant, WePsiValue, Dxy
+    DOUBLE PRECISION :: Cxx_approx, Cxy_approx, Cyy_approx, Czz_approx,&
+      TauWeConstant, PsiValue, WePsiValue, Dxy, f_of_trC, bValue, lambdaD,&
 ! LAPACK bits:
-      temp_matrix(4,4),temp_rhs(4),temp1,temp2,temp3,temp4,&
-      work(16),anorm,rcond
+      temp_matrix(4,4),temp_rhs(4)
 
-    DOUBLE PRECISION :: convective_contrib_xx(0:NP1SQM1,numelm),&
+    DOUBLE PRECISION :: tempVx(1:nptot),&
+      convective_contrib_xx(0:NP1SQM1,numelm),&
       convective_contrib_xy(0:NP1SQM1,numelm),&
       convective_contrib_yy(0:NP1SQM1,numelm),&
       convective_contrib_zz(0:NP1SQM1,numelm),&
@@ -117,10 +113,16 @@ MODULE fene_p_mp_module
       tempCxxNext(0:NP1SQM1,numelm),&
       tempCxyNext(0:NP1SQM1,numelm),&
       tempCyyNext(0:NP1SQM1,numelm),&
-      tempCzzNext(0:NP1SQM1,numelm)
+      tempCzzNext(0:NP1SQM1,numelm),&
+      tempTxx(0:NP1SQM1,numelm),&
+      tempTxy(0:NP1SQM1,numelm),&
+      tempTyy(0:NP1SQM1,numelm),&
+      tempTzz(0:NP1SQM1,numelm)!,&
+      !tempTxxNext(0:NP1SQM1,numelm),&
+      !tempTxyNext(0:NP1SQM1,numelm),&
+      !tempTyyNext(0:NP1SQM1,numelm),&
+      !tempTzzNext(0:NP1SQM1,numelm)
 
-    temp_giesekus_const=param_giesekus/(1d0-param_beta)
-    sum_temp=1d0
     temp_contrib_xx=0d0
     temp_contrib_xy=0d0
     temp_contrib_yy=0d0
@@ -128,31 +130,34 @@ MODULE fene_p_mp_module
     temp_contrib_xxNm1=0d0
     temp_contrib_xyNm1=0d0
     temp_contrib_yyNm1=0d0
+    temp_contrib_zzNm1=0d0
 
 
 ! If using the semi-implicit iterative method, then we will iterate with tempTpq as the solution at time N+1,
 ! and localTpq as Tpq at time N, and localTpqNm1 as Txx at time N-1. We then update Txx with the converged value.
-    IF (param_iterative_convection)
-      tempTxx = localTxx
-      tempTxy = localTxy
-      tempTyy = localTyy
-      tempTzz = localTzz
-
-      tempTxxNext = localTxx
-      tempTxyNext = localTxy
-      tempTyyNext = localTyy
-      tempTzzNext = localTzz
-
-      tempCxx = localCxx
-      tempCxy = localCxy
-      tempCyy = localCyy
-      tempCzz = localCzz
-
-      tempCxxNext = localCxx
-      tempCxyNext = localCxy
-      tempCyyNext = localCyy
-      tempCzzNext = localCzz
-    END
+! 
+! For now this is disabled.
+!    IF (param_iterative_convection) THEN
+!      tempTxx = localTxx
+!      tempTxy = localTxy
+!      tempTyy = localTyy
+!      tempTzz = localTzz
+!
+!      tempTxxNext = localTxx
+!      tempTxyNext = localTxy
+!      tempTyyNext = localTyy
+!      tempTzzNext = localTzz
+!
+!      tempCxx = localCxx
+!      tempCxy = localCxy
+!      tempCyy = localCyy
+!      tempCzz = localCzz
+!
+!      tempCxxNext = localCxx
+!      tempCxyNext = localCxy
+!      tempCyyNext = localCyy
+!      tempCzzNext = localCzz
+!    ENDIF
 
 
     IF (coordflag.eq.0) THEN
@@ -213,17 +218,16 @@ MODULE fene_p_mp_module
 ! We copy this into a matrix and solve with LAPACK.
             temp_matrix=0d0
 
-            Cxx_approx = time_beta_0*localCxx(ij,el) + time_beta_*localCxxNm1(ij,el)
+            Cxx_approx = time_beta_0*localCxx(ij,el) + time_beta_1*localCxxNm1(ij,el)
             Cyy_approx = time_beta_0*localCyy(ij,el) + time_beta_1*localCyyNm1(ij,el)
             Czz_approx = time_beta_0*localCzz(ij,el) + time_beta_1*localCzzNm1(ij,el)
             Cxy_approx = time_beta_0*localCxy(ij,el) + time_beta_1*localCxyNm1(ij,el)
-            Cyz_approx = time_beta_0*localCyx(ij,el) + time_beta_1*localCyxNm1(ij,el)
 
 ! TODO: Ask Tim where these values should be defined?
             bValue = 1d0; 
             lambdaD = 1d0;
 
-            f_of_trC = calculateF_FENE_PMP(bValue, Cxx_approx, Czz_approx, Czz_approx)
+            f_of_trC = calculateF_FENE_PMP(bValue, Cxx_approx, Cyy_approx, Czz_approx)
             psiValue = calculatePsi_FENE_PMP(lambdaD, localGradUxx(ij,el), localGradUxy(ij,el), &
               localGradUyx(ij,el), localGradUyy(ij,el), localGradUzz(ij,el))
 
@@ -252,13 +256,13 @@ MODULE fene_p_mp_module
             temp_matrix(1,2) = -2d0*We*localGradUyx(ij,el) &
               + 2d0*WePsiValue*Dxy
               
-            temp_matrix(2,1) = -We*localGradUxy(ij,el)
+            temp_matrix(2,1) = -We*localGradUxy(ij,el) &
              + WePsiValue*Dxy
 
-            temp_matrix(2,3) = -We*localGradUyx(ij,el)
+            temp_matrix(2,3) = -We*localGradUyx(ij,el) &
               + WePsiValue*Dxy
 
-            temp_matrix(3,2) = -2d0*We*localGradUxy(ij,el)
+            temp_matrix(3,2) = -2d0*We*localGradUxy(ij,el) &
               + 2d0*WePsiValue*Dxy
 
 ! Calculate RHS entries
@@ -271,10 +275,10 @@ MODULE fene_p_mp_module
               
 
             temp_rhs(3) = 1d0 + Wetime_constant2*( time_alpha_0*localCyy(ij,el) + time_alpha_1*localCyyNm1(ij,el) ) &
-              - We*convective_contrib_yy(ij,el) &
+              - We*convective_contrib_yy(ij,el)
 
             temp_rhs(4) = 1d0 + Wetime_constant2*( time_alpha_0*localCzz(ij,el) + time_alpha_1*localCzzNm1(ij,el) ) &
-              - We*convective_contrib_zz(ij,el) &
+              - We*convective_contrib_zz(ij,el)
 
 
 ! Using LAPACK to solve the 4x4 matrix:
@@ -348,3 +352,5 @@ MODULE fene_p_mp_module
       STOP
     ENDIF
   END SUBROUTINE calcStress_weakform_FENE_PMP
+
+END MODULE fene_p_mp_module
