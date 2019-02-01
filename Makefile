@@ -7,8 +7,8 @@ VPATH = ./src/
 EXE = vesemd
 
 SRC = \
-        constants.f90 \
-        shared_data.f90 \
+  constants.f90 \
+  shared_data.f90 \
 	functions_module.f90 \
 	IO_module.f90 \
 	geometry_module.f90 \
@@ -22,6 +22,7 @@ SRC = \
 	devss_module.f90 \
 	result_analysis.f90 \
 	viscoelastic_module.f90 \
+  fene_p_mp_module.f90 \
 	main.f90 \
 
 
