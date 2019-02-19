@@ -186,6 +186,8 @@ MODULE shared_data
 		      area_of_domain,&
 ! 		      param_elasticity,&
 ! 		      param_lambda,&
+                      param_fene_b=0d0
+                      param_fene_lambdaD=0d0,&
 		      gravity_const=9.8d0,&
 		      rho_s=3.581d0,& ! sphere density
 		      rho_f=0.868d0,& ! fluid density

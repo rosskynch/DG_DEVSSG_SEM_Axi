@@ -940,6 +940,7 @@ END SUBROUTINE read_input
 	print*,'3x = Viscoelastic (Fixed mesh)'
 	print*,'4x = Newtonian (Moving mesh)'
 	print*,'5x = Viscoelastic (Moving mesh)'
+	print*,'6x = Viscoelastic FENE_P_MP (Fixed mesh)'
 	print*,''
 	print*,'x1 = Poiseuille flow (past cylinder)'
 	print*,'x2 = Uniform flow (past sphere)'
@@ -974,6 +975,12 @@ END SUBROUTINE read_input
 	
       ELSEIF (arg_in.eq.'-beta_s'.or.arg_in.eq.'-Beta_s') THEN
 	READ(temp,*) param_beta_s
+
+      ELSEIF (arg_in.eq.'-fene_b'.or.arg_in.eq.'-fene_B') THEN
+	READ(temp,*) param_fene_b
+
+	ELSEIF (arg_in.eq.'-fene_lambdad'.or.arg_in.eq.'-fene_lambdaD') THEN
+	READ(temp,*) param_fene_lambdaD
 	
       ELSEIF (arg_in.eq.'-prob'.or.arg_in.eq.'-Prob') THEN
 	READ(temp,*) param_problem_choice
