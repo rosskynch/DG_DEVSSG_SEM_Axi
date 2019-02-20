@@ -57,11 +57,12 @@ PROGRAM main
 ! 3x = Viscoelastic (Fixed mesh)
 ! 4x = Newtonian (Moving mesh)
 ! 5x = Viscoelastic (Moving mesh)
-
+!
 ! x1 = Poiseuille flow (past cylinder)
 ! x2 = Uniform flow (past sphere)
 ! x3 = Stokes: model solution | Newt/Visco: transient Poiseuille (2-D)
 ! x4 = Stokes: known cylinder solution | Newt/Visco: transient Poiseuille (Axisymm 3-D)
+! x9 = Viscoelastic only (39): FENE-P-MP Model uniform flow past sphere.
 
   CALL setup_problem_style  
   

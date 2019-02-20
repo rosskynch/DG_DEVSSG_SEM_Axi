@@ -321,71 +321,73 @@ MODULE initial_conditions_module
   
   SUBROUTINE setup_problem_style
     IMPLICIT NONE
-    
 
-    
     IF (param_problem_choice.eq.11.or.param_problem_choice.eq.21.or.param_problem_choice.eq.31) THEN ! Poiseuille flow past fixed cylinder.
       IF (coordflag.eq.1) THEN
-	write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	STOP
+        write(*,*) 'ERROR: coordflag inconsistent with problem style'
+	      STOP
       ENDIF
       param_function_choice = 1
-    ELSEIF (param_problem_choice.eq.12.or.param_problem_choice.eq.22.or.param_problem_choice.eq.32) THEN ! Uniform flow past fixed sphere.
+    ELSEIF ( &
+      param_problem_choice.eq.12 &
+      .or.param_problem_choice.eq.22 &
+      .or.param_problem_choice.eq.32 &
+      .or.param_problem_choice.eq.39 &) THEN ! Uniform flow past fixed sphere.
       IF (coordflag.eq.0) THEN
-	write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: coordflag inconsistent with problem style'
+	      STOP
       ENDIF
       param_function_choice = 2
     ELSEIF (param_problem_choice.eq.13) THEN ! Stokes Model solution
       IF (coordflag.eq.1) THEN
-	write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	STOP
+        write(*,*) 'ERROR: coordflag inconsistent with problem style'
+	      STOP
       ENDIF
       param_function_choice = 3
       param_error=.true.
     ELSEIF (param_problem_choice.eq.14) THEN ! Stokes cylinder solution
       IF (coordflag.eq.1) THEN
-	write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: coordflag inconsistent with problem style'
+	      STOP
       ENDIF
       param_function_choice = 4
       param_error=.true.
-	ELSEIF (param_problem_choice.eq.15) THEN ! Stokes Model solution 2: Request from Tim.
-	  IF (coordflag.eq.1) THEN
-		write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	    STOP
-	  ENDIF
-	  param_function_choice = 10
-	  param_error=.true.
+	  ELSEIF (param_problem_choice.eq.15) THEN ! Stokes Model solution 2: Request from Tim.
+	    IF (coordflag.eq.1) THEN
+		    write(*,*) 'ERROR: coordflag inconsistent with problem style'
+	      STOP
+	    ENDIF
+	    param_function_choice = 10
+	    param_error=.true.
 ! THESE ARE YET TO BE MADE FINAL:
     ELSEIF (param_problem_choice.eq.23) THEN ! Newtonian 2-D Transient Waters solution
       IF (coordflag.eq.1) THEN
-	write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: coordflag inconsistent with problem style'
+	      STOP
       ENDIF
       param_function_choice = 5
       param_error=.true.
       param_waters=.true.
     ELSEIF (param_problem_choice.eq.24) THEN ! Newtonian 3-D Axisymmetric Transient Waters solution
       IF (coordflag.eq.0) THEN
-	write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: coordflag inconsistent with problem style'
+	      STOP
       ENDIF
       param_function_choice = 6
       param_error=.true.
       param_waters=.true.
     ELSEIF (param_problem_choice.eq.33) THEN ! Viscoelastic 2-D Transient Waters solution
       IF (coordflag.eq.1) THEN
-	write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: coordflag inconsistent with problem style'
+	      STOP
       ENDIF
       param_function_choice = 7
       param_error=.true.
       param_waters=.true.
     ELSEIF (param_problem_choice.eq.34) THEN ! Viscoelastic 3-D Axisymmetric Transient Waters solution
       IF (coordflag.eq.0) THEN
-	write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: coordflag inconsistent with problem style'
+	      STOP
       ENDIF
       param_function_choice = 8
       param_error=.true.
@@ -404,83 +406,88 @@ MODULE initial_conditions_module
 ! Check movingmeshflag is correct:
     IF (param_problem_choice.lt.40) THEN
       IF (movingmeshflag.eq.1) THEN
-	write(*,*) 'ERROR: movingmeshflag inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: movingmeshflag inconsistent with problem style'
+	      STOP
       ENDIF
     ELSEIF (param_problem_choice.lt.60) THEN
       IF (movingmeshflag.eq.0) THEN
-	write(*,*) 'ERROR: movingmeshflag inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: movingmeshflag inconsistent with problem style'
+	      STOP
       ENDIF
     ENDIF
     
 ! Check fluid parameters match problem choices:
     IF (param_problem_choice.lt.20) THEN ! Stokes
       IF (Re.gt.0d0) THEN
-	write(*,*) 'ERROR: Re inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: Re inconsistent with problem style'
+	      STOP
       ENDIF
       IF (We.gt.0d0) THEN
-	write(*,*) 'ERROR: We inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: We inconsistent with problem style'
+	      STOP
       ENDIF
       IF (param_beta.ne.1d0) THEN
-	write(*,*) 'ERROR: param_beta inconsistent with problem style'
-	STOP
-      ENDIF    
-
+	      write(*,*) 'ERROR: param_beta inconsistent with problem style'
+	      STOP
+      ENDIF
     ELSEIF (param_problem_choice.lt.30) THEN ! Newtonian
       IF (Re.lt.1d-6) THEN
-	write(*,*) 'ERROR: Re inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: Re inconsistent with problem style'
+	      STOP
       ENDIF
       IF (We.gt.0d0) THEN
-	write(*,*) 'ERROR: We inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: We inconsistent with problem style'
+	      STOP
       ENDIF
       IF (param_beta.ne.1d0) THEN
-	write(*,*) 'ERROR: param_beta inconsistent with problem style'
-	STOP
-      ENDIF 
-   
+	      write(*,*) 'ERROR: param_beta inconsistent with problem style'
+	      STOP
+      ENDIF
     ELSEIF (param_problem_choice.lt.40) THEN ! Viscoelastic
       IF (We.lt.1d-6) THEN
-	write(*,*) 'ERROR: We inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: We inconsistent with problem style'
+	      STOP
       ENDIF
       IF (param_beta.ge.1d0.or.param_beta.le.0d0) THEN
-	write(*,*) 'ERROR: param_beta inconsistent with problem style'
-	STOP
-      ENDIF 
-   
+	      write(*,*) 'ERROR: param_beta inconsistent with problem style'
+	      STOP
+      ENDIF
+      IF (param_problem_choice.eq.39) THEN
+        IF (fene_b.lt.1d-6) THEN
+          write(*,*) 'ERROR: fene_b inconsistent with problem style'
+          STOP
+        ENDIF
+        IF (fene_lambdaD.lt.1d-6) THEN
+          write(*,*) 'ERROR: fene_lambdaD inconsistent with problem style'
+          STOP
+        ENDIF
+      ENDIF
     ELSEIF (param_problem_choice.lt.50) THEN ! Moving Newtonian
       IF (Re.lt.1d-6) THEN
-	write(*,*) 'ERROR: Re inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: Re inconsistent with problem style'
+	      STOP
       ENDIF
       IF (We.gt.0d0) THEN
-	write(*,*) 'ERROR: We inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: We inconsistent with problem style'
+	      STOP
       ENDIF
       IF (param_beta.ne.1d0) THEN
-	write(*,*) 'ERROR: param_beta inconsistent with problem style'
-	STOP
-      ENDIF 
-   
+	      write(*,*) 'ERROR: param_beta inconsistent with problem style'
+	      STOP
+      ENDIF
     ELSEIF (param_problem_choice.lt.60) THEN ! Moving Viscoelastic
       IF (Re.lt.1d-6) THEN
-	write(*,*) 'ERROR: Re inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: Re inconsistent with problem style'
+	      STOP
       ENDIF
       IF (We.lt.1d-6) THEN
-	write(*,*) 'ERROR: We inconsistent with problem style'
-	STOP
+	      write(*,*) 'ERROR: We inconsistent with problem style'
+	      STOP
       ENDIF
       IF (param_beta.ge.1d0.or.param_beta.le.0d0) THEN
-	write(*,*) 'ERROR: param_beta inconsistent with problem style'
-	STOP
-      ENDIF 
-    
+	      write(*,*) 'ERROR: param_beta inconsistent with problem style'
+	      STOP
+      ENDIF
     ENDIF
   END SUBROUTINE setup_problem_style
   

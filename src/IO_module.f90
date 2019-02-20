@@ -909,126 +909,114 @@ END SUBROUTINE read_input
       IF (len_trim(temp) == 0) EXIT
       arg_in=trim(temp)
       IF (arg_in.eq.'-help') THEN
-	print*, 'Usage, ./stokes [arg list]'
-	print*, 'Available commandline arguments:'
-	print*, ''
-	print*, '-input [filename]  | input filename, may include path and must include suffix. '
-	print*, '-N [integer]       | Order of spectral approximation'
-	print*, '-Re [double]       | Reynolds number (default: 0.0 / OFF)'
-	print*, '-We [double]       | Weissenberg number (default: 0.0 / OFF)'
-	print*, '-beta [double]     | Viscosity Ratio (default: 1.0 / OFF)' 
-	print*, '-giesekus [double] | Giesekus slip parameter, alpha (default: 0.0 / OFF)'
-	print*, '-beta_s [double]   | DEVSS artificial viscosity parameter (default: 0.0 / OFF)'
-	print*, '-prob [integer]    | problem choice - use -prob_help for more info'
-	print*, '-output [filename] | output leading filename (3 will be produced), do not include suffix'
-	print*, '-enable_output [integer] | disable file output. 0 = OFF, any other value = ON (default: ON)'
-	print*, '-deltat [double]   | timestep size (default: 0.001)'
-	print*, '-alphaz [double]   | Co-efficient of integral of pressure in conservation of mass equation (default: 0.0 / OFF)'
-	print*, '-con_it [double]   | Choose the treatment of the convective term in the constituitive equation. 0 = EX2, 1=semi-iterative (default: 1 / semi-iterative)'
-	print*, '-time_order [integer]   | Choose the time-order of the numerical scheme. Available options: 1=1st-order, 2=2nd-order (default), 3=3rd-order'
-	print*, '-rho_f [double]   | density of fluid (default: 0.868)'
-	print*, '-rho_s [double]   | density of sphere (default: 3.581)'
-	
-	STOP
-      ELSEIF (arg_in.eq.'-prob_help'.or.arg_in.eq.'-probhelp') THEN
-            
-	print*,'parameter to set the boundary conditions and result analysis'
-	print*,'GUIDE:'
-	print*,''	
-	print*,'1x = Stokes (Fixed mesh)'
-	print*,'2x = Newtonian (Fixed mesh)'
-	print*,'3x = Viscoelastic (Fixed mesh)'
-	print*,'4x = Newtonian (Moving mesh)'
-	print*,'5x = Viscoelastic (Moving mesh)'
-	print*,'6x = Viscoelastic FENE_P_MP (Fixed mesh)'
-	print*,''
-	print*,'x1 = Poiseuille flow (past cylinder)'
-	print*,'x2 = Uniform flow (past sphere)'
-	print*,'x3 = Stokes: model solution | Newt/Visco: transient Poiseuille (2-D)'
-	print*,'x4 = Stokes: known cylinder solution | Newt/Visco: transient Poiseuille (Axisymm 3-D)'
-	print*,'x5 = Stokes: alternative model solution'
-	STOP
+	      print*, 'Usage, ./stokes [arg list]'
+	      print*, 'Available commandline arguments:'
+	      print*, ''
+	      print*, '-input [filename]  | input filename, may include path and must include suffix. '
+	      print*, '-N [integer]       | Order of spectral approximation'
+	      print*, '-Re [double]       | Reynolds number (default: 0.0 / OFF)'
+	      print*, '-We [double]       | Weissenberg number (default: 0.0 / OFF)'
+	      print*, '-beta [double]     | Viscosity Ratio (default: 1.0 / OFF)' 
+	      print*, '-giesekus [double] | Giesekus slip parameter, alpha (default: 0.0 / OFF)'
+	      print*, '-beta_s [double]   | DEVSS artificial viscosity parameter (default: 0.0 / OFF)'
+	      print*, '-fene_b [double]   | FENE-P-MP parameter (default: 0.0 / OFF)'
+	      print*, '-fene_lambdad [double]   | FENE-P-MP parameter (default: 0.0 / OFF)'
+	      print*, '-prob [integer]    | problem choice - use -prob_help for more info'
+	      print*, '-output [filename] | output leading filename (3 will be produced), do not include suffix'
+	      print*, '-enable_output [integer] | disable file output. 0 = OFF, any other value = ON (default: ON)'
+	      print*, '-deltat [double]   | timestep size (default: 0.001)'
+	      print*, '-alphaz [double]   | Co-efficient of integral of pressure in conservation of mass equation (default: 0.0 / OFF)'
+	      print*, '-con_it [double]   | Choose the treatment of the convective term in the constituitive equation. 0 = EX2, 1=semi-iterative (default: 1 / semi-iterative)'
+	      print*, '-time_order [integer]   | Choose the time-order of the numerical scheme. Available options: 1=1st-order, 2=2nd-order (default), 3=3rd-order'
+	      print*, '-rho_f [double]   | density of fluid (default: 0.868)'
+	      print*, '-rho_s [double]   | density of sphere (default: 3.581)'	
+	      STOP
+      ELSEIF (arg_in.eq.'-prob_help'.or.arg_in.eq.'-probhelp') THEN          
+	      print*,'parameter to set the boundary conditions and result analysis'
+	      print*,'GUIDE:'
+	      print*,''	
+	      print*,'1x = Stokes (Fixed mesh)'
+	      print*,'2x = Newtonian (Fixed mesh)'
+        print*,'3x = Viscoelastic (Fixed mesh)'
+	      print*,'4x = Newtonian (Moving mesh)'
+	      print*,'5x = Viscoelastic (Moving mesh)'
+	      print*,''
+	      print*,'x1 = Poiseuille flow (past cylinder)'
+	      print*,'x2 = Uniform flow (past sphere)'
+	      print*,'x3 = Stokes: model solution | Newt/Visco: transient Poiseuille (2-D)'
+	      print*,'x4 = Stokes: known cylinder solution | Newt/Visco: transient Poiseuille (Axisymm 3-D)'
+        print*,'x5 = Stokes: alternative model solution'
+        print*,'x9 = Viscoelastic only (39): FENE-P-MP Model uniform flow past sphere.'
+	      STOP
       ENDIF
       i=i+1
       CALL GETARG(i,temp)
       IF (len_trim(temp) == 0) THEN
-	print*,'ERROR: Mismatch in command line arguments: ',arg_in,' and ',trim(temp)
-	STOP
+	      print*,'ERROR: Mismatch in command line arguments: ',arg_in,' and ',trim(temp)
+	      STOP
       ENDIF
       IF (arg_in.eq.'-input') THEN
-	input_filename=trim(temp)
-	
+	      input_filename=trim(temp)	
       ELSEIF (arg_in.eq.'-n'.or.arg_in.eq.'-N') THEN
-	READ(temp,*) N
-	
+	      READ(temp,*) N	
       ELSEIF (arg_in.eq.'-Re'.or.arg_in.eq.'-re') THEN
-	READ(temp,*) Re
-	
+	      READ(temp,*) Re	
       ELSEIF (arg_in.eq.'-We'.or.arg_in.eq.'-we') THEN
-	READ(temp,*) We
-	
+	      READ(temp,*) We	
       ELSEIF (arg_in.eq.'-beta'.or.arg_in.eq.'-Beta') THEN
-	READ(temp,*) param_beta
-	
+	      READ(temp,*) param_beta	
       ELSEIF (arg_in.eq.'-giesekus'.or.arg_in.eq.'-Giesekus') THEN
-	READ(temp,*) param_giesekus
-	
+	      READ(temp,*) param_giesekus
       ELSEIF (arg_in.eq.'-beta_s'.or.arg_in.eq.'-Beta_s') THEN
-	READ(temp,*) param_beta_s
-
+	      READ(temp,*) param_beta_s
       ELSEIF (arg_in.eq.'-fene_b'.or.arg_in.eq.'-fene_B') THEN
-	READ(temp,*) param_fene_b
-
-	ELSEIF (arg_in.eq.'-fene_lambdad'.or.arg_in.eq.'-fene_lambdaD') THEN
-	READ(temp,*) param_fene_lambdaD
-	
+	      READ(temp,*) param_fene_b
+	    ELSEIF (arg_in.eq.'-fene_lambdad'.or.arg_in.eq.'-fene_lambdaD') THEN
+  	    READ(temp,*) param_fene_lambdaD
       ELSEIF (arg_in.eq.'-prob'.or.arg_in.eq.'-Prob') THEN
-	READ(temp,*) param_problem_choice
-	
+	      READ(temp,*) param_problem_choice	
       ELSEIF (arg_in.eq.'-output') THEN      
-	output_filename=trim(temp)
-	tecplot_output_filename = trim(output_filename)//'_tec.dat'
-	tecplot_fine_output_filename = trim(output_filename)//'_tec_fine.dat'
-	wallsymm_output_filename = trim(output_filename)//'_wallsymm.txt'
-	
-	  ELSEIF (arg_in.eq.'-enable_output') THEN
-	    READ(temp,*) temp_int
-	    IF(temp_int.eq.0) THEN
-	      enable_output_to_file=.false.
-	    ENDIF
+	      output_filename=trim(temp)
+	      tecplot_output_filename = trim(output_filename)//'_tec.dat'
+	      tecplot_fine_output_filename = trim(output_filename)//'_tec_fine.dat'
+	      wallsymm_output_filename = trim(output_filename)//'_wallsymm.txt'	
+	    ELSEIF (arg_in.eq.'-enable_output') THEN
+	      READ(temp,*) temp_int
+	      IF(temp_int.eq.0) THEN
+	        enable_output_to_file=.false.
+	      ENDIF
       ELSEIF (arg_in.eq.'-deltat'.or.arg_in.eq.'-Deltat') THEN      
-	READ(temp,*) deltat
+	      READ(temp,*) deltat
       ELSEIF (arg_in.eq.'-alphaz'.or.arg_in.eq.'-alphaZ' &
-	      .or.arg_in.eq.'-Alphaz'.or.arg_in.eq.'-AlphaZ' ) THEN
-	READ(temp,*) param_alphaZ
+        .or.arg_in.eq.'-Alphaz'.or.arg_in.eq.'-AlphaZ' ) THEN
+	      READ(temp,*) param_alphaZ
       ELSEIF (arg_in.eq.'-cons_it'.or.arg_in.eq.'-Cons_it') THEN
-	READ(temp,*) temp_int
-	IF (temp_int.eq.1) THEN
-	  param_iterative_convection=.true.
-	ELSEIF (temp_int.eq.0) THEN
-	  param_iterative_convection=.false.
-	ELSE
-	  print*,'ERROR: Input argument cons_it invalid: use values 0 (off) or 1 (on)'
-	  STOP
-	ENDIF
+	      READ(temp,*) temp_int
+	      IF (temp_int.eq.1) THEN
+	        param_iterative_convection=.true.
+	      ELSEIF (temp_int.eq.0) THEN
+	        param_iterative_convection=.false.
+	      ELSE
+	        print*,'ERROR: Input argument cons_it invalid: use values 0 (off) or 1 (on)'
+	        STOP
+	      ENDIF
       ELSEIF (arg_in.eq.'-time_order'.or.arg_in.eq.'-Time_order') THEN
-      	READ(temp,*) param_time_order
-      	IF (param_time_order.gt.2.or.param_time_order.lt.1) THEN
-	  print*,'ERROR: Input argument time_order invalid: use values 1, 2'! or 3' REMOVED FOR NOW.
-	  STOP
-	ENDIF
+        READ(temp,*) param_time_order
+        IF (param_time_order.gt.2.or.param_time_order.lt.1) THEN
+	        print*,'ERROR: Input argument time_order invalid: use values 1, 2'! or 3' REMOVED FOR NOW.
+	        STOP
+	      ENDIF
       ELSEIF (arg_in.eq.'-rho_s') THEN
-	READ(temp,*) rho_s
+	      READ(temp,*) rho_s
       ELSEIF (arg_in.eq.'-rho_f') THEN
-	READ(temp,*) rho_f
+	      READ(temp,*) rho_f
       ELSE
-	print*,'ERROR: Unknown commandline arguments: ',arg_in,' and ',trim(temp)
-	print*,'Try using the argument -help'
-	STOP
+	      print*,'ERROR: Unknown commandline arguments: ',arg_in,' and ',trim(temp)
+	      print*,'Try using the argument -help'
+	      STOP
       ENDIF
       i=i+1
-      ENDDO
-
+    ENDDO
   END SUBROUTINE parse_command_line_arguments  
   
 !  SUBROUTINE create_cross_stream_points
