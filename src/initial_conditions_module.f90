@@ -33,10 +33,10 @@ MODULE initial_conditions_module
 
       IF (param_function_choice.eq.6.or.param_function_choice.eq.8) THEN
 ! This is the penultimate node in the x-direction for both, and the node at the top of the channel for stress, and the bottom of the channel for velocity.
-	CALL find_transient_error_points_axisymm
+        CALL find_transient_error_points_axisymm
       ELSE
 ! This is the penultimate node in the x-direction for both, and the node nearest y-coord 0.5 for velocity and nearest 0.0 for stress.
-	CALL find_transient_error_points
+        CALL find_transient_error_points
       ENDIF
     ENDIF
 
@@ -252,27 +252,20 @@ MODULE initial_conditions_module
       localTxyNm2=0d0
       localTyyNm2=0d0
       localTzzNm2=0d0
-      
-
-      
     ENDIF
-    
 
-
-    
-    
 ! Steady Poiseuille Flow for pipe from [-1,1]:
 !     DO i=1,nptot
-! 	V_xNm1(i) = 1d0-nodeCoord(i,2)**2!0.25d0*(4d0-nodeCoord(i,2)**2)0.25d0*(4d0-nodeCoord(i,2)**2)
-! 	V_x(i) = 1d0-nodeCoord(i,2)**2!0.25d0*(4d0-nodeCoord(i,2)**2)
+!   V_xNm1(i) = 1d0-nodeCoord(i,2)**2!0.25d0*(4d0-nodeCoord(i,2)**2)0.25d0*(4d0-nodeCoord(i,2)**2)
+!   V_x(i) = 1d0-nodeCoord(i,2)**2!0.25d0*(4d0-nodeCoord(i,2)**2)
 !     ENDDO
 
 
 ! Transient ICs (Waters & King solution):
 ! Newtonian:
 !     DO i=1,nptot
-! 	V_xNm1(i) = calcWaters_newtonian_U(nodeCoord(i,1),nodeCoord(i,2),timeNm1)
-! 	V_x(i) = calcWaters_newtonian_U(nodeCoord(i,1),nodeCoord(i,2),timeN)
+!   V_xNm1(i) = calcWaters_newtonian_U(nodeCoord(i,1),nodeCoord(i,2),timeNm1)
+!   V_x(i) = calcWaters_newtonian_U(nodeCoord(i,1),nodeCoord(i,2),timeN)
 !     ENDDO
 
 ! Oldroyd B:
@@ -325,7 +318,7 @@ MODULE initial_conditions_module
     IF (param_problem_choice.eq.11.or.param_problem_choice.eq.21.or.param_problem_choice.eq.31) THEN ! Poiseuille flow past fixed cylinder.
       IF (coordflag.eq.1) THEN
         write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	      STOP
+        STOP
       ENDIF
       param_function_choice = 1
     ELSEIF ( &
@@ -334,66 +327,66 @@ MODULE initial_conditions_module
       .or.param_problem_choice.eq.32 &
       .or.param_problem_choice.eq.39 &) THEN ! Uniform flow past fixed sphere.
       IF (coordflag.eq.0) THEN
-	      write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: coordflag inconsistent with problem style'
+        STOP
       ENDIF
       param_function_choice = 2
     ELSEIF (param_problem_choice.eq.13) THEN ! Stokes Model solution
       IF (coordflag.eq.1) THEN
         write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	      STOP
+        STOP
       ENDIF
       param_function_choice = 3
       param_error=.true.
     ELSEIF (param_problem_choice.eq.14) THEN ! Stokes cylinder solution
       IF (coordflag.eq.1) THEN
-	      write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: coordflag inconsistent with problem style'
+        STOP
       ENDIF
       param_function_choice = 4
       param_error=.true.
-	  ELSEIF (param_problem_choice.eq.15) THEN ! Stokes Model solution 2: Request from Tim.
-	    IF (coordflag.eq.1) THEN
-		    write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	      STOP
-	    ENDIF
-	    param_function_choice = 10
-	    param_error=.true.
+    ELSEIF (param_problem_choice.eq.15) THEN ! Stokes Model solution 2: Request from Tim.
+      IF (coordflag.eq.1) THEN
+        write(*,*) 'ERROR: coordflag inconsistent with problem style'
+        STOP
+      ENDIF
+      param_function_choice = 10
+      param_error=.true.
 ! THESE ARE YET TO BE MADE FINAL:
     ELSEIF (param_problem_choice.eq.23) THEN ! Newtonian 2-D Transient Waters solution
       IF (coordflag.eq.1) THEN
-	      write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: coordflag inconsistent with problem style'
+        STOP
       ENDIF
       param_function_choice = 5
       param_error=.true.
       param_waters=.true.
     ELSEIF (param_problem_choice.eq.24) THEN ! Newtonian 3-D Axisymmetric Transient Waters solution
       IF (coordflag.eq.0) THEN
-	      write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: coordflag inconsistent with problem style'
+        STOP
       ENDIF
       param_function_choice = 6
       param_error=.true.
       param_waters=.true.
     ELSEIF (param_problem_choice.eq.33) THEN ! Viscoelastic 2-D Transient Waters solution
       IF (coordflag.eq.1) THEN
-	      write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: coordflag inconsistent with problem style'
+        STOP
       ENDIF
       param_function_choice = 7
       param_error=.true.
       param_waters=.true.
     ELSEIF (param_problem_choice.eq.34) THEN ! Viscoelastic 3-D Axisymmetric Transient Waters solution
       IF (coordflag.eq.0) THEN
-	      write(*,*) 'ERROR: coordflag inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: coordflag inconsistent with problem style'
+        STOP
       ENDIF
       param_function_choice = 8
       param_error=.true.
       param_waters=.true.
     ELSEIF (param_problem_choice.eq.41.or.param_problem_choice.eq.42.or.&  ! Moving mesh Newtonian/Viscoelastic 2-D
-	    param_problem_choice.eq.51.or.param_problem_choice.eq.52) THEN ! Moving mesh Newtonian/Viscoelastic 3-D Axisymmetric.
+      param_problem_choice.eq.51.or.param_problem_choice.eq.52) THEN ! Moving mesh Newtonian/Viscoelastic 3-D Axisymmetric.
 
       param_function_choice = 9
 
@@ -406,51 +399,51 @@ MODULE initial_conditions_module
 ! Check movingmeshflag is correct:
     IF (param_problem_choice.lt.40) THEN
       IF (movingmeshflag.eq.1) THEN
-	      write(*,*) 'ERROR: movingmeshflag inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: movingmeshflag inconsistent with problem style'
+        STOP
       ENDIF
     ELSEIF (param_problem_choice.lt.60) THEN
       IF (movingmeshflag.eq.0) THEN
-	      write(*,*) 'ERROR: movingmeshflag inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: movingmeshflag inconsistent with problem style'
+        STOP
       ENDIF
     ENDIF
     
 ! Check fluid parameters match problem choices:
     IF (param_problem_choice.lt.20) THEN ! Stokes
       IF (Re.gt.0d0) THEN
-	      write(*,*) 'ERROR: Re inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: Re inconsistent with problem style'
+        STOP
       ENDIF
       IF (We.gt.0d0) THEN
-	      write(*,*) 'ERROR: We inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: We inconsistent with problem style'
+        STOP
       ENDIF
       IF (param_beta.ne.1d0) THEN
-	      write(*,*) 'ERROR: param_beta inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: param_beta inconsistent with problem style'
+        STOP
       ENDIF
     ELSEIF (param_problem_choice.lt.30) THEN ! Newtonian
       IF (Re.lt.1d-6) THEN
-	      write(*,*) 'ERROR: Re inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: Re inconsistent with problem style'
+        STOP
       ENDIF
       IF (We.gt.0d0) THEN
-	      write(*,*) 'ERROR: We inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: We inconsistent with problem style'
+        STOP
       ENDIF
       IF (param_beta.ne.1d0) THEN
-	      write(*,*) 'ERROR: param_beta inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: param_beta inconsistent with problem style'
+        STOP
       ENDIF
     ELSEIF (param_problem_choice.lt.40) THEN ! Viscoelastic
       IF (We.lt.1d-6) THEN
-	      write(*,*) 'ERROR: We inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: We inconsistent with problem style'
+        STOP
       ENDIF
       IF (param_beta.ge.1d0.or.param_beta.le.0d0) THEN
-	      write(*,*) 'ERROR: param_beta inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: param_beta inconsistent with problem style'
+        STOP
       ENDIF
       IF (param_problem_choice.eq.39) THEN
         IF (fene_b.lt.1d-6) THEN
@@ -464,29 +457,29 @@ MODULE initial_conditions_module
       ENDIF
     ELSEIF (param_problem_choice.lt.50) THEN ! Moving Newtonian
       IF (Re.lt.1d-6) THEN
-	      write(*,*) 'ERROR: Re inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: Re inconsistent with problem style'
+        STOP
       ENDIF
       IF (We.gt.0d0) THEN
-	      write(*,*) 'ERROR: We inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: We inconsistent with problem style'
+        STOP
       ENDIF
       IF (param_beta.ne.1d0) THEN
-	      write(*,*) 'ERROR: param_beta inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: param_beta inconsistent with problem style'
+        STOP
       ENDIF
     ELSEIF (param_problem_choice.lt.60) THEN ! Moving Viscoelastic
       IF (Re.lt.1d-6) THEN
-	      write(*,*) 'ERROR: Re inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: Re inconsistent with problem style'
+        STOP
       ENDIF
       IF (We.lt.1d-6) THEN
-	      write(*,*) 'ERROR: We inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: We inconsistent with problem style'
+        STOP
       ENDIF
       IF (param_beta.ge.1d0.or.param_beta.le.0d0) THEN
-	      write(*,*) 'ERROR: param_beta inconsistent with problem style'
-	      STOP
+        write(*,*) 'ERROR: param_beta inconsistent with problem style'
+        STOP
       ENDIF
     ENDIF
   END SUBROUTINE setup_problem_style
@@ -495,19 +488,19 @@ MODULE initial_conditions_module
   SUBROUTINE find_transient_error_points
     IMPLICIT NONE
     INTEGER :: el,i,j,xi_i,eta_j,tempij,&
-		chan_end_glob_node,chan_end_loc_vert
+    chan_end_glob_node,chan_end_loc_vert
     DOUBLE PRECISION :: channel_end,xi_out,eta_out,dist_xi(0:N),dist_eta(0:N),&
-			temp_y,temp_xi,temp_eta,test_node_xcoord
+      temp_y,temp_xi,temp_eta,test_node_xcoord
     
 ! find x-coord of the end of channel: which is the largest x co-ord of vertex nodes.
     channel_end=-999d0
     temp_y=999d0
     DO i=1,numnp
       IF (nodeCoord(i,1).gt.channel_end.and.nodeCoord(i,2).lt.temp_y) THEN
-	channel_end=nodeCoord(i,1)
-	temp_y=nodeCoord(i,2)
-	chan_end_glob_node=i
-	ENDIF
+        channel_end=nodeCoord(i,1)
+        temp_y=nodeCoord(i,2)
+        chan_end_glob_node=i
+      ENDIF
     ENDDO
     IF (channel_end.lt.-998d0) THEN
       print*, 'ERROR: computing end of channel failed'
@@ -516,10 +509,10 @@ MODULE initial_conditions_module
 ! find element and local vertex of the node which lies on the end of the channel (and is at the "bottom")
     DO el=1,numelm
       DO i=1,4
-	IF (node(el,i).eq.chan_end_glob_node) THEN
-	  transient_stress_testelement=el
-	  chan_end_loc_vert=i
-	ENDIF
+        IF (node(el,i).eq.chan_end_glob_node) THEN
+          transient_stress_testelement=el
+          chan_end_loc_vert=i
+        ENDIF
       ENDDO
     ENDDO
 ! Use the vertex to work out the local numbering and assign the transient stress test point.
@@ -556,28 +549,25 @@ MODULE initial_conditions_module
     DO i=1,N
       
       IF (dist_xi(i).lt.temp_xi) THEN
-	temp_xi=dist_xi(i)
-	xi_i=i
+        temp_xi=dist_xi(i)
+        xi_i=i
       ENDIF
       IF (dist_eta(i).lt.temp_eta) THEN
-	temp_eta=dist_eta(i)
-	eta_j=i
+        temp_eta=dist_eta(i)
+        eta_j=i
       ENDIF
     ENDDO
-    
+
     tempij=xi_i+eta_j*NP1
-    
+
 ! Now translate to the global point
     transient_velocity_testnode = mapg(tempij,el)
-
-      
-      
   END SUBROUTINE find_transient_error_points
   
   SUBROUTINE find_transient_error_points_axisymm
     IMPLICIT NONE
     INTEGER :: el,i,temp_vel_node,temp_vel_element,&
-		chan_end_glob_node,chan_end_loc_vert
+    chan_end_glob_node,chan_end_loc_vert
     DOUBLE PRECISION :: channel_end,temp_y
 
 ! Stress node:
@@ -586,10 +576,10 @@ MODULE initial_conditions_module
     temp_y=-999d0
     DO i=1,numnp
       IF (nodeCoord(i,1).gt.channel_end.and.nodeCoord(i,2).gt.temp_y) THEN
-	channel_end=nodeCoord(i,1)
-	temp_y=nodeCoord(i,2)
-	chan_end_glob_node=i
-	ENDIF
+        channel_end=nodeCoord(i,1)
+        temp_y=nodeCoord(i,2)
+        chan_end_glob_node=i
+      ENDIF
     ENDDO
     IF (channel_end.lt.-998d0.or.temp_y.lt.-998d0) THEN
       print*, 'ERROR: computing end of channel failed (stress)'
@@ -599,10 +589,10 @@ MODULE initial_conditions_module
 ! will only be a single element which this lies in as it is in a global corner.
     DO el=1,numelm
       DO i=1,4
-	IF (node(el,i).eq.chan_end_glob_node) THEN
-	  transient_stress_testelement=el
-	  chan_end_loc_vert=i
-	ENDIF
+        IF (node(el,i).eq.chan_end_glob_node) THEN
+          transient_stress_testelement=el
+          chan_end_loc_vert=i
+        ENDIF
       ENDDO
     ENDDO
 ! Use the vertex to work out the local numbering and assign the transient stress test point.
@@ -626,10 +616,10 @@ MODULE initial_conditions_module
     temp_y=999d0
     DO i=1,numnp
       IF (nodeCoord(i,1).gt.channel_end.and.nodeCoord(i,2).lt.temp_y) THEN
-	channel_end=nodeCoord(i,1)
-	temp_y=nodeCoord(i,2)
-	chan_end_glob_node=i
-	ENDIF
+        channel_end=nodeCoord(i,1)
+        temp_y=nodeCoord(i,2)
+        chan_end_glob_node=i
+      ENDIF
     ENDDO
     IF (channel_end.lt.-998d0.or.temp_y.gt.998d0) THEN
       print*, 'ERROR: computing end of channel failed (velocity)'
@@ -639,10 +629,10 @@ MODULE initial_conditions_module
 ! will only be a single element which this lies in as it is in a global corner.
     DO el=1,numelm
       DO i=1,4
-	IF (node(el,i).eq.chan_end_glob_node) THEN
-	  temp_vel_element=el
-	  chan_end_loc_vert=i
-	ENDIF
+        IF (node(el,i).eq.chan_end_glob_node) THEN
+          temp_vel_element=el
+          chan_end_loc_vert=i
+        ENDIF
       ENDDO
     ENDDO
 ! Use the vertex to work out the local numbering and assign the transient velocity test node.
@@ -676,10 +666,7 @@ MODULE initial_conditions_module
     DOUBLE PRECISION, DIMENSION(npint) :: old_pressure
 
 ! Step 1: calculate u and v at the half timestep
-  
     
-
-  
   END SUBROUTINE initialise_2nd_timestep
 
 END MODULE initial_conditions_module

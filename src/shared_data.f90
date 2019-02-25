@@ -45,7 +45,7 @@ MODULE shared_data
 ! bdflag - flag for each node declaring if dirichlet boundary or not
 ! neuflag - flag for each node declaring if neumann boundary or not
 ! circflag - flag for each ELEMENT declaring if the element has a circular boundary
-!		NOTE: if = .true. => node 1 and node 2 are the circular nodes
+!    NOTE: if = .true. => node 1 and node 2 are the circular nodes
 ! 
 ! GLOBAL node flags in priority order
 ! (eg, if a node is between a wall vertex and an inflow vertex. it will be flagged as wall!)
@@ -90,360 +90,357 @@ MODULE shared_data
   
   LOGICAL :: enable_output_to_file = .true.
   
-  CHARACTER(LEN=256) ::	output_filename='output',&
-			tecplot_output_filename = 'output_tec.dat',&
-			tecplot_fine_output_filename = 'output_tec_fine.dat',&
-			input_filename = 'input.dat',&
-			wallsymm_output_filename = 'output_wallsymm.txt'
+  CHARACTER(LEN=256) ::  output_filename='output',&
+    tecplot_output_filename = 'output_tec.dat',&
+    tecplot_fine_output_filename = 'output_tec_fine.dat',&
+    input_filename = 'input.dat',&
+    wallsymm_output_filename = 'output_wallsymm.txt'
   
-  INTEGER ::	N=8, NM1, NM1SQ, threeNM1SQ, NP1, NP1SQ, NP1SQM1, &
-		tecplot_output_fileid=30, wallsymm_output_fileid=40, tecplot_fine_output_fileid=50, &
-		numelm,&
-		nptot,&
-		numnp,&
-		npedg,&
-		npint,&
-		bdnodes,&
-		neumann,&
-		circelm,&
-		preconflag=0,& !default = no precon
-		coordflag=0,&    !default = cartesian co-ords
-		movingmeshflag=0,& ! allow mesh to move? - 1 = yes
-		global_dim,& !dimension of square matrix when dirichlet nodes are removed = bd_numrows_x+bd_numrows_y+3*npint
-		global_non_zeros=0,& ! number of non-zeros in global matrix (for pardiso)
-		bd_numrows_x,&
-		bd_numrows_y,&
-		global_bd_dim,&
-		RK4_timesteps,&
-		Nfine = 20,&
-		num_wallsymm_nodes,&
-		param_problem_choice=0,&
-		param_function_choice=0,&
-		param_time_order=2,&
-		transient_velocity_testnode,&
-		transient_stress_testnode,&
-		transient_stress_testelement
+  INTEGER ::  N=8, NM1, NM1SQ, threeNM1SQ, NP1, NP1SQ, NP1SQM1, &
+    tecplot_output_fileid=30, wallsymm_output_fileid=40, tecplot_fine_output_fileid=50, &
+    numelm,&
+    nptot,&
+    numnp,&
+    npedg,&
+    npint,&
+    bdnodes,&
+    neumann,&
+    circelm,&
+    preconflag=0,& !default = no precon
+    coordflag=0,&    !default = cartesian co-ords
+    movingmeshflag=0,& ! allow mesh to move? - 1 = yes
+    global_dim,& !dimension of square matrix when dirichlet nodes are removed = bd_numrows_x+bd_numrows_y+3*npint
+    global_non_zeros=0,& ! number of non-zeros in global matrix (for pardiso)
+    bd_numrows_x,&
+    bd_numrows_y,&
+    global_bd_dim,&
+    RK4_timesteps,&
+    Nfine = 20,&
+    num_wallsymm_nodes,&
+    param_problem_choice=0,&
+    param_function_choice=0,&
+    param_time_order=2,&
+    transient_velocity_testnode,&
+    transient_stress_testnode,&
+    transient_stress_testelement
 
   INTEGER, ALLOCATABLE, DIMENSION(:) :: mult, &
-					non_dir_bd_map_x, &
-					non_dir_bd_map_y
+    non_dir_bd_map_x, &
+    non_dir_bd_map_y
 
   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: conelm,&
-                                          conedg,&
-                                          node,&
-                                          mapg,&
-                                          mapg_pressure!,&
+    conedg,&
+    node,&
+    mapg,&
+    mapg_pressure!,&
 !                                           locel,&
 !                                           locnp
-                                          
+
   INTEGER, ALLOCATABLE :: upwind_local_edge_node(:,:,:),&
-			  local_edge_node(:,:),&
-			  global_to_local_map(:,:),&
-			  local_to_interior_node(:),&
-			  interior_to_local_node(:),&
-			  local_ij_to_edge_node(:,:),&
-			  local_ij_to_i(:),&
-			  local_ij_to_j(:),&
-			  upwind_wallsymm_1d(:,:,:),&
-			  fine_edge_ifine(:,:),&
-			  fine_edge_jfine(:,:),&
-			  axisymm_edge(:)
-                                          
-					  
+    local_edge_node(:,:),&
+    global_to_local_map(:,:),&
+    local_to_interior_node(:),&
+    interior_to_local_node(:),&
+    local_ij_to_edge_node(:,:),&
+    local_ij_to_i(:),&
+    local_ij_to_j(:),&
+    upwind_wallsymm_1d(:,:,:),&
+    fine_edge_ifine(:,:),&
+    fine_edge_jfine(:,:),&
+    axisymm_edge(:)
+
   LOGICAL :: param_waters=.false.,&
-	      param_error=.false.,&
-	      param_iterative_convection=.true.
+    param_error=.false.,&
+    param_iterative_convection=.true.
   
   LOGICAL, ALLOCATABLE, DIMENSION(:) :: circflag,&
-  					wallflag,&
-					inflowflag,&
-					outflowflag,&
-					wallsymmflag,&
-					circnodeflag,&
-					fixed_node,&
-					accordianflag
+    wallflag,&
+    inflowflag,&
+    outflowflag,&
+    wallsymmflag,&
+    circnodeflag,&
+    fixed_node,&
+    accordianflag
 
   
   LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: bdflag,&
-					  neuflag
-					  
+    neuflag
+            
   LOGICAL, ALLOCATABLE :: is_wallsymm_edge(:,:),&
-			  is_circ_edge(:,:),&
-			  is_wall_edge(:,:),&
-			  is_inflow_edge(:,:),&
-			  is_outflow_edge(:,:)
-			  
+    is_circ_edge(:,:),&
+    is_wall_edge(:,:),&
+    is_inflow_edge(:,:),&
+    is_outflow_edge(:,:)
 
-					  
   DOUBLE PRECISION :: rad_sphere,rad_cylinder,&
-		      Re=0d0,&
-		      We=0d0,&
-		      param_giesekus=0d0,&
-		      param_beta=1d0,&
-		      param_beta_s=0d0,&
-! 		      param_delta_a,&
-		      param_alphaZ=0d0,&
-		      area_of_domain,&
-! 		      param_elasticity,&
-! 		      param_lambda,&
-                      param_fene_b=0d0
-                      param_fene_lambdaD=0d0,&
-		      gravity_const=9.8d0,&
-		      rho_s=3.581d0,& ! sphere density
-		      rho_f=0.868d0,& ! fluid density
-		      sphereXleft,&
-		      sphereXright,&
-		      sphereYtop,&
-		      sphereYbottom,&
-		      inflowX,& ! could also be a fixed wall
-		      outflowX,&
-		      wallYtop,&
-		      wallYbottom,& ! only needed if we don't have a sphere in the geometry
-		      deltat=1d-3,&
-		      timeN,& ! time NOW
-		      timeNm1,& ! time LAST 1
-		      timeNm2,& ! time LAST 2
-		      drag=0d0,&
-		      dragNm1=0d0,&
-		      dragNm2=0d0,&
-		      drag_star=0d0,&
-		      H1norm_vel_err,&
-		      L2norm_vel_err,&
-		      L2norm_press_err,&
-		      L2norm_stress_err,&
-		      transient_U_error, transient_gradUyx_error, transient_Txx_error, transient_Txy_error,&
-		      stopping_criteria,&
-		      V_sphere=0d0,&
-		      V_sphereNm1=0d0,&
-		      V_sphereNm2=0d0,&
-		      h_RK4,& !stepsize for RK4 solver
+    Re=0d0,&
+    We=0d0,&
+    param_giesekus=0d0,&
+    param_beta=1d0,&
+    param_beta_s=0d0,&
+!           param_delta_a,&
+    param_alphaZ=0d0,&
+    area_of_domain,&
+!           param_elasticity,&
+!           param_lambda,&
+    param_fene_b=0d0
+    param_fene_lambdaD=0d0,&
+    gravity_const=9.8d0,&
+    rho_s=3.581d0,& ! sphere density
+    rho_f=0.868d0,& ! fluid density
+    sphereXleft,&
+    sphereXright,&
+    sphereYtop,&
+    sphereYbottom,&
+    inflowX,& ! could also be a fixed wall
+    outflowX,&
+    wallYtop,&
+    wallYbottom,& ! only needed if we don't have a sphere in the geometry
+    deltat=1d-3,&
+    timeN,& ! time NOW
+    timeNm1,& ! time LAST 1
+    timeNm2,& ! time LAST 2
+    drag=0d0,&
+    dragNm1=0d0,&
+    dragNm2=0d0,&
+    drag_star=0d0,&
+    H1norm_vel_err,&
+    L2norm_vel_err,&
+    L2norm_press_err,&
+    L2norm_stress_err,&
+    transient_U_error, transient_gradUyx_error, transient_Txx_error, transient_Txy_error,&
+    stopping_criteria,&
+    V_sphere=0d0,&
+    V_sphereNm1=0d0,&
+    V_sphereNm2=0d0,&
+    h_RK4,& !stepsize for RK4 solver
 ! constants for OIFS/BDF/EX schemes
-		      time_gamma_0=0d0,&
-		      time_alpha_0=0d0,&
-		      time_alpha_1=0d0,&
-		      time_alpha_2=0d0,&
-		      time_beta_0=0d0,&
-		      time_beta_1=0d0,&
-		      time_beta_2=0d0,&
-		      Retime_constant1=0d0,&
-		      Retime_constant2=0d0,&
-		      Wetime_constant1=0d0,&
-		      Wetime_constant2=0d0,&
-		      cputime_initialise,cputime_setup,cputime_solve,cputime_total,cputime_newtonian,cputime_viscoelastic
+    time_gamma_0=0d0,&
+    time_alpha_0=0d0,&
+    time_alpha_1=0d0,&
+    time_alpha_2=0d0,&
+    time_beta_0=0d0,&
+    time_beta_1=0d0,&
+    time_beta_2=0d0,&
+    Retime_constant1=0d0,&
+    Retime_constant2=0d0,&
+    Wetime_constant1=0d0,&
+    Wetime_constant2=0d0,&
+    cputime_initialise,cputime_setup,cputime_solve,cputime_total,cputime_newtonian,cputime_viscoelastic
 
 ! NEW BITS
   DOUBLE PRECISION, ALLOCATABLE :: storeA_x(:,:,:),& !param_beta_a(:),&  
-				   storeA_y(:,:,:),&				   
-				   storeB_x(:,:,:),&
-				   storeB_y(:,:,:),&
-				   storeZ_p(:,:),&
-				   storef_x(:),&
-				   storef_y(:),&
-				   storeg_p(:),&
-! 				   storeM_stress(:,:),&
-				   storeM_pressure(:,:,:),&
-				   storeMv_x(:,:,:),&
-				   storeMv_y(:,:,:),&
-! 				   storeC_x(:,:,:),&
-! 				   storeC_y(:,:,:),&
-! 				   storeCb(:,:,:,:),&
-! 				   M_stress(:,:),&
-				   Mv_x(:,:,:),&
-				   Mv_y(:,:,:),&
-! 				   C_x(:,:,:),&
-! 				   C_y(:,:,:),&
-! 				   Cb(:,:,:,:),&
-				   localTxx(:,:),&
-				   localTxy(:,:),&
-				   localTyy(:,:),&
-				   localTzz(:,:),&
-				   localTxxNm1(:,:),&
-				   localTxyNm1(:,:),&
-				   localTyyNm1(:,:),&
-				   localTzzNm1(:,:),&
-				   localTxxNm2(:,:),&
-				   localTxyNm2(:,:),&
-				   localTyyNm2(:,:),&
-				   localTzzNm2(:,:),&
-				   localCxx(:,:),&
-				   localCxy(:,:),&
-				   localCyy(:,:),&
-				   localCzz(:,:),&
-				   localCxxNm1(:,:),&
-				   localCxyNm1(:,:),&
-				   localCyyNm1(:,:),&
-				   localCzzNm1(:,:),&
-				   localCxxNm2(:,:),&
-				   localCxyNm2(:,:),&
-				   localCyyNm2(:,:),&
-				   localCzzNm2(:,:),&
-				   norm_to_edge_node(:,:,:,:),&
-				   jac_on_edge(:,:),&
-				   jac_wallsymm_edge_1d(:,:),&
-				   localGradUxx(:,:),&
-				   localGradUxy(:,:),&
-				   localGradUyx(:,:),&
-				   localGradUyy(:,:),&
-				   localGradUzz(:,:),&
-				   localGradUxxNm1(:,:),&
-				   localGradUxyNm1(:,:),&
-				   localGradUyxNm1(:,:),&
-				   localGradUyyNm1(:,:),&
-				   localGradUzzNm1(:,:),&
-				   localGradUxxNm2(:,:),&
-				   localGradUxyNm2(:,:),&
-				   localGradUyxNm2(:,:),&
-				   localGradUyyNm2(:,:),&
-				   localGradUzzNm2(:,:),&
-				   diff_x(:,:,:),&
-				   diff_y(:,:,:),&
-				   fine_uniform_points(:),&
-				   fine_node_coords(:,:,:,:),&
-				   fine_hbasis(:,:),&
-				   fine_hbasis_tilde(:,:),&
-				   fine_velocitybasis(:,:),&
-				   fine_pressurebasis(:,:),&
-				   fine_velocity_x(:,:,:),&
-				   fine_velocity_y(:,:,:),&
-				   fine_pressure(:,:,:),&
-				   fine_tao_xx(:,:,:),&
-				   fine_tao_xy(:,:,:),&
-				   fine_tao_yy(:,:,:),&
-				   fine_tao_zz(:,:,:),&
-				   fineGxx(:,:,:),&
-				   fineGxy(:,:,:),&
-				   fineGyx(:,:,:),&
-				   fineGyy(:,:,:),&
-				   fineGzz(:,:,:),&
-				   localpressure(:,:),&
-				   localpressureNm1(:,:),&
-				   localpressureNm2(:,:),&
-				   localV_x(:,:),&
-				   localV_y(:,:),&
-				   localV_xNm1(:,:),&
-				   localV_yNm1(:,:),&
-				   localV_xNm2(:,:),&
-				   localV_yNm2(:,:),&
+    storeA_y(:,:,:),&           
+    storeB_x(:,:,:),&
+    storeB_y(:,:,:),&
+    storeZ_p(:,:),&
+    storef_x(:),&
+    storef_y(:),&
+    storeg_p(:),&
+!            storeM_stress(:,:),&
+    storeM_pressure(:,:,:),&
+    storeMv_x(:,:,:),&
+    storeMv_y(:,:,:),&
+!            storeC_x(:,:,:),&
+!            storeC_y(:,:,:),&
+!            storeCb(:,:,:,:),&
+!            M_stress(:,:),&
+    Mv_x(:,:,:),&
+    Mv_y(:,:,:),&
+!            C_x(:,:,:),&
+!            C_y(:,:,:),&
+!            Cb(:,:,:,:),&
+    localTxx(:,:),&
+    localTxy(:,:),&
+    localTyy(:,:),&
+    localTzz(:,:),&
+    localTxxNm1(:,:),&
+    localTxyNm1(:,:),&
+    localTyyNm1(:,:),&
+    localTzzNm1(:,:),&
+    localTxxNm2(:,:),&
+    localTxyNm2(:,:),&
+    localTyyNm2(:,:),&
+    localTzzNm2(:,:),&
+    localCxx(:,:),&
+    localCxy(:,:),&
+    localCyy(:,:),&
+    localCzz(:,:),&
+    localCxxNm1(:,:),&
+    localCxyNm1(:,:),&
+    localCyyNm1(:,:),&
+    localCzzNm1(:,:),&
+    localCxxNm2(:,:),&
+    localCxyNm2(:,:),&
+    localCyyNm2(:,:),&
+    localCzzNm2(:,:),&
+    norm_to_edge_node(:,:,:,:),&
+    jac_on_edge(:,:),&
+    jac_wallsymm_edge_1d(:,:),&
+    localGradUxx(:,:),&
+    localGradUxy(:,:),&
+    localGradUyx(:,:),&
+    localGradUyy(:,:),&
+    localGradUzz(:,:),&
+    localGradUxxNm1(:,:),&
+    localGradUxyNm1(:,:),&
+    localGradUyxNm1(:,:),&
+    localGradUyyNm1(:,:),&
+    localGradUzzNm1(:,:),&
+    localGradUxxNm2(:,:),&
+    localGradUxyNm2(:,:),&
+    localGradUyxNm2(:,:),&
+    localGradUyyNm2(:,:),&
+    localGradUzzNm2(:,:),&
+    diff_x(:,:,:),&
+    diff_y(:,:,:),&
+    fine_uniform_points(:),&
+    fine_node_coords(:,:,:,:),&
+    fine_hbasis(:,:),&
+    fine_hbasis_tilde(:,:),&
+    fine_velocitybasis(:,:),&
+    fine_pressurebasis(:,:),&
+    fine_velocity_x(:,:,:),&
+    fine_velocity_y(:,:,:),&
+    fine_pressure(:,:,:),&
+    fine_tao_xx(:,:,:),&
+    fine_tao_xy(:,:,:),&
+    fine_tao_yy(:,:,:),&
+    fine_tao_zz(:,:,:),&
+    fineGxx(:,:,:),&
+    fineGxy(:,:,:),&
+    fineGyx(:,:,:),&
+    fineGyy(:,:,:),&
+    fineGzz(:,:,:),&
+    localpressure(:,:),&
+    localpressureNm1(:,:),&
+    localpressureNm2(:,:),&
+    localV_x(:,:),&
+    localV_y(:,:),&
+    localV_xNm1(:,:),&
+    localV_yNm1(:,:),&
+    localV_xNm2(:,:),&
+    localV_yNm2(:,:),&
 ! analytical storage:
-				   V_x_analytic(:,:),&
-				   V_y_analytic(:,:),&
-				   gradUxx_analytic(:,:),&
-				   gradUyx_analytic(:,:),&
-				   gradUxy_analytic(:,:),&
-				   gradUyy_analytic(:,:),&
-				   pressure_analytic(:,:),&
+    V_x_analytic(:,:),&
+    V_y_analytic(:,:),&
+    gradUxx_analytic(:,:),&
+    gradUyx_analytic(:,:),&
+    gradUxy_analytic(:,:),&
+    gradUyy_analytic(:,:),&
+    pressure_analytic(:,:),&
 ! error storage:
-				   V_x_error(:,:),&
-				   V_y_error(:,:),&
-				   gradUxx_error(:,:),&
-				   gradUyx_error(:,:),&
-				   gradUxy_error(:,:),&
-				   gradUyy_error(:,:),&
-				   gradUzz_error(:,:),&
-				   pressure_error(:,:),&
-				   Txx_error(:,:),&
-				   Txy_error(:,:),&
-				   Tyy_error(:,:),&
-				   Tzz_error(:,:)
+    V_x_error(:,:),&
+    V_y_error(:,:),&
+    gradUxx_error(:,:),&
+    gradUyx_error(:,:),&
+    gradUxy_error(:,:),&
+    gradUyy_error(:,:),&
+    gradUzz_error(:,:),&
+    pressure_error(:,:),&
+    Txx_error(:,:),&
+    Txy_error(:,:),&
+    Tyy_error(:,:),&
+    Tzz_error(:,:)
 
   DOUBLE PRECISION, DIMENSION(2) :: centre_of_sphere
   
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: gl,&
-                                                 w,&
-                                                 weight_2d,&
-                                                 Leg,&
-                                                 Leg1,&
-                                                 f_x,&
-                                                 f_y,&
-                                                 V_x,&
-                                                 V_y,&
-                                                 V_xNm1,&!Stores velocity at previous timestep #1
-                                                 V_yNm1,& 
-                                                 V_xNm2,&!Stores velocity at previous timestep #2
-                                                 V_yNm2,& 
-                                                 pressure,&
-                                                 g,&
-                                                 boundaryContribution_x,&
-                                                 boundaryContribution_y,&
-                                                 boundaryContribution_p,&
-                                                 boundary_x,&
-                                                 boundary_y,&
-                                                 boundary_stress_xx, boundary_stress_xy, boundary_stress_yy, boundary_stress_zz,&
-!                                                  uxx,&
-!                                                  uxy,&
-!                                                  uyx,&
-!                                                  uyy,&
-!                                                  uzz,&
-!                                                  values,&
-!                                                  globalRHS,&
-!                                                  globalSOL,&
-                                                 OIFS_stokes_contrib_x,&
-                                                 OIFS_stokes_contrib_y,&
-                                                 stress_cont_to_stokes_x,&
-                                                 stress_cont_to_stokes_y,&
-                                                 stress_cont_to_stokes_xNm1,&
-                                                 stress_cont_to_stokes_yNm1,&
-                                                 stress_cont_to_stokes_xNm2,&
-                                                 stress_cont_to_stokes_yNm2,&
-                                                 OIFSstress_xx,&
-                                                 OIFSstress_xy,&
-                                                 OIFSstress_yy,&
-                                                 OIFSstress_zz,&
-                                                 upwinded_element,&
-                                                 RHS_x,&
-                                                 RHS_y,&
-! 						 Txx,&
-! 						 Txy,&
-! 						 Tyy,&
-! 						 Tzz,&
-! 						 TxxNm1,&
-! 						 TxyNm1,&
-! 						 TyyNm1,&
-! 						 TzzNm1,&
-! 						 TxxNm2,&
-! 						 TxyNm2,&
-! 						 TyyNm2,&
-! 						 TzzNm2,&
-						 mesh_velocity,&
-						 mesh_velocityNm1,&
-						 mesh_velocityNm2,&
-						 transient_u,transient_gradUyx,transient_txx,transient_txy
-						 !transient_u,transient_txx,transient_txy,transient_cxx,transient_cxy
-						 
+    w,&
+    weight_2d,&
+    Leg,&
+    Leg1,&
+    f_x,&
+    f_y,&
+    V_x,&
+    V_y,&
+    V_xNm1,&!Stores velocity at previous timestep #1
+    V_yNm1,& 
+    V_xNm2,&!Stores velocity at previous timestep #2
+    V_yNm2,& 
+    pressure,&
+    g,&
+    boundaryContribution_x,&
+    boundaryContribution_y,&
+    boundaryContribution_p,&
+    boundary_x,&
+    boundary_y,&
+    boundary_stress_xx, boundary_stress_xy, boundary_stress_yy, boundary_stress_zz,&
+!     uxx,&
+!     uxy,&
+!     uyx,&
+!     uyy,&
+!     uzz,&
+!     values,&
+!     globalRHS,&
+!     globalSOL,&
+      OIFS_stokes_contrib_x,&
+      OIFS_stokes_contrib_y,&
+      stress_cont_to_stokes_x,&
+      stress_cont_to_stokes_y,&
+      stress_cont_to_stokes_xNm1,&
+      stress_cont_to_stokes_yNm1,&
+      stress_cont_to_stokes_xNm2,&
+      stress_cont_to_stokes_yNm2,&
+      OIFSstress_xx,&
+      OIFSstress_xy,&
+      OIFSstress_yy,&
+      OIFSstress_zz,&
+      upwinded_element,&
+      RHS_x,&
+      RHS_y,&
+!       Txx,&
+!       Txy,&
+!       Tyy,&
+!       Tzz,&
+!       TxxNm1,&
+!       TxyNm1,&
+!       TyyNm1,&
+!       TzzNm1,&
+!       TxxNm2,&
+!       TxyNm2,&
+!       TyyNm2,&
+!       TzzNm2,&
+      mesh_velocity,&
+      mesh_velocityNm1,&
+      mesh_velocityNm2,&
+      transient_u,transient_gradUyx,transient_txx,transient_txy
+!       transient_u,transient_txx,transient_txy,transient_cxx,transient_cxy
   
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: vertx,&
-                                                   d,&
-                                                   evalh,&
-                                                   theta,&
-                                                   global_matrix,&
-                                                   Z_p,&
-						   nodeCoord,&
-						   nodeCoordNm1,&
-						   nodeCoordNm2
+    d,&
+    evalh,&
+    theta,&
+    global_matrix,&
+    Z_p,&
+    nodeCoord,&
+    nodeCoordNm1,&
+    nodeCoordNm2
 
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: jac,&
-                                                     dxdp,&
-                                                     dxde,&
-                                                     dydp,&
-                                                     dyde,&
-						     A_x,&
-						     A_y,&
-						     B_x,&
-						     B_y,&
-						     M_pressure,&  ! MAY NEED TO RENAME
-						     norm_to_edge,&
-						     angles_at_vertex
-! DEVSS module memory:						     
+    dxdp,&
+    dxde,&
+    dydp,&
+    dyde,&
+    A_x,&
+    A_y,&
+    B_x,&
+    B_y,&
+    M_pressure,&  ! MAY NEED TO RENAME
+    norm_to_edge,&
+    angles_at_vertex
+
+! DEVSS module memory:                 
   INTEGER, ALLOCATABLE :: devss_ipiv(:)
   DOUBLE PRECISION, ALLOCATABLE :: devss_contrib_x(:), devss_contrib_y(:), &
-				   devss_contrib_xNm1(:), devss_contrib_yNm1(:), &
-				   devss_contrib_xNm2(:), devss_contrib_yNm2(:), &
-				   devss_matrix(:,:,:), devss_rhs_xx(:,:), &
-				   devss_rhs_xy(:,:), devss_rhs_yx(:,:), &
-				   devss_rhs_yy(:,:), devss_rhs_zz(:,:), &
-				   devss_soln_xx(:,:),devss_soln_xy(:,:), &
-				   devss_soln_yx(:,:),devss_soln_yy(:,:), &
-				   devss_soln_zz(:,:)
+    devss_contrib_xNm1(:), devss_contrib_yNm1(:), &
+    devss_contrib_xNm2(:), devss_contrib_yNm2(:), &
+    devss_matrix(:,:,:), devss_rhs_xx(:,:), &
+    devss_rhs_xy(:,:), devss_rhs_yx(:,:), &
+    devss_rhs_yy(:,:), devss_rhs_zz(:,:), &
+    devss_soln_xx(:,:),devss_soln_xy(:,:), &
+    devss_soln_yx(:,:),devss_soln_yy(:,:), &
+    devss_soln_zz(:,:)
   CONTAINS
   SUBROUTINE assignMem
   
@@ -792,7 +789,6 @@ MODULE shared_data
     DEALLOCATE(diff_y)
 !     DEALLOCATE(param_beta_a)
 
-
     DEALLOCATE(norm_to_edge,angles_at_vertex)
     
 !     DEALLOCATE(M_stress)
@@ -806,23 +802,23 @@ MODULE shared_data
       localCxxNm2, localCxyNm2, localCyyNm2, localCzzNm2)
 
     DEALLOCATE(storeA_x, storeA_y, storeB_x, storeB_y, &
-	      storef_x, storef_y, storeg_p, storeZ_p, &
-	      storeM_pressure, storeMv_x, storeMv_y)
+      storef_x, storef_y, storeg_p, storeZ_p, &
+      storeM_pressure, storeMv_x, storeMv_y)
 !     DEALLOCATE(storeM_stress,storeC_x, storeC_y, storeCb)
     
     DEALLOCATE(fine_uniform_points,fine_node_coords,fine_edge_ifine,fine_edge_jfine,&
-		fine_hbasis,fine_hbasis_tilde,fine_velocitybasis,fine_pressurebasis,&
-		fine_velocity_x,fine_velocity_y,fine_pressure,&
-		fine_tao_xx,fine_tao_xy,fine_tao_yy,fine_tao_zz,&
-		fineGxx,fineGxy,fineGyx,fineGyy,fineGzz)
+      fine_hbasis,fine_hbasis_tilde,fine_velocitybasis,fine_pressurebasis,&
+      fine_velocity_x,fine_velocity_y,fine_pressure,&
+      fine_tao_xx,fine_tao_xy,fine_tao_yy,fine_tao_zz,&
+      fineGxx,fineGxy,fineGyx,fineGyy,fineGzz)
 
     DEALLOCATE(localpressure, localpressureNm1, localV_x, localV_xNm1, localV_y, localV_yNm1, &
-		V_x_analytic, V_y_analytic, &
-		gradUxx_analytic, gradUyx_analytic, gradUxy_analytic, gradUyy_analytic, pressure_analytic, &
-		V_x_error, V_y_error, pressure_error, &
-		gradUxx_error, gradUyx_error, gradUxy_error, gradUyy_error, gradUzz_error, &
-		Txx_error, Txy_error, Tyy_error, Tzz_error)
-		
+      V_x_analytic, V_y_analytic, &
+      gradUxx_analytic, gradUyx_analytic, gradUxy_analytic, gradUyy_analytic, pressure_analytic, &
+      V_x_error, V_y_error, pressure_error, &
+      gradUxx_error, gradUyx_error, gradUxy_error, gradUyy_error, gradUzz_error, &
+      Txx_error, Txy_error, Tyy_error, Tzz_error)
+    
     CALL deassign_devss_memory
   END SUBROUTINE deassignMem
   

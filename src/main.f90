@@ -33,10 +33,10 @@ PROGRAM main
   
   IMPLICIT NONE
   INTEGER :: edge,i,j,ij,k,l,kl,ijkl,el,tempint,minresconv=0,internalij,kk,ll,&
-	     timestep,numtimesteps,rowcount,printoutcount,stressnode,velnode,localstressnode,printel,meh,&
-	     print_threshold,ierror
+       timestep,numtimesteps,rowcount,printoutcount,stressnode,velnode,localstressnode,printel,meh,&
+       print_threshold,ierror
   DOUBLE PRECISION :: time_limit,test,msqe,temp1,temp2,cputime_temp1,cputime_temp2,cputime_section1,cputime_section2,&
-		      V_xH1norm,V_yH1norm,pressure_L2norm,stopping_tol,stopcheck,xi_out,eta_out,drag_criteria
+          V_xH1norm,V_yH1norm,pressure_L2norm,stopping_tol,stopcheck,xi_out,eta_out,drag_criteria
   LOGICAL :: printed_to_tecplot
 
 ! Read in values (This will assign required memory)
@@ -76,7 +76,7 @@ PROGRAM main
 ! Set the threshold iterations between printing to tecplot.
 ! The aim is to print 10 per time unit for a fixed mesh and
 ! 20 per time unit for a moving mesh simulation.
-  if (movingmeshflag.eq.1) THEN
+  IF (movingmeshflag.eq.1) THEN
     print_threshold = INT(5d-2/deltat)
   ELSE
     print_threshold = INT(1d-1/deltat)
@@ -135,7 +135,7 @@ PROGRAM main
 ! Open tecplot output file & write the ICs set.
 ! MODIFIED TO PRINT OUT FOR BOTH MOVING AND NON-MOVING
 ! TODO: Add an input parameter to turn this on/off (see at end of time loop too).
-  IF(enable_output_to_file) THEN
+  IF (enable_output_to_file) THEN
     OPEN(tecplot_output_fileid,FILE=tecplot_output_filename,IOSTAT=ierror)
     CALL output_to_tecplot
   ENDIF
@@ -206,7 +206,7 @@ PROGRAM main
       CALL calc_Upwinding_local_edge_nodes(V_x,V_y)
 ! DEVSS part:
       IF (param_beta_s.gt.0d0) THEN
-	CALL applyDEVSS
+        CALL applyDEVSS
       ENDIF
 
 ! Calculate Tau and add integration of Div(Tau) to RHS:
@@ -247,7 +247,7 @@ PROGRAM main
     IF (circelm.ne.0) THEN
       CALL calc_drag
       IF (movingmeshflag.eq.1) THEN
-	CALL calcSphereVelocity
+        CALL calcSphereVelocity
       ENDIF
     ENDIF
 
@@ -280,19 +280,19 @@ PROGRAM main
 ! Check if solution has converged:
     IF (movingmeshflag.eq.0) THEN 
       IF ((stopping_criteria.lt.stopping_tol.and.drag_criteria.lt.stopping_tol) &
-	                                    .or.timeN.gt.time_limit) THEN
-	    IF (enable_output_to_file.AND..NOT.printed_to_tecplot) THEN
-	      CALL output_to_tecplot
+                                      .or.timeN.gt.time_limit) THEN
+      IF (enable_output_to_file.AND..NOT.printed_to_tecplot) THEN
+        CALL output_to_tecplot
         ENDIF
         EXIT
       ENDIF
     ELSEIF (movingmeshflag.eq.1) THEN
       IF ((stopping_criteria.lt.stopping_tol.and.drag_criteria.lt.stopping_tol) &
-					    .or.timeN.gt.time_limit) THEN
-	    IF (enable_output_to_file.AND..NOT.printed_to_tecplot) THEN
-	      CALL output_to_tecplot
-	    ENDIF
-	    EXIT
+        .or.timeN.gt.time_limit) THEN
+      IF (enable_output_to_file.AND..NOT.printed_to_tecplot) THEN
+        CALL output_to_tecplot
+      ENDIF
+      EXIT
       ENDIF
     ENDIF
 
@@ -302,8 +302,6 @@ PROGRAM main
       CALL update_geometry
     ENDIF
     CALL updateSEM   
-
-
 
 ! REMOVE WHEN SURE:
 !     IF ((stopcheck.lt.1d-8.and.abs((drag-dragNm1)/drag).lt.1d-8).or.timeN.gt.60d0) THEN 
@@ -320,25 +318,24 @@ PROGRAM main
 ! Check for NaN problems   
     DO i=1,nptot
       IF (IsNaN(V_x(i))) THEN
-	print*, 'ERROR! V_x(',i,') is NaN'
-	STOP
+        print*, 'ERROR! V_x(',i,') is NaN'
+        STOP
       ELSEIF (IsNaN(V_y(i))) THEN
-	print*, 'ERROR! V_y(',i,') is NaN'
-	STOP
+        print*, 'ERROR! V_y(',i,') is NaN'
+        STOP
       ENDIF
     ENDDO
- 
   ENDDO
   
   
   
 ! Output final solution in fine form:
 !   IF (movingmeshflag.eq.0) THEN
-    CALL initialise_fine_grid ! setup fine node points
-    CALL create_fine_solution ! generate solution(s) on these points
-	IF(enable_output_to_file) THEN
-		CALL final_stage_output ! output to tecplot and along central axis for matlab.
-	ENDIF
+  CALL initialise_fine_grid ! setup fine node points
+  CALL create_fine_solution ! generate solution(s) on these points
+  IF(enable_output_to_file) THEN
+    CALL final_stage_output ! output to tecplot and along central axis for matlab.
+  ENDIF
 !   ENDIF
   
 
@@ -354,7 +351,7 @@ PROGRAM main
 !   CALL output_along_wallsymm
 
   IF(enable_output_to_file) THEN
-	CLOSE(tecplot_output_fileid)
+    CLOSE(tecplot_output_fileid)
   ENDIF
  
 ! Memory release

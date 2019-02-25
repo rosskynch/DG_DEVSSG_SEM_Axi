@@ -51,7 +51,7 @@ MODULE OIFS_module
   SUBROUTINE applyOIFS_to_stokes
     IMPLICIT NONE
     DOUBLE PRECISION, DIMENSION(nptot) :: OIFS_soln_x,OIFS_soln_y,&
-					  temp1,temp2,temp3
+            temp1,temp2,temp3
     
 ! Calculate the RHS contribution from the u^tilde and u^tilde,tilde terms
 ! x part:
@@ -86,16 +86,16 @@ MODULE OIFS_module
 ! ! Integrate the final solutions in each element
 !       out=0d0
 !       DO el=1,numelm
-! 	DO ij=0,NP1SQM1
-! 	  out(mapg(ij,el)) = out(mapg(ij,el)) + in(mapg(ij,el))*massmatrix(ij,ij,el)
-! 	ENDDO
+!   DO ij=0,NP1SQM1
+!     out(mapg(ij,el)) = out(mapg(ij,el)) + in(mapg(ij,el))*massmatrix(ij,ij,el)
+!   ENDDO
 !       ENDDO
 !       DO ij=1,npedg
-! 	IF (mult(ij).ne.1) THEN
-! 	  out(ij)=out(ij)!/dfloat(mult(i)) ! needed? - check!!!
-! 	ENDIF
+!   IF (mult(ij).ne.1) THEN
+!     out(ij)=out(ij)!/dfloat(mult(i)) ! needed? - check!!!
+!   ENDIF
 !       ENDDO
-! 	
+!   
 !     END SUBROUTINE integrateOIFS_solution_stokes
 
 ! OLD VERSION USING vector restriction/prolongation
@@ -106,18 +106,18 @@ MODULE OIFS_module
     DOUBLE PRECISION, DIMENSION(0:NP1SQM1) :: templocal
     DOUBLE PRECISION, DIMENSION(0:NP1SQM1,0:NP1SQM1,numelm), INTENT(IN) :: massmatrix
 ! Integrate the final solutions in each element
-      out=0d0
-      DO el=1,numelm
-	templocal=0d0	
-	CALL veclocalrestrict(in,el,templocal)
-	DO kl=0,NP1SQM1
-	  templocal(kl)=templocal(kl)*massmatrix(kl,kl,el)
-	ENDDO
-	tempglob=0d0
-	CALL vecglobalprolongation(templocal,el,tempglob)
-	out = out + tempglob
+    out=0d0
+    DO el=1,numelm
+      templocal=0d0  
+      CALL veclocalrestrict(in,el,templocal)
+      DO kl=0,NP1SQM1
+        templocal(kl)=templocal(kl)*massmatrix(kl,kl,el)
       ENDDO
-    END SUBROUTINE integrateOIFS_solution_stokes
+      tempglob=0d0
+      CALL vecglobalprolongation(templocal,el,tempglob)
+      out = out + tempglob
+    ENDDO
+  END SUBROUTINE integrateOIFS_solution_stokes
 
   
   SUBROUTINE RK4_OIFS(U_in,h,M,tstart,soln)
@@ -142,12 +142,12 @@ MODULE OIFS_module
     IMPLICIT NONE
     INTEGER :: i,j,M,k
     DOUBLE PRECISION :: h,t_curr,tstart,t_n
-			
-			
+      
+      
     DOUBLE PRECISION, DIMENSION(nptot) :: U_in,&
-					  k1,k2,k3,k4,&
-					  dkdx,dkdy,&
-					  soln,tempvec
+            k1,k2,k3,k4,&
+            dkdx,dkdy,&
+            soln,tempvec
     
     DOUBLE PRECISION, DIMENSION(nptot,2) :: Ustar
 
@@ -165,7 +165,7 @@ MODULE OIFS_module
       CALL calcGradVec(soln,dkdx,dkdy)
       
       DO k=1,nptot
-	k1(k)=-((Ustar(k,1))*dkdx(k) + Ustar(k,2)*dkdy(k))
+        k1(k)=-((Ustar(k,1))*dkdx(k) + Ustar(k,2)*dkdy(k))
       ENDDO
 
 ! Calculate k2
@@ -176,7 +176,7 @@ MODULE OIFS_module
       CALL calcGradVec(tempvec,dkdx,dkdy)
       
       DO k=1,nptot
-	k2(k)=-((Ustar(k,1))*dkdx(k) + Ustar(k,2)*dkdy(k))
+        k2(k)=-((Ustar(k,1))*dkdx(k) + Ustar(k,2)*dkdy(k))
       ENDDO
 
 ! Calculate k3
@@ -185,7 +185,7 @@ MODULE OIFS_module
       CALL calcGradVec(tempvec,dkdx,dkdy)
       
       DO k=1,nptot  
-	k3(k)=-((Ustar(k,1))*dkdx(k) + Ustar(k,2)*dkdy(k))
+        k3(k)=-((Ustar(k,1))*dkdx(k) + Ustar(k,2)*dkdy(k))
       ENDDO
 
 ! Calculate k4
@@ -196,23 +196,19 @@ MODULE OIFS_module
       CALL calcGradVec(tempvec,dkdx,dkdy)
 
       DO k=1,nptot    
-	k4(k)=-((Ustar(k,1))*dkdx(k) + Ustar(k,2)*dkdy(k))
+        k4(k)=-((Ustar(k,1))*dkdx(k) + Ustar(k,2)*dkdy(k))
       ENDDO
 
       soln=soln+h*(k1+2d0*k2+2d0*k3+k4)/6d0
       DO k=1,nptot
-	
-	IF (IsNaN(soln(k))) THEN
-	  print*,'OIFS ERROR!',timeN,k,t_n,k1(k),k2(k),k3(k),k4(k),U_in(k),Ustar(k,1),Ustar(k,2),dkdx(k),dkdy(k)
-	  STOP
-	ENDIF
-
+        IF (IsNaN(soln(k))) THEN
+          print*,'OIFS ERROR!',timeN,k,t_n,k1(k),k2(k),k3(k),k4(k),U_in(k),Ustar(k,1),Ustar(k,2),dkdx(k),dkdy(k)
+          STOP
+        ENDIF
       ENDDO
 
       t_n=t_n+h
-
     ENDDO
-  
   END SUBROUTINE RK4_OIFS
 
   
@@ -239,18 +235,18 @@ MODULE OIFS_module
 !     DO el=1,numelm
 !      DO j=0,N
 !       DO i=0,N
-! 	ij=i+j*NP1
-! 	IF (upwinded_element(mapg(ij,el)).ne.el) CYCLE
-! 	temp1=0d0
-! 	temp2=0d0
-! 	DO p=0,N
-! 	  pj=p+j*NP1
-! 	  ip=i+p*NP1
-! 	  temp1 = temp1 + in(mapg(pj,el))*d(i,p)
-! 	  temp2 = temp2 + in(mapg(ip,el))*d(j,p) ! switched p and q to save a new loop
-! 	ENDDO
-! 	outx(mapg(ij,el)) = (dyde(i,j,el)*temp1 - dydp(i,j,el)*temp2)/jac(i,j,el)
-! 	outy(mapg(ij,el)) = (dxdp(i,j,el)*temp2 - dxde(i,j,el)*temp1)/jac(i,j,el)
+!   ij=i+j*NP1
+!   IF (upwinded_element(mapg(ij,el)).ne.el) CYCLE
+!   temp1=0d0
+!   temp2=0d0
+!   DO p=0,N
+!     pj=p+j*NP1
+!     ip=i+p*NP1
+!     temp1 = temp1 + in(mapg(pj,el))*d(i,p)
+!     temp2 = temp2 + in(mapg(ip,el))*d(j,p) ! switched p and q to save a new loop
+!   ENDDO
+!   outx(mapg(ij,el)) = (dyde(i,j,el)*temp1 - dydp(i,j,el)*temp2)/jac(i,j,el)
+!   outy(mapg(ij,el)) = (dxdp(i,j,el)*temp2 - dxde(i,j,el)*temp1)/jac(i,j,el)
 !       ENDDO
 !     ENDDO
 !     ENDDO
@@ -268,24 +264,22 @@ MODULE OIFS_module
     DOUBLE PRECISION, INTENT(IN) :: t_in
     DOUBLE PRECISION, DIMENSION(nptot,2), INTENT(OUT) :: out
 
-	  out(1:nptot,1) = (t_in - timeNm1)*(V_x(1:nptot)- mesh_velocity(1:nptot))/deltat + (1d0 - (t_in-timeNm1)/deltat)*(V_xNm1(1:nptot)- mesh_velocity(1:nptot))
-	  out(1:nptot,2) = (t_in - timeNm1)*V_y(1:nptot)/deltat + (1d0 - (t_in-timeNm1)/deltat)*V_yNm1(1:nptot)
+    out(1:nptot,1) = (t_in - timeNm1)*(V_x(1:nptot)- mesh_velocity(1:nptot))/deltat + (1d0 - (t_in-timeNm1)/deltat)*(V_xNm1(1:nptot)- mesh_velocity(1:nptot))
+    out(1:nptot,2) = (t_in - timeNm1)*V_y(1:nptot)/deltat + (1d0 - (t_in-timeNm1)/deltat)*V_yNm1(1:nptot)
 
 ! trying to get it working for 3rd order.. not working atm:
-! 	IF ( t_in.ge.timeNm1) THEN
-! 	  out(1:nptot,1) = (t_in - timeNm1)*V_x(1:nptot)/deltat + (1d0 - (t_in-timeNm1)/deltat)*V_xNm1(1:nptot)
-! 	  out(1:nptot,2) = (t_in - timeNm1)*V_y(1:nptot)/deltat + (1d0 - (t_in-timeNm1)/deltat)*V_yNm1(1:nptot)
-! 	ELSE
-! 	  out(1:nptot,1) = (t_in - timeNm2)*V_xNm1(1:nptot)/deltat + (1d0 - (t_in-timeNm2)/deltat)*V_xNm2(1:nptot)
-! 	  out(1:nptot,2) = (t_in - timeNm2)*V_yNm1(1:nptot)/deltat + (1d0 - (t_in-timeNm2)/deltat)*V_yNm2(1:nptot)
-! 	ENDIF
+!   IF ( t_in.ge.timeNm1) THEN
+!     out(1:nptot,1) = (t_in - timeNm1)*V_x(1:nptot)/deltat + (1d0 - (t_in-timeNm1)/deltat)*V_xNm1(1:nptot)
+!     out(1:nptot,2) = (t_in - timeNm1)*V_y(1:nptot)/deltat + (1d0 - (t_in-timeNm1)/deltat)*V_yNm1(1:nptot)
+!   ELSE
+!     out(1:nptot,1) = (t_in - timeNm2)*V_xNm1(1:nptot)/deltat + (1d0 - (t_in-timeNm2)/deltat)*V_xNm2(1:nptot)
+!     out(1:nptot,2) = (t_in - timeNm2)*V_yNm1(1:nptot)/deltat + (1d0 - (t_in-timeNm2)/deltat)*V_yNm2(1:nptot)
+!   ENDIF
 !  OR?:
-! 	out(1:nptot,1) = sqrt((t_in - timeNm1)/deltat*((t_in-timeNm2)/deltat -1d0))*V_x(1:nptot)+ sqrt((1d0 - (t_in-timeNm1)/deltat)*(t_in-timeNm2)/deltat)*V_xNm1(1:nptot) &
-! 			  + sqrt((t_in-timeNm1)/deltat*((t_in-timeNm2)/deltat -1))*V_xNm2(1:nptot)
-! 	out(1:nptot,2) = sqrt((t_in - timeNm1)/deltat*((t_in-timeNm2)/deltat -1d0))*V_y(1:nptot)+ sqrt((1d0 - (t_in-timeNm1)/deltat)*(t_in-timeNm2)/deltat)*V_yNm1(1:nptot) &
-! 			  + sqrt((t_in-timeNm1)/deltat*((t_in-timeNm2)/deltat -1))*V_yNm2(1:nptot)
-      
-
+!   out(1:nptot,1) = sqrt((t_in - timeNm1)/deltat*((t_in-timeNm2)/deltat -1d0))*V_x(1:nptot)+ sqrt((1d0 - (t_in-timeNm1)/deltat)*(t_in-timeNm2)/deltat)*V_xNm1(1:nptot) &
+!         + sqrt((t_in-timeNm1)/deltat*((t_in-timeNm2)/deltat -1))*V_xNm2(1:nptot)
+!   out(1:nptot,2) = sqrt((t_in - timeNm1)/deltat*((t_in-timeNm2)/deltat -1d0))*V_y(1:nptot)+ sqrt((1d0 - (t_in-timeNm1)/deltat)*(t_in-timeNm2)/deltat)*V_yNm1(1:nptot) &
+!         + sqrt((t_in-timeNm1)/deltat*((t_in-timeNm2)/deltat -1))*V_yNm2(1:nptot)
   END SUBROUTINE calcUstar
 
   SUBROUTINE setup_time_constants

@@ -25,38 +25,33 @@ MODULE pardiso_solver
   INTEGER :: iparm_stokes(64)
   
 !   INTEGER :: global_non_zeros
-!   	     perm_stokes,&
-	     
-
+!          perm_stokes,&
 
   INTEGER, ALLOCATABLE :: Ax_local_to_sparse(:,:,:),&
-			  Ay_local_to_sparse(:,:,:),&
-			  Bx_local_to_sparse(:,:,:),&
-			  By_local_to_sparse(:,:,:),&
-			  Cp_local_to_sparse(:,:,:,:),&
-			  sparse_rowIndex_stokes(:),&
-			  sparse_columns_stokes(:)
-			  
-  DOUBLE PRECISION, ALLOCATABLE :: sparse_values_stokes(:),&
-				   globalRHS_stokes(:),&
-				   globalSOL_stokes(:)
+    Ay_local_to_sparse(:,:,:),&
+    Bx_local_to_sparse(:,:,:),&
+    By_local_to_sparse(:,:,:),&
+    Cp_local_to_sparse(:,:,:,:),&
+    sparse_rowIndex_stokes(:),&
+    sparse_columns_stokes(:)
 
+  DOUBLE PRECISION, ALLOCATABLE :: sparse_values_stokes(:),&
+    globalRHS_stokes(:),&
+    globalSOL_stokes(:)
 
 ! Using MKL_ALLOC FOR MEMORY:
 !   DOUBLE PRECISION :: sparse_values_stokes,&
-! 		      globalRHS_stokes,&
-! 		      globalSOL_stokes
-		      
+!           globalRHS_stokes,&
+!           globalSOL_stokes
+          
 !   POINTER    (sparse_values_stokes_PTR,sparse_values_stokes(1)),&
-! 	     (globalRHS_stokes_PTR,globalRHS_stokes(1)),&
-! 	     (globalSOL_stokes_PTR,globalSOL_stokes(1))
-! 	      	     (perm_stokes_PTR,perm_stokes(1)),&
+!        (globalRHS_stokes_PTR,globalRHS_stokes(1)),&
+!        (globalSOL_stokes_PTR,globalSOL_stokes(1))
+!                (perm_stokes_PTR,perm_stokes(1)),&
 
 !   INTEGER MKL_MALLOC
 !   INTEGER*8 MKL_MALLOC ! Use INTEGER*8 for 64bit (ie merlin)
 !   EXTERNAL MKL_MALLOC,MKL_FREE,MKL_MEM_STAT
-	     
-			  
   
   CONTAINS
   
@@ -170,10 +165,10 @@ MODULE pardiso_solver
     CALL assign_pardiso_memory      
         
     CALL initialise_local_to_global_sparse(sparse_values_stokes, &
-					   sparse_rowIndex_stokes, &
-					   sparse_columns_stokes)
-					   
-					   
+             sparse_rowIndex_stokes, &
+             sparse_columns_stokes)
+             
+             
 
 
 
@@ -199,24 +194,22 @@ MODULE pardiso_solver
 ! Reordering step - only required once.    
     phase = 11 ! 11 perform analysis and numerical factorisation, 22 just numerical factorisation
 
-
-
     CALL pardiso (pt_stokes, maxfct, mnum, mtype, phase, global_dim, sparse_values_stokes,&
-					    sparse_rowIndex_stokes, sparse_columns_stokes,& 
-					idum, nrhs, iparm_stokes, msglvl, ddum, ddum, error)
+      sparse_rowIndex_stokes, sparse_columns_stokes,& 
+      idum, nrhs, iparm_stokes, msglvl, ddum, ddum, error)
 
 !     WRITE(*,*) 'Reordering completed ... '
     IF (error.ne.0) THEN
       WRITE(*,*) 'At phase 11 of PARDISO: The following ERROR was detected: ', error
       STOP
-    END IF
+    ENDIF
 !     WRITE(*,*) 'Number of nonzeros in factors = ',iparm(18)
 !     WRITE(*,*) 'Number of factorization MFLOPS = ',iparm(19)
 
 ! If the mesh is non-moving then this is only required once, so we do it now.
 ! If the mesh is moving we will need to update the values vector and update the factorisation.
     CALL Pardiso_Fact(pt_stokes, iparm_stokes, global_non_zeros, global_dim, &
-			sparse_values_stokes, sparse_columns_stokes, sparse_rowIndex_stokes)
+      sparse_values_stokes, sparse_columns_stokes, sparse_rowIndex_stokes)
 
   END SUBROUTINE initialise_pardiso_stokes
   
@@ -229,7 +222,7 @@ MODULE pardiso_solver
       CALL update_global_sparse_storage(sparse_values_stokes,global_non_zeros)
 
       CALL Pardiso_Fact(pt_stokes, iparm_stokes, global_non_zeros, global_dim, &
-			sparse_values_stokes, sparse_columns_stokes, sparse_rowIndex_stokes)
+      sparse_values_stokes, sparse_columns_stokes, sparse_rowIndex_stokes)
 
     ENDIF
     
@@ -237,9 +230,8 @@ MODULE pardiso_solver
     CALL update_RHS_stokes(globalRHS_stokes)
     
     CALL Pardiso_Solve(pt_stokes, iparm_stokes, global_non_zeros, global_dim,&
-		       sparse_values_stokes, sparse_columns_stokes, sparse_rowIndex_stokes,&
-			globalRHS_stokes, globalSOL_stokes)
-
+      sparse_values_stokes, sparse_columns_stokes, sparse_rowIndex_stokes,&
+      globalRHS_stokes, globalSOL_stokes)
 
     CALL PARDISO_UPDATE_SOLUTION(globalSOL_stokes,V_x,V_y,pressure)
 !     call cpu_time(cputime2)
@@ -254,15 +246,14 @@ MODULE pardiso_solver
 !     TYPE(MKL_PARDISO_HANDLE) :: pt(64)
 
     INTEGER :: maxfct, mnum, mtype, phase, nrhs, error, msglvl, i,&
-		nnz, mat_dim, idum,&
-! 		perm(mat_dim),&
-		rowindex(mat_dim+1),&
-		columns(nnz),&
-		iparm(64)
-
+      nnz, mat_dim, idum,&
+!       perm(mat_dim),&
+      rowindex(mat_dim+1),&
+      columns(nnz),&
+      iparm(64)
 
     DOUBLE PRECISION :: ddum,&
-			values(nnz)
+      values(nnz)
     
     nrhs = 1 ! number of rhs vectors
     mnum = 1 ! number of matrices
@@ -290,34 +281,34 @@ MODULE pardiso_solver
     !.. Factorization.
     phase = 22 ! only factorization
     CALL pardiso (pt, maxfct, mnum, mtype, phase, mat_dim, values, rowindex, columns,& 
-                 idum, nrhs, iparm, msglvl, ddum, ddum, error) !perm
+      idum, nrhs, iparm, msglvl, ddum, ddum, error) !perm
+
     IF (error.ne.0) THEN
       WRITE(*,*) 'At phase 22 of PARDISO: The following ERROR was detected: ', error
       STOP
     END IF
-    
-
   END SUBROUTINE Pardiso_Fact
 
   SUBROUTINE Pardiso_Solve(pt, iparm, nnz, mat_dim, values, columns, rowindex, rhs_in, sol_out)
     IMPLICIT NONE
-    
+
 !     INTEGER*4, INTENT(INOUT) :: pt(64)
-  INTEGER*8, INTENT(INOUT) :: pt(64)
+    INTEGER*8, INTENT(INOUT) :: pt(64)
 !     TYPE(MKL_PARDISO_HANDLE) :: pt(64)
     INTEGER, INTENT (INOUT) :: iparm(64)
     INTEGER, INTENT (IN) :: nnz,mat_dim, &
-! 			    perm(mat_dim), &
-			    rowindex(mat_dim+1), &
-			    columns(nnz)
-    
+!       perm(mat_dim), &
+      rowindex(mat_dim+1), &
+      columns(nnz)
+
     INTEGER :: i,maxfct, mnum, mtype, phase, nrhs, error, msglvl, idum
     DOUBLE PRECISION, INTENT(IN) :: values(nnz),&
-				    rhs_in(mat_dim)
+      rhs_in(mat_dim)
+
     DOUBLE PRECISION, INTENT(OUT) :: sol_out(mat_dim)
     DOUBLE PRECISION :: ddum
-			
-			
+      
+      
 
     
     nrhs = 1 ! number of rhs vectors
@@ -337,22 +328,22 @@ MODULE pardiso_solver
    
     do i = 1, mat_dim
       if((rhs_in(i)+1d0).eq.rhs_in(i).or.isNaN(rhs_in(i)))then
-	write(*,*) 'globalRHS_stokes is NaN, before solve sym',i,rhs_in(i)
-	stop
+        write(*,*) 'globalRHS_stokes is NaN, before solve sym',i,rhs_in(i)
+        stop
       endif
     enddo
 
 
     call pardiso (pt, maxfct, mnum, mtype, phase, mat_dim, &
-		  values, rowindex, columns,& 
-		  idum, nrhs, iparm, msglvl, &
-		  rhs_in, sol_out, error)
+      values, rowindex, columns,& 
+      idum, nrhs, iparm, msglvl, &
+      rhs_in, sol_out, error)
 
 
     do i = 1, mat_dim
       if((sol_out(i)+1d0).eq.sol_out(i)) then
-	write(*,*) 'sol_out is NaN, after solve',i
-	stop
+        write(*,*) 'sol_out is NaN, after solve',i
+        stop
       endif
     enddo
     
@@ -360,10 +351,6 @@ MODULE pardiso_solver
       WRITE(0,*) 'At phase 33 of PARDISO: The following ERROR was detected: ', error
 !       STOP
     END IF
-    
-
-
-
   END SUBROUTINE Pardiso_Solve
   
   SUBROUTINE Pardiso_Release_Memory(pt, iparm, mat_dim)
@@ -373,11 +360,10 @@ MODULE pardiso_solver
     INTEGER*8 :: pt(64)
 !     TYPE(MKL_PARDISO_HANDLE) :: pt(64)
     INTEGER :: maxfct, mnum, mtype, phase, nrhs, error, msglvl, idum, mat_dim,&
-		iparm(64)
+      iparm(64)
 
- 
     DOUBLE PRECISION :: ddum
-    
+
     nrhs = 1 ! number of rhs vectors
     mnum = 1 ! number of matrices
     maxfct = 1 ! max number of matrices (i think)
@@ -394,50 +380,46 @@ MODULE pardiso_solver
     ddum = 0
 
     call pardiso(pt, maxfct, mnum, mtype, phase, mat_dim, ddum, idum, idum,& 
-                idum, nrhs, iparm, msglvl, ddum, ddum, error) 
-
+      idum, nrhs, iparm, msglvl, ddum, ddum, error) 
 
   END SUBROUTINE Pardiso_Release_Memory
-  
-  
+
+
   SUBROUTINE PARDISO_UPDATE_SOLUTION(sol_in,out_x,out_y,out_p)
     IMPLICIT NONE
     INTEGER :: rowcount,i
     DOUBLE PRECISION, INTENT(IN) :: sol_in(1:global_bd_dim+3*npint)
     DOUBLE PRECISION, INTENT(OUT) :: out_x(1:nptot),&
-				      out_y(1:nptot),&
-				      out_p(1:npint)
+      out_y(1:nptot),&
+      out_p(1:npint)
 ! Transfer global solution to V_x, V_y, p
 ! release global memory.
     
     rowcount=0
     DO i=1,nptot
       IF (bdflag(1,i)) THEN
-	out_x(i) = boundary_x(i)
+        out_x(i) = boundary_x(i)
       ELSE
-	rowcount=rowcount+1
-	out_x(i)= sol_in(rowcount)
+        rowcount=rowcount+1
+        out_x(i)= sol_in(rowcount)
       ENDIF
     ENDDO
     DO i=1,nptot
       IF (bdflag(2,i)) THEN
-	out_y(i) = boundary_y(i)
+        out_y(i) = boundary_y(i)
       ELSE
-	rowcount=rowcount+1
-	out_y(i)= sol_in(rowcount)
+        rowcount=rowcount+1
+        out_y(i)= sol_in(rowcount)
       ENDIF
     ENDDO
     DO i=1,npint
       rowcount=rowcount+1
       out_p(i)= sol_in(rowcount)
     ENDDO
-   
-    
+
   END SUBROUTINE PARDISO_UPDATE_SOLUTION
-  
-  
-  
- 
+
+
   SUBROUTINE update_global_sparse_storage(values,nnz)
 ! Only needed if the mesh is moving, otherwise our matrix does not change.
     IMPLICIT NONE
@@ -451,36 +433,36 @@ MODULE pardiso_solver
 !     temp(1:global_non_zeros)=sparse_values_stokes
 !       print*,global_non_zeros
 !       DO i=0,global_non_zeros
-! 	temp=0d0
+!   temp=0d0
 !       ENDDO
 !DEC$ NOPARALLEL
-      DO el=1,numelm
-	DO ij=0,NP1SQM1
-	  DO kl=0,NP1SQM1
-! 	    IF (Ax_local_to_sparse(kl,ij,el).lt.0) print*,'ALERT: Ax_local_to_sparse DODGY VALUE',Ax_local_to_sparse(kl,ij,el)
-! 	    IF (Ay_local_to_sparse(kl,ij,el).lt.0) print*,'ALERT: Ay_local_to_sparse DODGY VALUE',Ay_local_to_sparse(kl,ij,el)
-	    temp(Ax_local_to_sparse(kl,ij,el)) = temp(Ax_local_to_sparse(kl,ij,el)) + A_x(kl,ij,el)
-	    temp(Ay_local_to_sparse(kl,ij,el)) = temp(Ay_local_to_sparse(kl,ij,el)) + A_y(kl,ij,el)
-	  ENDDO
-	  DO intkl=1,NM1SQ
-! 	    IF (Bx_local_to_sparse(intkl,ij,el).lt.0) print*,'ALERT: Ax_local_to_sparse DODGY VALUE',Bx_local_to_sparse(intkl,ij,el)
-! 	    IF (By_local_to_sparse(intkl,ij,el).lt.0) print*,'ALERT: Ay_local_to_sparse DODGY VALUE',By_local_to_sparse(intkl,ij,el)
-	    temp(Bx_local_to_sparse(intkl,ij,el)) = temp(Bx_local_to_sparse(intkl,ij,el)) + B_x(intkl,ij,el)
-	    temp(By_local_to_sparse(intkl,ij,el)) = temp(By_local_to_sparse(intkl,ij,el)) + B_y(intkl,ij,el)
-	  ENDDO
-	ENDDO
+    DO el=1,numelm
+      DO ij=0,NP1SQM1
+        DO kl=0,NP1SQM1
+!       IF (Ax_local_to_sparse(kl,ij,el).lt.0) print*,'ALERT: Ax_local_to_sparse DODGY VALUE',Ax_local_to_sparse(kl,ij,el)
+!       IF (Ay_local_to_sparse(kl,ij,el).lt.0) print*,'ALERT: Ay_local_to_sparse DODGY VALUE',Ay_local_to_sparse(kl,ij,el)
+          temp(Ax_local_to_sparse(kl,ij,el)) = temp(Ax_local_to_sparse(kl,ij,el)) + A_x(kl,ij,el)
+          temp(Ay_local_to_sparse(kl,ij,el)) = temp(Ay_local_to_sparse(kl,ij,el)) + A_y(kl,ij,el)
+        ENDDO
+        DO intkl=1,NM1SQ
+!           IF (Bx_local_to_sparse(intkl,ij,el).lt.0) print*,'ALERT: Ax_local_to_sparse DODGY VALUE',Bx_local_to_sparse(intkl,ij,el)
+!           IF (By_local_to_sparse(intkl,ij,el).lt.0) print*,'ALERT: Ay_local_to_sparse DODGY VALUE',By_local_to_sparse(intkl,ij,el)
+          temp(Bx_local_to_sparse(intkl,ij,el)) = temp(Bx_local_to_sparse(intkl,ij,el)) + B_x(intkl,ij,el)
+          temp(By_local_to_sparse(intkl,ij,el)) = temp(By_local_to_sparse(intkl,ij,el)) + B_y(intkl,ij,el)
+        ENDDO
       ENDDO
+    ENDDO
 
     IF (param_alphaZ.gt.0d0) THEN
 !DEC$ NOPARALLEL    
       DO el2=1,numelm
-	DO el1=1,numelm
-	  DO intkl=1,NM1SQ
-	    DO intij=1,NM1SQ
-	      temp(Cp_local_to_sparse(intij,intkl,el1,el2)) = param_alphaZ*Z_p(intij,el1)*Z_p(intkl,el2)
-	    ENDDO
-	  ENDDO
-	ENDDO
+        DO el1=1,numelm
+          DO intkl=1,NM1SQ
+            DO intij=1,NM1SQ
+              temp(Cp_local_to_sparse(intij,intkl,el1,el2)) = param_alphaZ*Z_p(intij,el1)*Z_p(intkl,el2)
+            ENDDO
+          ENDDO
+        ENDDO
       ENDDO
     ENDIF
 
@@ -512,17 +494,13 @@ MODULE pardiso_solver
       rhs_out(fixed1+i) = f_y(npedg+i)
       rhs_out(fixed2+i) = g(i)
     ENDDO
-      
-  
   END SUBROUTINE update_RHS_stokes
   
   SUBROUTINE calc_global_symmetric_non_zeroes(nnz)
     IMPLICIT NONE
     LOGICAL,ALLOCATABLE :: seen_nodex(:,:),seen_nodey(:,:)
-	       
-	       
-    INTEGER :: el,el1,el2,i,j,ij,kl,nnz
 
+    INTEGER :: el,el1,el2,i,j,ij,kl,nnz
 
     nnz=0
     ALLOCATE(seen_nodex(npedg,npedg),seen_nodey(npedg,npedg))
@@ -532,82 +510,82 @@ MODULE pardiso_solver
     DO el=1,numelm
       DO ij=0,NP1SQM1
 ! scan through A_x
-	i=mapg(ij,el)
-	IF (.not.bdflag(1,i)) THEN
-	  DO kl=0,NP1SQM1
-	    j=mapg(kl,el)
-	    IF (.not.bdflag(1,j)) THEN
-	      IF (i.le.npedg.and.j.le.npedg) THEN	      
-		IF (seen_nodex(i,j)) CYCLE    
-		IF (i.eq.j) THEN
-		  nnz=nnz+1
-		  seen_nodex(i,j)=.true.		    
-		ELSEIF (abs(A_x(ij,kl,el)).gt.1d-15) THEN
-		  nnz=nnz+1
-		  seen_nodex(i,j)=.true.
-		ENDIF
-	      ELSE
-		IF (i.eq.j) THEN
-		  nnz=nnz+1
-		ELSEIF (abs(A_x(ij,kl,el)).gt.1d-15) THEN
-		  nnz=nnz+1	    
-		ENDIF
-	      ENDIF
-	    ENDIF
-	  ENDDO
+        i=mapg(ij,el)
+        IF (.not.bdflag(1,i)) THEN
+          DO kl=0,NP1SQM1
+            j=mapg(kl,el)
+            IF (.not.bdflag(1,j)) THEN
+              IF (i.le.npedg.and.j.le.npedg) THEN        
+                IF (seen_nodex(i,j)) CYCLE    
+                IF (i.eq.j) THEN
+                  nnz=nnz+1
+                  seen_nodex(i,j)=.true.        
+                ELSEIF (abs(A_x(ij,kl,el)).gt.1d-15) THEN
+                  nnz=nnz+1
+                  seen_nodex(i,j)=.true.
+                ENDIF
+              ELSE
+                IF (i.eq.j) THEN
+                  nnz=nnz+1
+                ELSEIF (abs(A_x(ij,kl,el)).gt.1d-15) THEN
+                  nnz=nnz+1      
+                ENDIF
+              ENDIF
+            ENDIF
+          ENDDO
 ! scan through B_x (add 2 because of B_x transpose too)
-	  DO kl=1,NM1SQ
-	    IF (abs(B_x(kl,ij,el)).gt.1d-15) THEN
-	      nnz=nnz+2	
-	    ENDIF
-	  ENDDO
-	ENDIF
+          DO kl=1,NM1SQ
+            IF (abs(B_x(kl,ij,el)).gt.1d-15) THEN
+              nnz=nnz+2  
+            ENDIF
+          ENDDO
+        ENDIF
 ! scan through A_y
-	IF (.not.bdflag(2,i)) THEN
-	  DO kl=0,NP1SQM1
-	    j=mapg(kl,el)
-	    IF (.not.bdflag(2,j)) THEN
-	      IF (i.le.npedg.and.j.le.npedg) THEN	      
-		IF (seen_nodey(i,j)) CYCLE		
-		IF (i.eq.j) THEN
-		  nnz=nnz+1
-		  seen_nodey(i,j)=.true.		    
-		ELSEIF (abs(A_y(ij,kl,el)).gt.1d-15) THEN
-		  nnz=nnz+1
-		  seen_nodey(i,j)=.true.
-		ENDIF
-	      ELSE
-		IF (i.eq.j) THEN
-		  nnz=nnz+1		  
-		ELSEIF (abs(A_y(ij,kl,el)).gt.1d-15) THEN
-		  nnz=nnz+1		  
-		ENDIF
-	      ENDIF
-	    ENDIF
-	  ENDDO
+        IF (.not.bdflag(2,i)) THEN
+          DO kl=0,NP1SQM1
+            j=mapg(kl,el)
+            IF (.not.bdflag(2,j)) THEN
+              IF (i.le.npedg.and.j.le.npedg) THEN        
+                IF (seen_nodey(i,j)) CYCLE    
+                IF (i.eq.j) THEN
+                  nnz=nnz+1
+                  seen_nodey(i,j)=.true.        
+                ELSEIF (abs(A_y(ij,kl,el)).gt.1d-15) THEN
+                  nnz=nnz+1
+                  seen_nodey(i,j)=.true.
+                ENDIF
+              ELSE
+                IF (i.eq.j) THEN
+                  nnz=nnz+1      
+                ELSEIF (abs(A_y(ij,kl,el)).gt.1d-15) THEN
+                  nnz=nnz+1      
+                ENDIF
+              ENDIF
+            ENDIF
+          ENDDO
 ! scan through B_y (add 2 because of B_y transpose too)
-	  DO kl=1,NM1SQ
-	    IF (abs(B_y(kl,ij,el)).gt.1d-15) THEN
-	      nnz=nnz+2	      
-	    ENDIF
-	  ENDDO
-	ENDIF
+          DO kl=1,NM1SQ
+            IF (abs(B_y(kl,ij,el)).gt.1d-15) THEN
+              nnz=nnz+2        
+            ENDIF
+          ENDDO
+        ENDIF
       ENDDO
     ENDDO
 
     IF (param_alphaZ.gt.0d0) THEN
       DO el1=1,numelm
-	DO ij=1,NM1SQ
-	  DO el2=1,numelm
-	    DO kl=1,NM1SQ
-	      IF (mapg_pressure(ij,el1).eq.mapg_pressure(kl,el2)) THEN
-		nnz=nnz+1
-	      ELSEIF (abs(param_alphaZ*Z_p(ij,el1)*Z_p(kl,el2)).gt.1d-15) THEN
-		nnz=nnz+1
-	      ENDIF
-	    ENDDO
-	  ENDDO
-	ENDDO
+        DO ij=1,NM1SQ
+          DO el2=1,numelm
+            DO kl=1,NM1SQ
+              IF (mapg_pressure(ij,el1).eq.mapg_pressure(kl,el2)) THEN
+                nnz=nnz+1
+              ELSEIF (abs(param_alphaZ*Z_p(ij,el1)*Z_p(kl,el2)).gt.1d-15) THEN
+                nnz=nnz+1
+              ENDIF
+            ENDDO
+          ENDDO
+        ENDDO
       ENDDO
     ELSE     
 ! zero-entries on the diagonal of lower block diagonal of zeros.
@@ -632,7 +610,7 @@ MODULE pardiso_solver
     LOGICAL :: seen_node
     INTEGER :: i,j,el,el1,el2,ij,intij,kl,intkl,non_zero_count
     INTEGER, INTENT(OUT) :: rowindex(1:global_bd_dim+3*npint+1),&
-			    columns(1:global_non_zeros)
+          columns(1:global_non_zeros)
     DOUBLE PRECISION :: temp
     DOUBLE PRECISION, INTENT(OUT) :: values(1:global_non_zeros)
 
@@ -649,76 +627,74 @@ MODULE pardiso_solver
     
     DO i=1,npedg
       IF (.not.bdflag(1,i)) THEN
-	rowindex(non_dir_bd_map_x(i))=non_zero_count+1
-	DO j=i,npedg
-	  seen_node=.false.
-	  IF (.not.bdflag(1,j)) THEN
-	    DO el=1,numelm
-	      ij = global_to_local_map(i,el)
-	      IF (ij.lt.0) CYCLE
-	      kl = global_to_local_map(j,el)
-	      IF (kl.lt.0) CYCLE
-	      IF (i.eq.j) THEN ! Always store the diagonal entry, even if it is zero.
-		IF (seen_node) THEN
-		  Ax_local_to_sparse(ij,kl,el)=non_zero_count
-		  values(non_zero_count) = values(non_zero_count) + A_x(ij,kl,el)
-		ELSE
-		  non_zero_count = non_zero_count+1
-		  Ax_local_to_sparse(ij,kl,el) = non_zero_count
-		  values(non_zero_count) = A_x(ij,kl,el)
-		  columns(non_zero_count) = non_dir_bd_map_x(j)
-		  seen_node=.true.
-		  
-		ENDIF
-	      ELSEIF (abs(A_x(ij,kl,el)).gt.1d-15) THEN
-		IF (seen_node) THEN
-		  Ax_local_to_sparse(ij,kl,el)=non_zero_count
-		  values(non_zero_count) = values(non_zero_count) + A_x(ij,kl,el)
-		ELSE
-		  non_zero_count = non_zero_count+1
-		  Ax_local_to_sparse(ij,kl,el) = non_zero_count
-		  values(non_zero_count) = A_x(ij,kl,el)
-		  columns(non_zero_count) = non_dir_bd_map_x(j)
-		  seen_node=.true.
-		  		 	  
-		ENDIF
-	      ENDIF
-	    ENDDO
-	  ENDIF
-	ENDDO
-	A_x_interior_loop1: DO j=npedg+1,nptot
-	  DO el=1,numelm
-	    ij = global_to_local_map(i,el)
-	    IF (ij.lt.0) CYCLE
-	    kl = global_to_local_map(j,el)
-	    IF (kl.lt.0) CYCLE
-	    IF (abs(A_x(ij,kl,el)).gt.1d-15) THEN
-	      non_zero_count=non_zero_count+1
-	      Ax_local_to_sparse(ij,kl,el)=non_zero_count
-	      values(non_zero_count) = A_x(ij,kl,el)
-	      columns(non_zero_count)=j-npedg+bd_numrows_x
-
-	      CYCLE A_x_interior_loop1 ! Exit as we will only find 1 contribution to this node - it is interior
-	    ENDIF
-	  ENDDO
-	ENDDO A_x_interior_loop1
-	B_x_interior_loop1: DO j=1,npint
-	  DO el=1,numelm
-	    ij = global_to_local_map(npedg+j,el)
-	    IF (ij.lt.0) CYCLE
-	    intij = local_to_interior_node(ij)
-	    kl = global_to_local_map(i,el)
-	    IF (kl.lt.0) CYCLE
-	    IF (abs(B_x(intij,kl,el)).gt.1d-15) THEN
-	      non_zero_count=non_zero_count+1
-	      Bx_local_to_sparse(intij,kl,el)=non_zero_count
-	      values(non_zero_count) = B_x(intij,kl,el)
-	      columns(non_zero_count)=j+global_bd_dim+2*npint
-	      
-	      CYCLE B_x_interior_loop1 ! Exit as we will only find 1 contribution to this node - it is partly interior
-	    ENDIF
-	  ENDDO
-	ENDDO B_x_interior_loop1
+        rowindex(non_dir_bd_map_x(i))=non_zero_count+1
+        DO j=i,npedg
+          seen_node=.false.
+          IF (.not.bdflag(1,j)) THEN
+            DO el=1,numelm
+              ij = global_to_local_map(i,el)
+              IF (ij.lt.0) CYCLE
+              kl = global_to_local_map(j,el)
+              IF (kl.lt.0) CYCLE
+              IF (i.eq.j) THEN ! Always store the diagonal entry, even if it is zero.
+                IF (seen_node) THEN
+                  Ax_local_to_sparse(ij,kl,el)=non_zero_count
+                  values(non_zero_count) = values(non_zero_count) + A_x(ij,kl,el)
+                ELSE
+                  non_zero_count = non_zero_count+1
+                  Ax_local_to_sparse(ij,kl,el) = non_zero_count
+                  values(non_zero_count) = A_x(ij,kl,el)
+                  columns(non_zero_count) = non_dir_bd_map_x(j)
+                  seen_node=.true.
+                ENDIF
+              ELSEIF (abs(A_x(ij,kl,el)).gt.1d-15) THEN
+                IF (seen_node) THEN
+                  Ax_local_to_sparse(ij,kl,el)=non_zero_count
+                  values(non_zero_count) = values(non_zero_count) + A_x(ij,kl,el)
+                ELSE
+                  non_zero_count = non_zero_count+1
+                  Ax_local_to_sparse(ij,kl,el) = non_zero_count
+                  values(non_zero_count) = A_x(ij,kl,el)
+                  columns(non_zero_count) = non_dir_bd_map_x(j)
+                  seen_node=.true.
+                ENDIF
+              ENDIF
+            ENDDO
+          ENDIF
+        ENDDO
+        A_x_interior_loop1: DO j=npedg+1,nptot
+          DO el=1,numelm
+            ij = global_to_local_map(i,el)
+            IF (ij.lt.0) CYCLE
+            kl = global_to_local_map(j,el)
+            IF (kl.lt.0) CYCLE
+            IF (abs(A_x(ij,kl,el)).gt.1d-15) THEN
+              non_zero_count=non_zero_count+1
+              Ax_local_to_sparse(ij,kl,el)=non_zero_count
+              values(non_zero_count) = A_x(ij,kl,el)
+              columns(non_zero_count)=j-npedg+bd_numrows_x
+      
+              CYCLE A_x_interior_loop1 ! Exit as we will only find 1 contribution to this node - it is interior
+            ENDIF
+          ENDDO
+        ENDDO A_x_interior_loop1
+        B_x_interior_loop1: DO j=1,npint
+          DO el=1,numelm
+            ij = global_to_local_map(npedg+j,el)
+            IF (ij.lt.0) CYCLE
+            intij = local_to_interior_node(ij)
+            kl = global_to_local_map(i,el)
+            IF (kl.lt.0) CYCLE
+            IF (abs(B_x(intij,kl,el)).gt.1d-15) THEN
+              non_zero_count=non_zero_count+1
+              Bx_local_to_sparse(intij,kl,el)=non_zero_count
+              values(non_zero_count) = B_x(intij,kl,el)
+              columns(non_zero_count)=j+global_bd_dim+2*npint
+              
+              CYCLE B_x_interior_loop1 ! Exit as we will only find 1 contribution to this node - it is partly interior
+            ENDIF
+          ENDDO
+        ENDDO B_x_interior_loop1
       ENDIF  
     ENDDO ! Now done all boundary nodes of the x-part of the global matrix.
     
@@ -729,120 +705,120 @@ MODULE pardiso_solver
       rowindex(i-npedg+bd_numrows_x)=non_zero_count+1
 
       A_x_interior_loop2: DO j=i,nptot
-	DO el=1,numelm
-	  ij = global_to_local_map(i,el)
-	  IF (ij.lt.0) CYCLE
-	  kl = global_to_local_map(j,el)
-	  IF (kl.lt.0) CYCLE
-	  IF (i.eq.j) THEN ! Always store the diagonal entry, even if it is zero.
-	    non_zero_count=non_zero_count+1
-	    Ax_local_to_sparse(ij,kl,el)=non_zero_count
-	    values(non_zero_count) = A_x(ij,kl,el)
-	    columns(non_zero_count) = j - npedg + bd_numrows_x
-	    
-	    CYCLE A_x_interior_loop2 ! Exit as we will only find 1 contribution to this node - it is interior
-	  ELSEIF (abs(A_x(ij,kl,el)).gt.1d-15) THEN
-	    non_zero_count=non_zero_count+1
-	    Ax_local_to_sparse(ij,kl,el)=non_zero_count
-	    values(non_zero_count) = A_x(ij,kl,el)
-	    columns(non_zero_count) = j-npedg+bd_numrows_x
+        DO el=1,numelm
+          ij = global_to_local_map(i,el)
+          IF (ij.lt.0) CYCLE
+          kl = global_to_local_map(j,el)
+          IF (kl.lt.0) CYCLE
+          IF (i.eq.j) THEN ! Always store the diagonal entry, even if it is zero.
+            non_zero_count=non_zero_count+1
+            Ax_local_to_sparse(ij,kl,el)=non_zero_count
+            values(non_zero_count) = A_x(ij,kl,el)
+            columns(non_zero_count) = j - npedg + bd_numrows_x
 
-	    CYCLE A_x_interior_loop2 ! Exit as we will only find 1 contribution to this node - it is interior
-	  ENDIF
-	ENDDO
+            CYCLE A_x_interior_loop2 ! Exit as we will only find 1 contribution to this node - it is interior
+          ELSEIF (abs(A_x(ij,kl,el)).gt.1d-15) THEN
+            non_zero_count=non_zero_count+1
+            Ax_local_to_sparse(ij,kl,el)=non_zero_count
+            values(non_zero_count) = A_x(ij,kl,el)
+            columns(non_zero_count) = j-npedg+bd_numrows_x
+
+            CYCLE A_x_interior_loop2 ! Exit as we will only find 1 contribution to this node - it is interior
+          ENDIF
+        ENDDO
       ENDDO A_x_interior_loop2
       B_x_interior_loop2: DO j=1,npint
-	DO el=1,numelm
-	  ij = global_to_local_map(npedg+j,el)
-	  IF (ij.lt.0) CYCLE
-	  intij = local_to_interior_node(ij)
-	  kl =  global_to_local_map(i,el)
-	  IF (kl.lt.0) CYCLE
-	  IF (abs(B_x(intij,kl,el)).gt.1d-15) THEN
-	    non_zero_count=non_zero_count+1
-	    Bx_local_to_sparse(intij,kl,el)=non_zero_count
-	    values(non_zero_count) = B_x(intij,kl,el)
-	    columns(non_zero_count)=j+global_bd_dim+2*npint
-	    
-	    CYCLE B_x_interior_loop2 ! Exit as we will only find 1 contribution to this node - it is partly interior
-	  ENDIF  
-	ENDDO
+        DO el=1,numelm
+          ij = global_to_local_map(npedg+j,el)
+          IF (ij.lt.0) CYCLE
+          intij = local_to_interior_node(ij)
+          kl =  global_to_local_map(i,el)
+          IF (kl.lt.0) CYCLE
+          IF (abs(B_x(intij,kl,el)).gt.1d-15) THEN
+            non_zero_count=non_zero_count+1
+            Bx_local_to_sparse(intij,kl,el)=non_zero_count
+            values(non_zero_count) = B_x(intij,kl,el)
+            columns(non_zero_count)=j+global_bd_dim+2*npint
+            
+            CYCLE B_x_interior_loop2 ! Exit as we will only find 1 contribution to this node - it is partly interior
+          ENDIF  
+        ENDDO
       ENDDO B_x_interior_loop2
     ENDDO ! Now done all interior nodes of the x-part of the global matrix.
 
 ! boundary rows of y-part of global matrix:
     DO i=1,npedg
       IF (.not.bdflag(2,i)) THEN
-	rowindex(npint+non_dir_bd_map_y(i))=non_zero_count+1
-	DO j=i,npedg
-	  seen_node=.false.
-	  IF (.not.bdflag(2,j)) THEN
-	    DO el=1,numelm
-	      ij = global_to_local_map(i,el)
-	      IF (ij.lt.0) CYCLE
-	      kl =  global_to_local_map(j,el)
-	      IF (kl.lt.0) CYCLE
-	      IF (i.eq.j) THEN ! Always store the diagonal entry, even if it is zero.
-		IF (seen_node) THEN
-		  Ay_local_to_sparse(ij,kl,el )= non_zero_count
-		  values(non_zero_count) = values(non_zero_count) + A_y(ij,kl,el)
-		ELSE
-		  non_zero_count = non_zero_count+1
-		  Ay_local_to_sparse(ij,kl,el) = non_zero_count
-		  values(non_zero_count) = A_y(ij,kl,el)
-		  columns(non_zero_count) = npint + non_dir_bd_map_y(j)
-		  seen_node=.true.
-		  
-		ENDIF
-	      ELSEIF (abs(A_y(ij,kl,el)).gt.1d-15) THEN
-		IF (seen_node) THEN
-		  Ay_local_to_sparse(ij,kl,el) = non_zero_count	
-		  values(non_zero_count) = values(non_zero_count) + A_y(ij,kl,el)
-		ELSE
-		  non_zero_count = non_zero_count+1
-		  Ay_local_to_sparse(ij,kl,el) = non_zero_count
-		  values(non_zero_count) = A_y(ij,kl,el)
-		  columns(non_zero_count) = npint + non_dir_bd_map_y(j)
-		  seen_node=.true.
-		  
-		ENDIF
-	      ENDIF
-	    ENDDO
-	  ENDIF
-	ENDDO
-	A_y_interior_loop1: DO j=npedg+1,nptot
-	  DO el=1,numelm
-	    ij = global_to_local_map(i,el)
-	    IF (ij.lt.0) CYCLE
-	    kl =  global_to_local_map(j,el)
-	    IF (kl.lt.0) CYCLE
-	    IF (abs(A_y(ij,kl,el)).gt.1d-15) THEN
-	      non_zero_count=non_zero_count+1
-	      Ay_local_to_sparse(ij,kl,el)=non_zero_count
-	      values(non_zero_count) = A_y(ij,kl,el)
-	      columns(non_zero_count)=j - npedg + global_bd_dim + npint	         
-	      
-	      CYCLE A_y_interior_loop1 ! Exit as we will only find 1 contribution to this node - it is interior
-	    ENDIF
-	  ENDDO
-	ENDDO A_y_interior_loop1
-	B_y_interior_loop1: DO j=1,npint
-	  DO el=1,numelm
-	    ij = global_to_local_map(npedg+j,el)
-	    IF (ij.lt.0) CYCLE
-	    intij = local_to_interior_node(ij)
-	    kl =  global_to_local_map(i,el)
-	    IF (kl.lt.0) CYCLE
-	    IF (abs(B_y(intij,kl,el)).gt.1d-15) THEN
-	      non_zero_count=non_zero_count+1
-	      By_local_to_sparse(intij,kl,el)=non_zero_count
-	      values(non_zero_count) = B_y(intij,kl,el)
-	      columns(non_zero_count)=j+global_bd_dim+2*npint	      
-	      
-	      CYCLE B_y_interior_loop1 ! Exit as we will only find 1 contribution to this node - it is partly interior
-	    ENDIF  
-	  ENDDO
-	ENDDO B_y_interior_loop1
+        rowindex(npint+non_dir_bd_map_y(i))=non_zero_count+1
+        DO j=i,npedg
+          seen_node=.false.
+          IF (.not.bdflag(2,j)) THEN
+            DO el=1,numelm
+              ij = global_to_local_map(i,el)
+              IF (ij.lt.0) CYCLE
+              kl =  global_to_local_map(j,el)
+              IF (kl.lt.0) CYCLE
+              IF (i.eq.j) THEN ! Always store the diagonal entry, even if it is zero.
+                IF (seen_node) THEN
+                  Ay_local_to_sparse(ij,kl,el )= non_zero_count
+                  values(non_zero_count) = values(non_zero_count) + A_y(ij,kl,el)
+                ELSE
+                  non_zero_count = non_zero_count+1
+                  Ay_local_to_sparse(ij,kl,el) = non_zero_count
+                  values(non_zero_count) = A_y(ij,kl,el)
+                  columns(non_zero_count) = npint + non_dir_bd_map_y(j)
+                  seen_node=.true.
+                  
+                ENDIF
+              ELSEIF (abs(A_y(ij,kl,el)).gt.1d-15) THEN
+                IF (seen_node) THEN
+                  Ay_local_to_sparse(ij,kl,el) = non_zero_count  
+                  values(non_zero_count) = values(non_zero_count) + A_y(ij,kl,el)
+                ELSE
+                  non_zero_count = non_zero_count+1
+                  Ay_local_to_sparse(ij,kl,el) = non_zero_count
+                  values(non_zero_count) = A_y(ij,kl,el)
+                  columns(non_zero_count) = npint + non_dir_bd_map_y(j)
+                  seen_node=.true.
+                  
+                ENDIF
+              ENDIF
+            ENDDO
+          ENDIF
+        ENDDO
+        A_y_interior_loop1: DO j=npedg+1,nptot
+          DO el=1,numelm
+            ij = global_to_local_map(i,el)
+            IF (ij.lt.0) CYCLE
+            kl =  global_to_local_map(j,el)
+            IF (kl.lt.0) CYCLE
+            IF (abs(A_y(ij,kl,el)).gt.1d-15) THEN
+              non_zero_count=non_zero_count+1
+              Ay_local_to_sparse(ij,kl,el)=non_zero_count
+              values(non_zero_count) = A_y(ij,kl,el)
+              columns(non_zero_count)=j - npedg + global_bd_dim + npint           
+              
+              CYCLE A_y_interior_loop1 ! Exit as we will only find 1 contribution to this node - it is interior
+            ENDIF
+          ENDDO
+        ENDDO A_y_interior_loop1
+        B_y_interior_loop1: DO j=1,npint
+          DO el=1,numelm
+            ij = global_to_local_map(npedg+j,el)
+            IF (ij.lt.0) CYCLE
+            intij = local_to_interior_node(ij)
+            kl =  global_to_local_map(i,el)
+            IF (kl.lt.0) CYCLE
+            IF (abs(B_y(intij,kl,el)).gt.1d-15) THEN
+              non_zero_count=non_zero_count+1
+              By_local_to_sparse(intij,kl,el)=non_zero_count
+              values(non_zero_count) = B_y(intij,kl,el)
+              columns(non_zero_count)=j+global_bd_dim+2*npint        
+
+              CYCLE B_y_interior_loop1 ! Exit as we will only find 1 contribution to this node - it is partly interior
+            ENDIF  
+          ENDDO
+        ENDDO B_y_interior_loop1
       ENDIF  
     ENDDO ! Now done all boundary nodes of the y-part of the global matrix.
 
@@ -850,44 +826,45 @@ MODULE pardiso_solver
     DO i=npedg+1,nptot
       rowindex(i-npedg+global_bd_dim+npint)=non_zero_count+1
       A_y_interior_loop2: DO j=i,nptot
-	DO el=1,numelm
-	  ij = global_to_local_map(i,el)
-	  IF (ij.lt.0) CYCLE
-	  kl =  global_to_local_map(j,el)
-	  IF (kl.lt.0) CYCLE
-	  IF (i.eq.j) THEN ! Always store the diagonal entry, even if it is zero.
-	    non_zero_count=non_zero_count+1
-	    Ay_local_to_sparse(ij,kl,el)=non_zero_count
-	    values(non_zero_count) = A_y(ij,kl,el)
-	    columns(non_zero_count)= j - npedg + global_bd_dim + npint	    
-	    
-	    CYCLE A_y_interior_loop2 ! Exit as we will only find 1 contribution to this node - it is interior
-	  ELSEIF (abs(A_y(ij,kl,el)).gt.1d-15) THEN
-	    non_zero_count=non_zero_count+1
-	    Ay_local_to_sparse(ij,kl,el)=non_zero_count
-	    values(non_zero_count) = A_y(ij,kl,el)
-	    columns(non_zero_count)=j - npedg + global_bd_dim + npint	    
-	    
-	    CYCLE A_y_interior_loop2 ! Exit as we will only find 1 contribution to this node - it is interior
-	  ENDIF
-	ENDDO
+        DO el=1,numelm
+          ij = global_to_local_map(i,el)
+          IF (ij.lt.0) CYCLE
+          kl =  global_to_local_map(j,el)
+          IF (kl.lt.0) CYCLE
+          IF (i.eq.j) THEN ! Always store the diagonal entry, even if it is zero.
+            non_zero_count=non_zero_count+1
+            Ay_local_to_sparse(ij,kl,el)=non_zero_count
+            values(non_zero_count) = A_y(ij,kl,el)
+            columns(non_zero_count)= j - npedg + global_bd_dim + npint      
+            
+            CYCLE A_y_interior_loop2 ! Exit as we will only find 1 contribution to this node - it is interior
+          ELSEIF (abs(A_y(ij,kl,el)).gt.1d-15) THEN
+            non_zero_count=non_zero_count+1
+            Ay_local_to_sparse(ij,kl,el)=non_zero_count
+            values(non_zero_count) = A_y(ij,kl,el)
+            columns(non_zero_count)=j - npedg + global_bd_dim + npint      
+            
+            CYCLE A_y_interior_loop2 ! Exit as we will only find 1 contribution to this node - it is interior
+          ENDIF
+        ENDDO
       ENDDO A_y_interior_loop2
+
       B_y_interior_loop2: DO j=1,npint
-	DO el=1,numelm
-	  ij = global_to_local_map(npedg+j,el)
-	  IF (ij.lt.0) CYCLE
-	  intij = local_to_interior_node(ij)
-	  kl =  global_to_local_map(i,el)
-	  IF (kl.lt.0) CYCLE
-	  IF (abs(B_y(intij,kl,el)).gt.1d-15) THEN
-	    non_zero_count=non_zero_count+1
-	    By_local_to_sparse(intij,kl,el)=non_zero_count
-	    values(non_zero_count) = B_y(intij,kl,el)
-	    columns(non_zero_count)=j+global_bd_dim+2*npint	    
-	    
-	    CYCLE B_y_interior_loop2 ! Exit as we will only find 1 contribution to this node - it is partly interior
-	  ENDIF
-	ENDDO
+        DO el=1,numelm
+          ij = global_to_local_map(npedg+j,el)
+          IF (ij.lt.0) CYCLE
+          intij = local_to_interior_node(ij)
+          kl =  global_to_local_map(i,el)
+          IF (kl.lt.0) CYCLE
+          IF (abs(B_y(intij,kl,el)).gt.1d-15) THEN
+            non_zero_count=non_zero_count+1
+            By_local_to_sparse(intij,kl,el)=non_zero_count
+            values(non_zero_count) = B_y(intij,kl,el)
+            columns(non_zero_count)=j+global_bd_dim+2*npint      
+            
+            CYCLE B_y_interior_loop2 ! Exit as we will only find 1 contribution to this node - it is partly interior
+          ENDIF
+        ENDDO
       ENDDO B_y_interior_loop2
     ENDDO ! Now done all interior nodes of the y-part of the global matrix.
 
@@ -895,46 +872,46 @@ MODULE pardiso_solver
 ! Alternative formulation:
     IF (param_alphaZ.gt.0d0) THEN
       DO i=1,npint
-	rowindex(i+global_bd_dim+2*npint)=non_zero_count+1
+        rowindex(i+global_bd_dim+2*npint)=non_zero_count+1
 ! find correct element/local point for global i. There must be one and only 1 (internal points)
-	DO el1=1,numelm
-	  ij = global_to_local_map(npedg+i,el1)
-	  IF (ij.ge.0) THEN
-	    intij = local_to_interior_node(ij)
-	    EXIT
-	  ENDIF
-	ENDDO
-	DO j=i,npint  
+        DO el1=1,numelm
+          ij = global_to_local_map(npedg+i,el1)
+          IF (ij.ge.0) THEN
+            intij = local_to_interior_node(ij)
+            EXIT
+          ENDIF
+        ENDDO
+        DO j=i,npint  
 ! find correct element/local point for global j. There must be one and only 1 (internal points)
-	  DO el2=1,numelm
-	    kl =  global_to_local_map(npedg+j,el2)
-	    IF (kl.ge.0) THEN
-	      intkl=local_to_interior_node(kl)
-	      EXIT
-	    ENDIF
-	  ENDDO
-	  temp=param_alphaZ*Z_p(intij,el1)*Z_p(intkl,el2)
-	  IF (i.eq.j) THEN
-	    non_zero_count=non_zero_count+1
-	    Cp_local_to_sparse(intij,intkl,el1,el2)=non_zero_count
-	    values(non_zero_count) = temp!param_alphaZ*Z_p(intij,el1)*Z_p(intkl,el2) !C_p(intij,intkl,el)
-	    columns(non_zero_count)=j+global_bd_dim+2*npint
-	  ELSEIF (abs(temp).gt.1d-15) THEN
-	    non_zero_count=non_zero_count+1
-	    Cp_local_to_sparse(intij,intkl,el1,el2)=non_zero_count
-	    values(non_zero_count) = temp!param_alphaZ*Z_p(intij,el1)*Z_p(intkl,el2)
-	    columns(non_zero_count)=j+global_bd_dim+2*npint	    
-	  ENDIF
-	ENDDO
+          DO el2=1,numelm
+            kl =  global_to_local_map(npedg+j,el2)
+            IF (kl.ge.0) THEN
+              intkl=local_to_interior_node(kl)
+              EXIT
+            ENDIF
+          ENDDO
+          temp=param_alphaZ*Z_p(intij,el1)*Z_p(intkl,el2)
+          IF (i.eq.j) THEN
+            non_zero_count=non_zero_count+1
+            Cp_local_to_sparse(intij,intkl,el1,el2)=non_zero_count
+            values(non_zero_count) = temp!param_alphaZ*Z_p(intij,el1)*Z_p(intkl,el2) !C_p(intij,intkl,el)
+            columns(non_zero_count)=j+global_bd_dim+2*npint
+          ELSEIF (abs(temp).gt.1d-15) THEN
+            non_zero_count=non_zero_count+1
+            Cp_local_to_sparse(intij,intkl,el1,el2)=non_zero_count
+            values(non_zero_count) = temp!param_alphaZ*Z_p(intij,el1)*Z_p(intkl,el2)
+            columns(non_zero_count)=j+global_bd_dim+2*npint      
+          ENDIF
+        ENDDO
       ENDDO
     ELSE
 ! Normal formulation:    
 ! These are all zero, so we need only store the diagonal entries
       DO i=1,npint
-	non_zero_count=non_zero_count+1
-	rowindex(i+global_bd_dim+2*npint)=non_zero_count
-	values(non_zero_count) = 0d0!1d-16
-	columns(non_zero_count)=i+global_bd_dim+2*npint
+        non_zero_count=non_zero_count+1
+        rowindex(i+global_bd_dim+2*npint)=non_zero_count
+        values(non_zero_count) = 0d0!1d-16
+        columns(non_zero_count)=i+global_bd_dim+2*npint
       ENDDO
     ENDIF
     
@@ -942,7 +919,7 @@ MODULE pardiso_solver
     
     IF (global_non_zeros.ne.non_zero_count) THEN
       write(*,*) 'Error in sparse matrix construction. Inconsistent non-zero count! global_non_zeros = ', &
-		  global_non_zeros,'internal_count = ',non_zero_count
+      global_non_zeros,'internal_count = ',non_zero_count
       STOP
     ENDIF
 !     print *, huge(global_non_zeros)
@@ -953,7 +930,5 @@ MODULE pardiso_solver
 !     DO kl=0,NP1SQM1
 !       IF Bx_local_to_sparse(intij,kl,el).gt.
   END SUBROUTINE initialise_local_to_global_sparse
-  
-
 
 END MODULE pardiso_solver

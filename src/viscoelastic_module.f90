@@ -330,7 +330,6 @@ MODULE viscoelastic_module
 !     temp_contrib_zzNm2=0d0
 
 
-
 ! Will iterate with tempTpq as the solution at time N+1, and localTpq as Tpq at time N, and localTpqNm1 as Txx at time N-1
 ! We then update Txx with the converged value.
     tempTxx = localTxx
@@ -345,7 +344,6 @@ MODULE viscoelastic_module
 
     IF (coordflag.eq.0) THEN
 ! CARTESIAN CASE !
-
       IF (param_iterative_convection) THEN
 ! ITERATIVE VERSION
         sum_counter=0

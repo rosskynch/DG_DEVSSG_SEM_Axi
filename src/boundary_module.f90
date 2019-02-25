@@ -38,26 +38,24 @@ MODULE boundary_module
     CALL calcBoundaryRHS
     CALL calcBoundaryRHS2
     CALL applyBC_to_RHS
-    
+
   END SUBROUTINE updateBoundary
-  
+
   SUBROUTINE applyBCs_to_solution
 ! Simply subs-in the boundary values on dirichlet nodes onto the global solution
     IMPLICIT NONE
     INTEGER :: i
     
     DO i=1,npedg
-
       IF (bdflag(1,i)) THEN
-	V_x(i) = boundary_x(i)
+        V_x(i) = boundary_x(i)
       ENDIF
       IF (bdflag(2,i)) THEN
-	V_y(i) = boundary_y(i)
+        V_y(i) = boundary_y(i)
       ENDIF
     ENDDO
-
   END SUBROUTINE applyBCs_to_solution
-  
+
 
   SUBROUTINE calcBoundaryConditions
 ! Calculates the vector of known boundary terms for a moving mesh.
@@ -67,23 +65,23 @@ MODULE boundary_module
     boundary_y=0d0
     DO i=1,npedg
       IF (wallflag(i)) THEN
-	boundary_x(i) = 0d0
-	boundary_y(i) = 0d0
+        boundary_x(i) = 0d0
+        boundary_y(i) = 0d0
       ELSEIF (circnodeflag(i)) THEN
-	boundary_x(i) = V_sphere
-	boundary_y(i) = 0d0
+        boundary_x(i) = V_sphere
+        boundary_y(i) = 0d0
       ELSEIF (inflowflag(i)) THEN
-	boundary_x(i) = 0d0
-	boundary_y(i) = 0d0
+        boundary_x(i) = 0d0
+        boundary_y(i) = 0d0
       ELSEIF (outflowflag(i)) THEN
-	boundary_x(i) = 0d0
-	boundary_y(i) = 0d0
+        boundary_x(i) = 0d0
+        boundary_y(i) = 0d0
       ELSEIF (wallsymmflag(i)) THEN
-	boundary_x(i) = 0d0
-	boundary_y(i) = 0d0
+        boundary_x(i) = 0d0
+        boundary_y(i) = 0d0
       ELSE !In case we use a non-boundary node for anything elsewhere in the code, this will make it easier to track.
-	boundary_x(i) = -1d99
-	boundary_y(i) = -1d99
+        boundary_x(i) = -1d99
+        boundary_y(i) = -1d99
       ENDIF
     ENDDO
 
@@ -101,16 +99,15 @@ MODULE boundary_module
     ELSE
       wallterm_x = 0d0
     ENDIF
-
   END FUNCTION wallterm_x
   
   DOUBLE PRECISION FUNCTION wallterm_y(x,y)
 ! y component of the wall boundary condition
     IMPLICIT NONE
     DOUBLE PRECISION, INTENT(IN) :: x,y
-		
+    
     wallterm_y = 0d0
-		
+    
   END FUNCTION wallterm_y
   
   DOUBLE PRECISION FUNCTION circterm_x(x,y)
@@ -126,16 +123,16 @@ MODULE boundary_module
 ! y component of the circular boundary condition
     IMPLICIT NONE
     DOUBLE PRECISION, INTENT(IN) :: x,y
-		
+    
     circterm_y = 0d0
-		
+    
   END FUNCTION circterm_y
   
   DOUBLE PRECISION FUNCTION inflowterm_x(x,y)
 ! x component of the inflow condition
     IMPLICIT NONE
     DOUBLE PRECISION, INTENT(IN) :: x,y
-! Poiseuille flow:		
+! Poiseuille flow:    
 !    inflowterm_x = -4d0*y*(y-1d0)!1d0-y**2
 !     inflowterm_x = 1d0-y**2
 ! Coette flow:
@@ -164,7 +161,7 @@ MODULE boundary_module
 ! x component of the outflow condition
     IMPLICIT NONE
     DOUBLE PRECISION, INTENT(IN) :: x,y
-!Poiseuille flow:		
+!Poiseuille flow:    
 !     outflowterm_x = -4d0*y*(y-1d0)!1d0-y**2
 !     outflowterm_x = 1d0-y**2
 ! Coette flow:
@@ -196,18 +193,18 @@ MODULE boundary_module
 ! x component of the symmetric wall condition
     IMPLICIT NONE
     DOUBLE PRECISION, INTENT(IN) :: x,y
-		
+    
     wallsymmterm_x = 0d0!-1d6
-		
+    
   END FUNCTION wallsymmterm_x
   
   DOUBLE PRECISION FUNCTION wallsymmterm_y(x,y)
 ! y component of the symmetric wall condition
     IMPLICIT NONE
     DOUBLE PRECISION, INTENT(IN) :: x,y
-		
+    
     wallsymmterm_y = 0d0
-		
+    
   END FUNCTION wallsymmterm_y
   
   SUBROUTINE calcBoundaryConditionsFIXED
@@ -221,23 +218,23 @@ MODULE boundary_module
 ! GENERAL WAY:   
     DO i=1,npedg
       IF (wallflag(i)) THEN
-	boundary_x(i) = FIXEDwallterm_x(i)
-	boundary_y(i) = FIXEDwallterm_y(i)
+        boundary_x(i) = FIXEDwallterm_x(i)
+        boundary_y(i) = FIXEDwallterm_y(i)
       ELSEIF (circnodeflag(i)) THEN
-	boundary_x(i) = FIXEDcircterm_x(i)
-	boundary_y(i) = FIXEDcircterm_y(i)
+        boundary_x(i) = FIXEDcircterm_x(i)
+        boundary_y(i) = FIXEDcircterm_y(i)
       ELSEIF (inflowflag(i)) THEN
-	boundary_x(i) = FIXEDinflowterm_x(i)
-	boundary_y(i) = FIXEDinflowterm_y(i)
+        boundary_x(i) = FIXEDinflowterm_x(i)
+        boundary_y(i) = FIXEDinflowterm_y(i)
       ELSEIF (outflowflag(i)) THEN
-	boundary_x(i) = FIXEDoutflowterm_x(i)
-	boundary_y(i) = FIXEDoutflowterm_y(i)
+        boundary_x(i) = FIXEDoutflowterm_x(i)
+        boundary_y(i) = FIXEDoutflowterm_y(i)
       ELSEIF (wallsymmflag(i)) THEN
-	boundary_x(i) = FIXEDwallsymmterm_x(i)
-	boundary_y(i) = FIXEDwallsymmterm_y(i)
+        boundary_x(i) = FIXEDwallsymmterm_x(i)
+        boundary_y(i) = FIXEDwallsymmterm_y(i)
       ELSE !In case we use a non-boundary node for anything elsewhere in the code, this will make it easier to track.
-	boundary_x(i) = -1d99
-	boundary_y(i) = -1d99
+        boundary_x(i) = -1d99
+        boundary_y(i) = -1d99
       ENDIF
     ENDDO
   END SUBROUTINE calcBoundaryConditionsFIXED
@@ -316,7 +313,7 @@ MODULE boundary_module
       a = 0d0 ! Includes 1 2 5 6 7 8.
 ! ADD MORE AS APPROPRIATE.
     ENDIF
-		
+    
   END FUNCTION FIXEDcircterm_y
   
   DOUBLE PRECISION FUNCTION FIXEDinflowterm_x(i) RESULT(a)
@@ -422,7 +419,7 @@ END FUNCTION FIXEDoutflowterm_y
       a = 0d0 ! Includes 1 2 5 6 7 8.
 ! ADD MORE AS APPROPRIATE.
     ENDIF
-		
+    
   END FUNCTION FIXEDwallsymmterm_x
   
   DOUBLE PRECISION FUNCTION FIXEDwallsymmterm_y(i) RESULT(a)
@@ -441,7 +438,7 @@ END FUNCTION FIXEDoutflowterm_y
       a = 0d0 ! Includes 1 2 5 6 7 8.
 ! ADD MORE AS APPROPRIATE.
     ENDIF
-		
+    
   END FUNCTION FIXEDwallsymmterm_y
   
   
@@ -464,14 +461,14 @@ END FUNCTION FIXEDoutflowterm_y
       tempglob=0d0
       bdloc=0d0
       DO kl=0,NP1SQM1
-! 	IF (bdflag(1,mapg(kl,el))) CYCLE ! Not needed as we zero the boundary node rows/columns anyway !
-	temp = 0d0
-	DO ij=0,NP1SQM1
-	  IF (bdflag(1,mapg(ij,el))) THEN
-	    temp = temp + boundary_x(mapg(ij,el))*A_x(kl,ij,el)
-	  ENDIF
-	ENDDO
-	bdloc(kl) = temp
+!   IF (bdflag(1,mapg(kl,el))) CYCLE ! Not needed as we zero the boundary node rows/columns anyway !
+      temp = 0d0
+        DO ij=0,NP1SQM1
+          IF (bdflag(1,mapg(ij,el))) THEN
+            temp = temp + boundary_x(mapg(ij,el))*A_x(kl,ij,el)
+          ENDIF
+        ENDDO
+        bdloc(kl) = temp
       ENDDO
       CALL vecglobalprolongation(bdloc,el,tempglob)
       boundaryContribution_x = boundaryContribution_x + tempglob
@@ -482,14 +479,14 @@ END FUNCTION FIXEDoutflowterm_y
       tempglob=0d0
       bdloc=0d0
       DO kl=0,NP1SQM1
-! 	IF (bdflag(2,mapg(kl,el))) CYCLE ! Not needed as we zero the boundary node rows/columns anyway !
-	temp = 0d0
-	DO ij=0,NP1SQM1
-	  IF (bdflag(2,mapg(ij,el))) THEN
-	    temp = temp + boundary_y(mapg(ij,el))*A_y(kl,ij,el)
-	  ENDIF
-	ENDDO
-	bdloc(kl) = temp
+!   IF (bdflag(2,mapg(kl,el))) CYCLE ! Not needed as we zero the boundary node rows/columns anyway !
+        temp = 0d0
+        DO ij=0,NP1SQM1
+          IF (bdflag(2,mapg(ij,el))) THEN
+            temp = temp + boundary_y(mapg(ij,el))*A_y(kl,ij,el)
+          ENDIF
+        ENDDO
+        bdloc(kl) = temp
       ENDDO
       CALL vecglobalprolongation(bdloc,el,tempglob)
       boundaryContribution_y = boundaryContribution_y + tempglob
@@ -514,17 +511,17 @@ END FUNCTION FIXEDoutflowterm_y
       tempglob=0d0
       bdloc=0d0
       DO kl=1,NM1SQ
-	temp1=0d0
-	temp2=0d0
-	DO ij=0,NP1SQM1
-	  IF (bdflag(1,mapg(ij,el))) THEN
-	    temp1 = temp1 + boundary_x(mapg(ij,el))*B_x(kl,ij,el)
-	  ENDIF
-	  IF (bdflag(2,mapg(ij,el))) THEN
-	    temp2 = temp2 + boundary_y(mapg(ij,el))*B_y(kl,ij,el)
-	  ENDIF
-	ENDDO
-	bdloc(kl)=temp1+temp2
+        temp1=0d0
+        temp2=0d0
+        DO ij=0,NP1SQM1
+          IF (bdflag(1,mapg(ij,el))) THEN
+            temp1 = temp1 + boundary_x(mapg(ij,el))*B_x(kl,ij,el)
+          ENDIF
+          IF (bdflag(2,mapg(ij,el))) THEN
+            temp2 = temp2 + boundary_y(mapg(ij,el))*B_y(kl,ij,el)
+          ENDIF
+        ENDDO
+        bdloc(kl)=temp1+temp2
       ENDDO
       CALL vecglobalprolongation_internal_nodes(bdloc,el,tempglob)
       boundaryContribution_p = boundaryContribution_p + tempglob
@@ -550,28 +547,28 @@ END FUNCTION FIXEDoutflowterm_y
 ! 
     DO el=1,numelm
       DO ij=0,NP1SQM1
-	IF(bdflag(1,mapg(ij,el))) THEN
-	  f_x(mapg(ij,el))=0d0
-	  DO kl=0,NP1SQM1	  	  
-	    A_x(ij,kl,el) = 0d0
-	    A_x(kl,ij,el) = 0d0
-	  ENDDO
-	  A_x(ij,ij,el) = 1d0
-	  DO kl=1,NM1SQ
-	    B_x(kl,ij,el) = 0d0
-	  ENDDO
-	ENDIF
-	IF(bdflag(2,mapg(ij,el))) THEN
-	  f_y(mapg(ij,el))=0d0
-	  DO kl=0,NP1SQM1  
-	    A_y(ij,kl,el) = 0d0
-	    A_y(kl,ij,el) = 0d0
-	  ENDDO
-	  A_y(ij,ij,el) = 1d0
-	  DO kl=1,NM1SQ
-	    B_y(kl,ij,el) = 0d0
-	  ENDDO
-	ENDIF
+        IF(bdflag(1,mapg(ij,el))) THEN
+          f_x(mapg(ij,el))=0d0
+          DO kl=0,NP1SQM1        
+            A_x(ij,kl,el) = 0d0
+            A_x(kl,ij,el) = 0d0
+          ENDDO
+          A_x(ij,ij,el) = 1d0
+          DO kl=1,NM1SQ
+            B_x(kl,ij,el) = 0d0
+          ENDDO
+        ENDIF
+        IF(bdflag(2,mapg(ij,el))) THEN
+          f_y(mapg(ij,el))=0d0
+          DO kl=0,NP1SQM1  
+            A_y(ij,kl,el) = 0d0
+            A_y(kl,ij,el) = 0d0
+          ENDDO
+          A_y(ij,ij,el) = 1d0
+          DO kl=1,NM1SQ
+            B_y(kl,ij,el) = 0d0
+          ENDDO
+        ENDIF
       ENDDO
     ENDDO
     
@@ -704,7 +701,7 @@ END FUNCTION FIXEDoutflowterm_y
 !Poiseuille flow
 !     IF (x.eq.-4d0.OR.x.eq.4d0) THEN
 !       uterm_x=-4d0*y*(y-1d0)
-! ! 	uterm_x=1d0-y**2
+! !   uterm_x=1d0-y**2
 !     ELSE
 !       uterm_x=0d0
 !     ENDIF
@@ -762,42 +759,42 @@ END FUNCTION FIXEDoutflowterm_y
   SUBROUTINE generate_boundary_stress
     IMPLICIT NONE
     INTEGER :: i
-	  
+    
     IF (param_function_choice.eq.1) THEN ! Steady Poiseuille flow (2-D)
       DO i=1,npedg
-	boundary_stress_xx(i) = 2d0*We*(1d0-param_beta)*((-3d0/4d0*nodeCoord(i,2))**2)
-	boundary_stress_xy(i) = (1d0-param_beta)*(-3d0/4d0*nodeCoord(i,2))
-	boundary_stress_yy(i) = 0d0
+        boundary_stress_xx(i) = 2d0*We*(1d0-param_beta)*((-3d0/4d0*nodeCoord(i,2))**2)
+        boundary_stress_xy(i) = (1d0-param_beta)*(-3d0/4d0*nodeCoord(i,2))
+        boundary_stress_yy(i) = 0d0
       ENDDO
     ELSEIF (param_function_choice.eq.2) THEN ! Steady Uniform flow (3-D)
       DO i=1,npedg
-	boundary_stress_xx(i) = 0d0
-	boundary_stress_xy(i) = 0d0
-	boundary_stress_yy(i) = 0d0
-	boundary_stress_zz(i) = 0d0
+        boundary_stress_xx(i) = 0d0
+        boundary_stress_xy(i) = 0d0
+        boundary_stress_yy(i) = 0d0
+        boundary_stress_zz(i) = 0d0
       ENDDO  
     ELSEIF (param_function_choice.eq.7) THEN ! 2-D Waters solution
       DO i=1,npedg
-	boundary_stress_xx(i)=transient_txx(i)
-	boundary_stress_xy(i)=transient_txy(i)
-	boundary_stress_yy(i)=0d0
+        boundary_stress_xx(i)=transient_txx(i)
+        boundary_stress_xy(i)=transient_txy(i)
+        boundary_stress_yy(i)=0d0
       ENDDO
     ELSEIF (param_function_choice.eq.8) THEN ! 3-D Waters solution.. extrapolated from known velocity and gradV
       DO i=1,npedg
-	boundary_stress_xx(i)=transient_txx(i)
-	boundary_stress_xy(i)=transient_txy(i)
-	boundary_stress_yy(i)=0d0
-	boundary_stress_zz(i)=0d0
+        boundary_stress_xx(i)=transient_txx(i)
+        boundary_stress_xy(i)=transient_txy(i)
+        boundary_stress_yy(i)=0d0
+        boundary_stress_zz(i)=0d0
       ENDDO
     ELSEIF (param_function_choice.eq.9) THEN ! Moving mesh - zero inflow velocity.
       DO i=1,npedg
-	boundary_stress_xx(i) = 0d0
-	boundary_stress_xy(i) = 0d0
-	boundary_stress_yy(i) = 0d0
-	boundary_stress_zz(i) = 0d0
+        boundary_stress_xx(i) = 0d0
+        boundary_stress_xy(i) = 0d0
+        boundary_stress_yy(i) = 0d0
+        boundary_stress_zz(i) = 0d0
       ENDDO  
-    ENDIF	
-	
+    ENDIF  
+  
   END SUBROUTINE generate_boundary_stress
   
 END MODULE boundary_module

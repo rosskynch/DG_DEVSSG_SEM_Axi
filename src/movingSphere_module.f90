@@ -36,7 +36,7 @@ MODULE movingSphere_module
 
     DO i=1,numnp
       IF (.not.fixed_node(i)) THEN  
-	vertx(i,1)=vertx(i,1) + temp 
+        vertx(i,1)=vertx(i,1) + temp 
       ENDIF
     ENDDO
 
@@ -87,8 +87,8 @@ MODULE movingSphere_module
 !       temp2=temp1
 !       temp3=temp1
 !     else
-      temp2 = 0.75d0*densratio*dragNm1/(PI*Re)
-      temp3 = 0.75d0*densratio*dragNm2/(PI*Re)
+    temp2 = 0.75d0*densratio*dragNm1/(PI*Re)
+    temp3 = 0.75d0*densratio*dragNm2/(PI*Re)
 !     endif
 
 !First order:
