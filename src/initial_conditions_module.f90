@@ -325,7 +325,7 @@ MODULE initial_conditions_module
       param_problem_choice.eq.12 &
       .or.param_problem_choice.eq.22 &
       .or.param_problem_choice.eq.32 &
-      .or.param_problem_choice.eq.39 &) THEN ! Uniform flow past fixed sphere.
+      .or.param_problem_choice.eq.39 ) THEN ! Uniform flow past fixed sphere.
       IF (coordflag.eq.0) THEN
         write(*,*) 'ERROR: coordflag inconsistent with problem style'
         STOP
