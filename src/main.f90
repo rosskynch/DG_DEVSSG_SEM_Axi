@@ -213,7 +213,7 @@ PROGRAM main
       IF (param_ve_model_choice.eq.1) THEN ! OldB / Giesekus
         CALL applyElasticStress
       ELSEIF (param_ve_model_choice.eq.2) THEN ! FENE-P-MP
-        CALLapplyElasticStress_FENE_PMP
+        CALL applyElasticStress_FENE_PMP
       ELSE
         print*, 'Error: Unknown viscoelastic model selected: ', param_ve_model_choice, ' ', param_problem_choice
         print*, 'Stopping'
