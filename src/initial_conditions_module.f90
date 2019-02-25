@@ -423,6 +423,7 @@ MODULE initial_conditions_module
         write(*,*) 'ERROR: param_beta inconsistent with problem style'
         STOP
       ENDIF
+      param_ve_model_choice = 0;
     ELSEIF (param_problem_choice.lt.30) THEN ! Newtonian
       IF (Re.lt.1d-6) THEN
         write(*,*) 'ERROR: Re inconsistent with problem style'
@@ -436,6 +437,7 @@ MODULE initial_conditions_module
         write(*,*) 'ERROR: param_beta inconsistent with problem style'
         STOP
       ENDIF
+      param_ve_model_choice = 0;
     ELSEIF (param_problem_choice.lt.40) THEN ! Viscoelastic
       IF (We.lt.1d-6) THEN
         write(*,*) 'ERROR: We inconsistent with problem style'
@@ -446,14 +448,17 @@ MODULE initial_conditions_module
         STOP
       ENDIF
       IF (param_problem_choice.eq.39) THEN
-        IF (fene_b.lt.1d-6) THEN
-          write(*,*) 'ERROR: fene_b inconsistent with problem style'
+        IF (param_fene_b.lt.1d-6) THEN
+          write(*,*) 'ERROR: param_fene_b inconsistent with problem style'
           STOP
         ENDIF
-        IF (fene_lambdaD.lt.1d-6) THEN
-          write(*,*) 'ERROR: fene_lambdaD inconsistent with problem style'
+        IF (param_fene_lambdaD.lt.1d-6) THEN
+          write(*,*) 'ERROR: param_fene_lambdaD inconsistent with problem style'
           STOP
         ENDIF
+        param_ve_model_choice = 2;
+      ELSE
+        param_ve_model_choice = 1;
       ENDIF
     ELSEIF (param_problem_choice.lt.50) THEN ! Moving Newtonian
       IF (Re.lt.1d-6) THEN
@@ -468,6 +473,7 @@ MODULE initial_conditions_module
         write(*,*) 'ERROR: param_beta inconsistent with problem style'
         STOP
       ENDIF
+      param_ve_model_choice = 0;
     ELSEIF (param_problem_choice.lt.60) THEN ! Moving Viscoelastic
       IF (Re.lt.1d-6) THEN
         write(*,*) 'ERROR: Re inconsistent with problem style'
@@ -481,6 +487,17 @@ MODULE initial_conditions_module
         write(*,*) 'ERROR: param_beta inconsistent with problem style'
         STOP
       ENDIF
+! FENE-P-MP not allowed for moving mesh for now.
+      IF (param_fene_b.ne.0d0) THEN
+        write(*,*) 'ERROR: param_fene_b inconsistent with problem style'
+        STOP
+      ENDIF
+      IF (param_fene_lambdaD.ne.0d0) THEN
+        write(*,*) 'ERROR: param_fene_lambdaD inconsistent with problem style'
+        STOP
+      ENDIF
+
+      param_ve_model_choice = 1;
     ENDIF
   END SUBROUTINE setup_problem_style
   

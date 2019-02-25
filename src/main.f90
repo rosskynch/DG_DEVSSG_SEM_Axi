@@ -210,7 +210,15 @@ PROGRAM main
       ENDIF
 
 ! Calculate Tau and add integration of Div(Tau) to RHS:
-      CALL applyElasticStress
+      IF (param_ve_model_choice.eq.1) THEN ! OldB / Giesekus
+        CALL applyElasticStress
+      ELSEIF (param_ve_model_choice.eq.2) THEN ! FENE-P-MP
+        CALLapplyElasticStress_FENE_PMP
+      ELSE
+        print*, 'Error: Unknown viscoelastic model selected: ', param_ve_model_choice, ' ', param_problem_choice
+        print*, 'Stopping'
+        STOP
+      ENDIF
       CALL cpu_time(cputime_section2)
       cputime_viscoelastic = cputime_section2-cputime_section1
     ENDIF

@@ -119,6 +119,7 @@ MODULE shared_data
     num_wallsymm_nodes,&
     param_problem_choice=0,&
     param_function_choice=0,&
+    param_ve_model_choice=0,&
     param_time_order=2,&
     transient_velocity_testnode,&
     transient_stress_testnode,&
@@ -133,8 +134,8 @@ MODULE shared_data
     node,&
     mapg,&
     mapg_pressure!,&
-!                                           locel,&
-!                                           locnp
+!     locel,&
+!     locnp
 
   INTEGER, ALLOCATABLE :: upwind_local_edge_node(:,:,:),&
     local_edge_node(:,:),&
@@ -165,7 +166,7 @@ MODULE shared_data
   
   LOGICAL, ALLOCATABLE, DIMENSION(:,:) :: bdflag,&
     neuflag
-            
+
   LOGICAL, ALLOCATABLE :: is_wallsymm_edge(:,:),&
     is_circ_edge(:,:),&
     is_wall_edge(:,:),&

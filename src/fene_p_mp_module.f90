@@ -88,8 +88,8 @@ MODULE fene_p_mp_module
 ! LAPACK bits:
     info,ipiv(4)
 
-    DOUBLE PRECISION :: Cxx_approx, Cxy_approx, Cyy_approx, Czz_approx,&
-      TauWeConstant, PsiValue, WePsiValue, Dxy, f_of_trC, bValue, lambdaD,&
+    DOUBLE PRECISION :: Cxx_approx, Cxy_approx, Cyy_approx, Czz_approx, &
+      TauWeConstant, PsiValue, WePsiValue, Dxy, f_of_trC, &
 ! LAPACK bits:
       temp_matrix(4,4),temp_rhs(4)
 
@@ -166,7 +166,7 @@ MODULE fene_p_mp_module
       print*, 'Error: The FENE-P-MP model is not yet implemented for Cartesian co-ordinates...'
       print*, 'Stopping'
       STOP
-    ELSEIF (coordflag.eq.1) THEN 
+    ELSEIF (coordflag.eq.1) THEN
 ! CYLINDERICAL POLAR (AXISYMMETRIC) CASE !
 !
 ! NOTE:
@@ -223,12 +223,8 @@ MODULE fene_p_mp_module
             Czz_approx = time_beta_0*localCzz(ij,el) + time_beta_1*localCzzNm1(ij,el)
             Cxy_approx = time_beta_0*localCxy(ij,el) + time_beta_1*localCxyNm1(ij,el)
 
-! TODO: Ask Tim where these values should be defined?
-            bValue = 1d0; 
-            lambdaD = 1d0;
-
-            f_of_trC = calculateF_FENE_PMP(bValue, Cxx_approx, Cyy_approx, Czz_approx)
-            psiValue = calculatePsi_FENE_PMP(lambdaD, localGradUxx(ij,el), localGradUxy(ij,el), &
+            f_of_trC = calculateF_FENE_PMP(param_fene_b, Cxx_approx, Cyy_approx, Czz_approx)
+            psiValue = calculatePsi_FENE_PMP(param_fene_lambdaD, localGradUxx(ij,el), localGradUxy(ij,el), &
               localGradUyx(ij,el), localGradUyy(ij,el), localGradUzz(ij,el))
 
             WePsiValue = We*psiValue
@@ -255,7 +251,7 @@ MODULE fene_p_mp_module
 
             temp_matrix(1,2) = -2d0*We*localGradUyx(ij,el) &
               + 2d0*WePsiValue*Dxy
-              
+
             temp_matrix(2,1) = -We*localGradUxy(ij,el) &
              + WePsiValue*Dxy
 
@@ -272,14 +268,12 @@ MODULE fene_p_mp_module
 
             temp_rhs(2) = Wetime_constant2*( time_alpha_0*localCxy(ij,el) + time_alpha_1*localCxyNm1(ij,el) ) &
               - We*convective_contrib_xy(ij,el)
-              
 
             temp_rhs(3) = 1d0 + Wetime_constant2*( time_alpha_0*localCyy(ij,el) + time_alpha_1*localCyyNm1(ij,el) ) &
               - We*convective_contrib_yy(ij,el)
 
             temp_rhs(4) = 1d0 + Wetime_constant2*( time_alpha_0*localCzz(ij,el) + time_alpha_1*localCzzNm1(ij,el) ) &
               - We*convective_contrib_zz(ij,el)
-
 
 ! Using LAPACK to solve the 4x4 matrix:
             call dgetrf( 4, 4, temp_matrix, 4, ipiv, info )
@@ -302,17 +296,17 @@ MODULE fene_p_mp_module
           ENDDO
         ENDDO
       ENDIF
-      
+
 ! Calculate the new value of tau from the conformation tensor that's just been computed (currently stored as temp).
       TauWeConstant = (1d0 - param_beta)/We
       DO el=1,numelm
         DO ij=0,NP1SQM1
-          f_of_trC = calculateF_FENE_PMP(bValue, tempCxx(ij,el), tempCzz(ij,el), tempCzz(ij,el))
+          f_of_trC = calculateF_FENE_PMP(param_fene_b, tempCxx(ij,el), tempCzz(ij,el), tempCzz(ij,el))
           tempTxx(ij,el) = TauWeConstant*(f_of_trC*tempCxx(ij,el) - 1d0)
           tempTxy(ij,el) = TauWeConstant*f_of_trC*tempCxy(ij,el)
           tempTyy(ij,el) = TauWeConstant*(f_of_trC*tempCyy(ij,el) - 1d0)
           tempTzz(ij,el) = TauWeConstant*(f_of_trC*tempCzz(ij,el) - 1d0)
-        ENDDO        
+        ENDDO
       ENDDO
 
 ! Update stored valeus of Cpq and Tpq 
@@ -331,7 +325,7 @@ MODULE fene_p_mp_module
       localCxy=tempCxy
       localCyy=tempCyy
       localCzz=tempCzz
-      
+
       localTxxNm2=localTxxNm1
       localTxyNm2=localTxyNm1
       localTyyNm2=localTyyNm1

@@ -18,8 +18,6 @@ MODULE viscoelastic_module
   USE shared_data
   USE functions_module
   USE IO_module
-  USE fene_p_mp_module
-!   USE result_analysis
   
   IMPLICIT NONE
   CONTAINS
@@ -33,15 +31,7 @@ MODULE viscoelastic_module
     stress_cont_to_stokes_xNm1=stress_cont_to_stokes_x
     stress_cont_to_stokes_yNm1=stress_cont_to_stokes_y
     
-    IF param_ve_model_choice.eq.1 THEN
-        CALL calcStress_weakform
-    ELSEIF param_ve_model_choice.eq.2 THEN
-        CALL calcStress_weakform_FENE_PMP
-    ELSE
-      print*, 'Error: Unknown viscoelastic model selected: ', param_ve_model_choice, ' ', param_problem_choice
-      print*, 'Stopping'
-      STOP
-    ENDIF
+    CALL calcStress_weakform
 
     CALL integrate_divergence_of_local_stress
 
