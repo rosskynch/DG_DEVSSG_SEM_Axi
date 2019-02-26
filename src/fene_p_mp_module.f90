@@ -278,13 +278,13 @@ MODULE fene_p_mp_module
 ! Using LAPACK to solve the 4x4 matrix:
             call dgetrf( 4, 4, temp_matrix, 4, ipiv, info )
             IF (info.ne.0) THEN
-              write(*,*) 'Error in calcStress_weakform:',el,info
+              write(*,*) 'Error in calcStress_weakform_FENE_PMP:',el,info
               STOP
             ENDIF
 
             call dgetrs( 'N', 4, 1, temp_matrix, 4, ipiv, temp_rhs, 4, info )  
             IF (info.ne.0) THEN
-              write(*,*) 'Error in calcStress_weakform:',el,info
+              write(*,*) 'Error in calcStress_weakform_FENE_PMP:',el,info
               STOP
             ENDIF
 
@@ -301,7 +301,7 @@ MODULE fene_p_mp_module
       TauWeConstant = (1d0 - param_beta)/We
       DO el=1,numelm
         DO ij=0,NP1SQM1
-          f_of_trC = calculateF_FENE_PMP(param_fene_b, tempCxx(ij,el), tempCzz(ij,el), tempCzz(ij,el))
+          f_of_trC = calculateF_FENE_PMP(param_fene_b, tempCxx(ij,el), tempCyy(ij,el), tempCzz(ij,el))
           tempTxx(ij,el) = TauWeConstant*(f_of_trC*tempCxx(ij,el) - 1d0)
           tempTxy(ij,el) = TauWeConstant*f_of_trC*tempCxy(ij,el)
           tempTyy(ij,el) = TauWeConstant*(f_of_trC*tempCyy(ij,el) - 1d0)
