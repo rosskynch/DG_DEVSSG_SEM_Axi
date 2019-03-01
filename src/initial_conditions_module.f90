@@ -144,7 +144,7 @@ MODULE initial_conditions_module
       devss_soln_yy=0d0
       devss_soln_zz=0d0
 
-      IF (param_ve_model_choice.neq.0) THEN
+      IF (param_ve_model_choice.ne.0) THEN
     ! Required for all V/E models.
         localTxx=0d0
         localTxy=0d0
@@ -255,7 +255,7 @@ MODULE initial_conditions_module
       devss_soln_yy=0d0
       devss_soln_zz=0d0
       
-      IF (param_ve_model_choice.neq.0) THEN
+      IF (param_ve_model_choice.ne.0) THEN
     ! Required for all V/E models.
         localTxx=0d0
         localTxy=0d0
