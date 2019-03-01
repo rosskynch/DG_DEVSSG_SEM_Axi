@@ -531,34 +531,11 @@ MODULE shared_data
 !       C_x(0:NP1SQM1,0:NP1SQM1,1:numelm),&
 !       C_y(0:NP1SQM1,0:NP1SQM1,1:numelm),&
 !       Cb(0:N,0:N,1:4,1:numelm),&
-      localTxx(0:NP1SQM1,1:numelm),&
-      localTxy(0:NP1SQM1,1:numelm),&
-      localTyy(0:NP1SQM1,1:numelm),&
-      localTzz(0:NP1SQM1,1:numelm),&
-      localTxxNm1(0:NP1SQM1,1:numelm),&
-      localTxyNm1(0:NP1SQM1,1:numelm),&
-      localTyyNm1(0:NP1SQM1,1:numelm),&
-      localTzzNm1(0:NP1SQM1,1:numelm),&
-      localTxxNm2(0:NP1SQM1,1:numelm),&
-      localTxyNm2(0:NP1SQM1,1:numelm),&
-      localTyyNm2(0:NP1SQM1,1:numelm),&
-      localTzzNm2(0:NP1SQM1,1:numelm),&
-      localCxx(0:NP1SQM1,1:numelm),&
-      localCxy(0:NP1SQM1,1:numelm),&
-      localCyy(0:NP1SQM1,1:numelm),&
-      localCzz(0:NP1SQM1,1:numelm),&
-      localCxxNm1(0:NP1SQM1,1:numelm),&
-      localCxyNm1(0:NP1SQM1,1:numelm),&
-      localCyyNm1(0:NP1SQM1,1:numelm),&
-      localCzzNm1(0:NP1SQM1,1:numelm),&
-      localCxxNm2(0:NP1SQM1,1:numelm),&
-      localCxyNm2(0:NP1SQM1,1:numelm),&
-      localCyyNm2(0:NP1SQM1,1:numelm),&
-      localCzzNm2(0:NP1SQM1,1:numelm),&
       norm_to_edge_node(2,0:N,1:4,numelm),&
       jac_on_edge(4,numelm) &
 !       param_beta_a(numelm)&
-   ) 
+    )
+
 ! could move all non-mapglobal2 data to 2nd routine below...
   END SUBROUTINE assignMem
 
@@ -690,7 +667,41 @@ MODULE shared_data
       Txy_error(0:NP1SQM1,1:numelm),&
       Tyy_error(0:NP1SQM1,1:numelm),&
       Tzz_error(0:NP1SQM1,1:numelm) &
-            )
+    )
+
+! Memory for stress in viscoelastic models.
+    IF (param_ve_model_choice.neq.0) THEN
+! Required for all V/E models.
+      ALLOCATE( &
+        localTxy(0:NP1SQM1,1:numelm),&
+        localTyy(0:NP1SQM1,1:numelm),&
+        localTzz(0:NP1SQM1,1:numelm),&
+        localTxxNm1(0:NP1SQM1,1:numelm),&
+        localTxyNm1(0:NP1SQM1,1:numelm),&
+        localTyyNm1(0:NP1SQM1,1:numelm),&
+        localTzzNm1(0:NP1SQM1,1:numelm),&
+        localTxxNm2(0:NP1SQM1,1:numelm),&
+        localTxyNm2(0:NP1SQM1,1:numelm),&
+        localTyyNm2(0:NP1SQM1,1:numelm),&
+        localTzzNm2(0:NP1SQM1,1:numelm) &
+      )
+    ENDIF
+    IF (param_ve_model_choice.eq.2) THEN
+! Required only for FENE-P-MP
+      ALLOCATE( &
+        localCxy(0:NP1SQM1,1:numelm),&
+        localCyy(0:NP1SQM1,1:numelm),&
+        localCzz(0:NP1SQM1,1:numelm),&
+        localCxxNm1(0:NP1SQM1,1:numelm),&
+        localCxyNm1(0:NP1SQM1,1:numelm),&
+        localCyyNm1(0:NP1SQM1,1:numelm),&
+        localCzzNm1(0:NP1SQM1,1:numelm),&
+        localCxxNm2(0:NP1SQM1,1:numelm),&
+        localCxyNm2(0:NP1SQM1,1:numelm),&
+        localCyyNm2(0:NP1SQM1,1:numelm),&
+        localCzzNm2(0:NP1SQM1,1:numelm) &
+      )
+    ENDIF
             
       CALL assign_devss_memory
   END SUBROUTINE

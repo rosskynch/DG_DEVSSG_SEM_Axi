@@ -208,10 +208,10 @@ MODULE fene_p_mp_module
               tempCxx(ij,el) = boundary_stress_xx(i)
               tempCxy(ij,el) = boundary_stress_xy(i)
               tempCyy(ij,el) = boundary_stress_yy(i)
-              tempCzz(ij,el) = boundary_stress_yy(i)
+              tempCzz(ij,el) = boundary_stress_zz(i)
               CYCLE
             ENDIF
-! Calculate entries of the matrix for OldroydB:
+! Calculate entries of the matrix for FENE-P-MP:
 
 ! DEVSS-G:
 ! Where G tensor is used for deformation terms as well as Strain Rate.
