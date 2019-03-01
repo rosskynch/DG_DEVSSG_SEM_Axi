@@ -670,7 +670,7 @@ MODULE shared_data
     )
 
 ! Memory for stress in viscoelastic models.
-    IF (param_ve_model_choice.neq.0) THEN
+    IF (param_ve_model_choice.ne.0) THEN
 ! Required for all V/E models.
       ALLOCATE( &
         localTxy(0:NP1SQM1,1:numelm),&
