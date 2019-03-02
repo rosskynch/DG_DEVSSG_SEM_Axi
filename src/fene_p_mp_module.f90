@@ -62,21 +62,36 @@ MODULE fene_p_mp_module
     I2 = localGradUxx_in*localGradUyy_in + localGradUxx_in*localGradUzz_in + localGradUyy_in*localGradUzz_in - Dxy*Dxy
     I3 = localGradUxx_in*localGradUyy_in*localGradUzz_in - Dxy*Dxy*localGradUzz_in
 
-    extensionRate = 3d0*I3 / I2
-
-    calculatePsi_FENE_PMP = 0.5*(cosh(lambdaD*extensionRate) - 1d0)  
+    IF (I2.lt.1d-15) THEN
+      calculatePsi_FENE_PMP = 0d0;
+    ELSE
+      extensionRate = 3d0*I3 / I2
+      calculatePsi_FENE_PMP = 0.5*(cosh(lambdaD*extensionRate) - 1d0)
+    ENDIF
+    
     RETURN
-
   END FUNCTION calculatePsi_FENE_PMP
 
   DOUBLE PRECISION FUNCTION calculateF_FENE_PMP(bValue, Cxx_in, Cyy_in, Czz_in)
     IMPLICIT NONE
     DOUBLE PRECISION, INTENT(IN) :: bValue, Cxx_in, Cyy_in, Czz_in
+    DOUBLE PRECISION :: trace, denominator
 ! F(tr(C)) = 1 / (1 - (tr(C)/b^2))
 !
 ! where b is the square of the maximum extension of the dumbbell (considered in the model).
+    trace = Cxx_in + Cyy_in + Czz_in
+    IF (trace.lt.1d-15) THEN
+      calculateF_FENE_PMP = 1d0
+      RETURN
+    ENDIF
+    
+    denominator = 1d0 - (trace / (bValue*bValue))
+    IF (denominator.lt.1d-15) THEN
+      calculateF_FENE_PMP = 0d0
+      RETURN
+    ENDIF
 
-    calculateF_FENE_PMP = 1d0 / (1d0 - (Cxx_in + Cyy_in + Czz_in) / (bValue*bValue))
+    calculateF_FENE_PMP = 1d0 / denominator
     RETURN
 
   END FUNCTION calculateF_FENE_PMP
