@@ -219,11 +219,7 @@ MODULE fene_p_mp_module
           DO ij=0,NP1SQM1
             i=mapg(ij,el)
             IF (inflowflag(i)) THEN 
-!  Apply inflow boundary conditions on stress.
-              tempCxx(ij,el) = boundary_stress_xx(i)
-              tempCxy(ij,el) = boundary_stress_xy(i)
-              tempCyy(ij,el) = boundary_stress_yy(i)
-              tempCzz(ij,el) = boundary_stress_zz(i)
+!  We will apply inflow boundary conditions on stress, so nothing to do.
               CYCLE
             ENDIF
 ! Calculate entries of the matrix for FENE-P-MP:
@@ -316,11 +312,30 @@ MODULE fene_p_mp_module
       TauWeConstant = (1d0 - param_beta)/We
       DO el=1,numelm
         DO ij=0,NP1SQM1
-          f_of_trC = calculateF_FENE_PMP(param_fene_b, tempCxx(ij,el), tempCyy(ij,el), tempCzz(ij,el))
-          tempTxx(ij,el) = TauWeConstant*(f_of_trC*tempCxx(ij,el) - 1d0)
-          tempTxy(ij,el) = TauWeConstant*f_of_trC*tempCxy(ij,el)
-          tempTyy(ij,el) = TauWeConstant*(f_of_trC*tempCyy(ij,el) - 1d0)
-          tempTzz(ij,el) = TauWeConstant*(f_of_trC*tempCzz(ij,el) - 1d0)
+          IF (inflowflag(mapg(ij,el))) THEN 
+            tempTxx(ij,el) = boundary_stress_xx(i)
+            tempTxy(ij,el) = boundary_stress_xy(i)
+            tempTyy(ij,el) = boundary_stress_yy(i)
+            tempTzz(ij,el) = boundary_stress_zz(i)
+          ELSE
+            IF ( tempCxx(ij,el).gt.1d15 &
+            .OR. tempCxy(ij,el).gt.1d15 &
+            .OR. tempCyy(ij,el).gt.1d15 & 
+            .OR. tempCzz(ij,el).gt.1d15 ) THEN
+              write(*,*) &
+                ij,' ', &
+                el,' ', &
+                tempCxx(ij,el), ' ',&
+                tempCxy(ij,el), ' ',&
+                tempCyy(ij,el), ' ',&
+                tempCzz(ij,el), ' '
+            ENDIF
+            f_of_trC = calculateF_FENE_PMP(param_fene_b, tempCxx(ij,el), tempCyy(ij,el), tempCzz(ij,el))
+            tempTxx(ij,el) = TauWeConstant*(f_of_trC*tempCxx(ij,el) - 1d0)
+            tempTxy(ij,el) = TauWeConstant*f_of_trC*tempCxy(ij,el)
+            tempTyy(ij,el) = TauWeConstant*(f_of_trC*tempCyy(ij,el) - 1d0)
+            tempTzz(ij,el) = TauWeConstant*(f_of_trC*tempCzz(ij,el) - 1d0)
+          ENDIF
         ENDDO
       ENDDO
 
