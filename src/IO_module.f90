@@ -785,7 +785,7 @@ MODULE IO_module
       WRITE(*,*) numelm, N, timeN, drag, (drag-dragNm1)/drag, stopping_criteria, & 
         cputime_initialise, cputime_setup, cputime_solve, cputime_total, global_dim  
         
-    ELSEIF (param_problem_choice.eq.22.or.param_problem_choice.eq.32) THEN
+    ELSEIF (param_problem_choice.eq.22.or.param_problem_choice.eq.32.or.param_problem_choice.eq.39) THEN
 ! General 3-D Axisymmetric output (usually Uniform flow past sphere).
 ! Want numelm, N, time, drag, dragstar, drag_diff, stopping_criteria, cputime_initialise, cputime_setup, cputime_solve, cputime_total, global_dim
       WRITE(*,*) numelm, N, timeN, drag, drag_star, (drag-dragNm1)/drag, stopping_criteria, & 

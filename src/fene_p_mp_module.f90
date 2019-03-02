@@ -124,15 +124,15 @@ MODULE fene_p_mp_module
       tempCxx(0:NP1SQM1,numelm),&
       tempCxy(0:NP1SQM1,numelm),&
       tempCyy(0:NP1SQM1,numelm),&
-      tempCzz(0:NP1SQM1,numelm),&
-      tempCxxNext(0:NP1SQM1,numelm),&
-      tempCxyNext(0:NP1SQM1,numelm),&
-      tempCyyNext(0:NP1SQM1,numelm),&
-      tempCzzNext(0:NP1SQM1,numelm),&
-      tempTxx(0:NP1SQM1,numelm),&
-      tempTxy(0:NP1SQM1,numelm),&
-      tempTyy(0:NP1SQM1,numelm),&
-      tempTzz(0:NP1SQM1,numelm)!,&
+      tempCzz(0:NP1SQM1,numelm)
+      !tempCxxNext(0:NP1SQM1,numelm),&
+      !tempCxyNext(0:NP1SQM1,numelm),&
+      !tempCyyNext(0:NP1SQM1,numelm),&
+      !tempCzzNext(0:NP1SQM1,numelm),&
+      !tempTxx(0:NP1SQM1,numelm),&
+      !tempTxy(0:NP1SQM1,numelm),&
+      !tempTyy(0:NP1SQM1,numelm),&
+      !tempTzz(0:NP1SQM1,numelm)!,&
       !tempTxxNext(0:NP1SQM1,numelm),&
       !tempTxyNext(0:NP1SQM1,numelm),&
       !tempTyyNext(0:NP1SQM1,numelm),&
@@ -308,37 +308,6 @@ MODULE fene_p_mp_module
         ENDDO
       ENDIF
 
-! Calculate the new value of tau from the conformation tensor that's just been computed (currently stored as temp).
-      TauWeConstant = (1d0 - param_beta)/We
-      DO el=1,numelm
-        DO ij=0,NP1SQM1
-          IF (inflowflag(mapg(ij,el))) THEN 
-            tempTxx(ij,el) = boundary_stress_xx(i)
-            tempTxy(ij,el) = boundary_stress_xy(i)
-            tempTyy(ij,el) = boundary_stress_yy(i)
-            tempTzz(ij,el) = boundary_stress_zz(i)
-          ELSE
-            IF ( tempCxx(ij,el).gt.1d15 &
-            .OR. tempCxy(ij,el).gt.1d15 &
-            .OR. tempCyy(ij,el).gt.1d15 & 
-            .OR. tempCzz(ij,el).gt.1d15 ) THEN
-              write(*,*) &
-                ij,' ', &
-                el,' ', &
-                tempCxx(ij,el), ' ',&
-                tempCxy(ij,el), ' ',&
-                tempCyy(ij,el), ' ',&
-                tempCzz(ij,el), ' '
-            ENDIF
-            f_of_trC = calculateF_FENE_PMP(param_fene_b, tempCxx(ij,el), tempCyy(ij,el), tempCzz(ij,el))
-            tempTxx(ij,el) = TauWeConstant*(f_of_trC*tempCxx(ij,el) - 1d0)
-            tempTxy(ij,el) = TauWeConstant*f_of_trC*tempCxy(ij,el)
-            tempTyy(ij,el) = TauWeConstant*(f_of_trC*tempCyy(ij,el) - 1d0)
-            tempTzz(ij,el) = TauWeConstant*(f_of_trC*tempCzz(ij,el) - 1d0)
-          ENDIF
-        ENDDO
-      ENDDO
-
 ! Update stored valeus of Cpq and Tpq 
 ! ie move time along by one for these, so that localTpq and localCpq now hold the current stress/conformation values
       localCxxNm2=localCxxNm1
@@ -355,7 +324,7 @@ MODULE fene_p_mp_module
       localCxy=tempCxy
       localCyy=tempCyy
       localCzz=tempCzz
-
+      
       localTxxNm2=localTxxNm1
       localTxyNm2=localTxyNm1
       localTyyNm2=localTyyNm1
@@ -365,11 +334,24 @@ MODULE fene_p_mp_module
       localTxyNm1=localTxy
       localTyyNm1=localTyy
       localTzzNm1=localTzz
-
-      localTxx=tempTxx
-      localTxy=tempTxy
-      localTyy=tempTyy
-      localTzz=tempTzz
+! Calculate the new value of tau from the conformation tensor that's just been computed (currently stored as temp).
+      TauWeConstant = (1d0 - param_beta)/We
+      DO el=1,numelm
+        DO ij=0,NP1SQM1
+          IF (inflowflag(mapg(ij,el))) THEN 
+            localTxx(ij,el) = boundary_stress_xx(i)
+            localTxy(ij,el) = boundary_stress_xy(i)
+            localTyy(ij,el) = boundary_stress_yy(i)
+            localTzz(ij,el) = boundary_stress_zz(i)
+          ELSE
+            f_of_trC = calculateF_FENE_PMP(param_fene_b, tempCxx(ij,el), tempCyy(ij,el), tempCzz(ij,el))
+            localTxx(ij,el) = TauWeConstant*(f_of_trC*tempCxx(ij,el) - 1d0)
+            localTxy(ij,el) = TauWeConstant*f_of_trC*tempCxy(ij,el)
+            localTyy(ij,el) = TauWeConstant*(f_of_trC*tempCyy(ij,el) - 1d0)
+            localTzz(ij,el) = TauWeConstant*(f_of_trC*tempCzz(ij,el) - 1d0)
+          ENDIF
+        ENDDO
+      ENDDO
     ELSE
       print*, 'Error: No co-ordinate system specified...'
       print*, 'Stopping'
