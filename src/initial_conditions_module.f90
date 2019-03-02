@@ -144,36 +144,31 @@ MODULE initial_conditions_module
       devss_soln_yy=0d0
       devss_soln_zz=0d0
 
-      IF (param_ve_model_choice.ne.0) THEN
-    ! Required for all V/E models.
-        localTxx=0d0
-        localTxy=0d0
-        localTyy=0d0
-        localTzz=0d0
-        localTxxNm1=0d0
-        localTxyNm1=0d0
-        localTyyNm1=0d0
-        localTzzNm1=0d0
-        localTxxNm2=0d0
-        localTxyNm2=0d0
-        localTyyNm2=0d0
-        localTzzNm2=0d0
-      ENDIF
-      IF (param_ve_model_choice.eq.2) THEN
-    ! Required only for FENE-P-MP
-        localCxx=0d0
-        localCxy=0d0
-        localCyy=0d0
-        localCzz=0d0
-        localCxxNm1=0d0
-        localCxyNm1=0d0
-        localCyyNm1=0d0
-        localCzzNm1=0d0
-        localCxxNm2=0d0
-        localCxyNm2=0d0
-        localCyyNm2=0d0
-        localCzzNm2=0d0
-      ENDIF   
+      localTxx=0d0
+      localTxy=0d0
+      localTyy=0d0
+      localTzz=0d0
+      localTxxNm1=0d0
+      localTxyNm1=0d0
+      localTyyNm1=0d0
+      localTzzNm1=0d0
+      localTxxNm2=0d0
+      localTxyNm2=0d0
+      localTyyNm2=0d0
+      localTzzNm2=0d0
+
+      localCxx=0d0
+      localCxy=0d0
+      localCyy=0d0
+      localCzz=0d0
+      localCxxNm1=0d0
+      localCxyNm1=0d0
+      localCyyNm1=0d0
+      localCzzNm1=0d0
+      localCxxNm2=0d0
+      localCxyNm2=0d0
+      localCyyNm2=0d0
+      localCzzNm2=0d0
     ELSEIF (param_problem_choice.lt.50) THEN ! Newtonian (moving mesh)
     
       V_sphere=1d-5
@@ -254,37 +249,32 @@ MODULE initial_conditions_module
       devss_soln_yx=0d0
       devss_soln_yy=0d0
       devss_soln_zz=0d0
-      
-      IF (param_ve_model_choice.ne.0) THEN
-    ! Required for all V/E models.
-        localTxx=0d0
-        localTxy=0d0
-        localTyy=0d0
-        localTzz=0d0
-        localTxxNm1=0d0
-        localTxyNm1=0d0
-        localTyyNm1=0d0
-        localTzzNm1=0d0
-        localTxxNm2=0d0
-        localTxyNm2=0d0
-        localTyyNm2=0d0
-        localTzzNm2=0d0
-      ENDIF
-      IF (param_ve_model_choice.eq.2) THEN
-    ! Required only for FENE-P-MP
-        localCxx=0d0
-        localCxy=0d0
-        localCyy=0d0
-        localCzz=0d0
-        localCxxNm1=0d0
-        localCxyNm1=0d0
-        localCyyNm1=0d0
-        localCzzNm1=0d0
-        localCxxNm2=0d0
-        localCxyNm2=0d0
-        localCyyNm2=0d0
-        localCzzNm2=0d0
-      ENDIF
+
+      localTxx=0d0
+      localTxy=0d0
+      localTyy=0d0
+      localTzz=0d0
+      localTxxNm1=0d0
+      localTxyNm1=0d0
+      localTyyNm1=0d0
+      localTzzNm1=0d0
+      localTxxNm2=0d0
+      localTxyNm2=0d0
+      localTyyNm2=0d0
+      localTzzNm2=0d0
+
+      localCxx=0d0
+      localCxy=0d0
+      localCyy=0d0
+      localCzz=0d0
+      localCxxNm1=0d0
+      localCxyNm1=0d0
+      localCyyNm1=0d0
+      localCzzNm1=0d0
+      localCxxNm2=0d0
+      localCxyNm2=0d0
+      localCyyNm2=0d0
+      localCzzNm2=0d0
     ENDIF
 
 ! Steady Poiseuille Flow for pipe from [-1,1]:

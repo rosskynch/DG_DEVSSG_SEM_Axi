@@ -562,7 +562,7 @@ MODULE viscoelastic_module
                 tempTxxNext(ij,el) = boundary_stress_xx(i)
                 tempTxyNext(ij,el) = boundary_stress_xy(i)
                 tempTyyNext(ij,el) = boundary_stress_yy(i)
-                tempTzzNext(ij,el) = boundary_stress_yy(i)
+                tempTzzNext(ij,el) = boundary_stress_zz(i)
                 CYCLE
               ENDIF
 
@@ -742,7 +742,7 @@ MODULE viscoelastic_module
               tempTxxNext(ij,el) = boundary_stress_xx(i)
               tempTxyNext(ij,el) = boundary_stress_xy(i)
               tempTyyNext(ij,el) = boundary_stress_yy(i)
-              tempTzzNext(ij,el) = boundary_stress_yy(i)
+              tempTzzNext(ij,el) = boundary_stress_zz(i)
               CYCLE
             ENDIF
 ! Calculate entries of the matrix for OldroydB:
