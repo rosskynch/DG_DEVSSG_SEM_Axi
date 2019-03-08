@@ -62,7 +62,7 @@ MODULE fene_p_mp_module
     I2 = Dxy*Dxy - (localGradUxx_in*localGradUyy_in + localGradUxx_in*localGradUzz_in + localGradUyy_in*localGradUzz_in)
     I3 = localGradUxx_in*localGradUyy_in*localGradUzz_in - Dxy*Dxy*localGradUzz_in
 
-    IF (I2.lt.1d-15) THEN
+    IF (abs(I2).lt.1d-15) THEN
       calculatePsi_FENE_PMP = 0d0;
     ELSE
       extensionRate = 3d0*I3 / I2
@@ -80,13 +80,13 @@ MODULE fene_p_mp_module
 !
 ! where b is the square of the maximum extension of the dumbbell (considered in the model).
     trace = Cxx_in + Cyy_in + Czz_in
-    IF (trace.lt.1d-15) THEN
+    IF (abs(trace).lt.1d-15) THEN
       calculateF_FENE_PMP = 1d0
       RETURN
     ENDIF
     
     denominator = 1d0 - (trace / (bValue*bValue))
-    IF (denominator.lt.1d-15) THEN
+    IF (abs(denominator).lt.1d-15) THEN
       calculateF_FENE_PMP = 0d0
       RETURN
     ENDIF
