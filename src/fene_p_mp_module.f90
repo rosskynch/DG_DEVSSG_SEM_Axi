@@ -53,13 +53,13 @@ MODULE fene_p_mp_module
 !
 ! with principal invariants:
 ! I1(D) = tr(D) = Dxx + Dyy + Dzz (not required)
-! I2(D) = (1/2)*(tr(D)^2 - tr(D^2)) = Dxx*Dyy + Dxx*Dzz + Dyy*Dzz - Dxy*Dxy 
+! I2(D) = (1/2)*(tr(D^2) - tr(D)^2) = Dxy*Dxy - Dxx*Dyy - Dxx*Dzz - Dyy*Dzz
 ! I3(D) = det(D) = Dxx*Dyy*Dzz - Dxy*Dyx*Dzz
 !
 ! tr denotes trace, det denotes determinant, ' denotes transpose.
 
     Dxy = 0.5*(localGradUxy_in + localGradUyx_in)
-    I2 = localGradUxx_in*localGradUyy_in + localGradUxx_in*localGradUzz_in + localGradUyy_in*localGradUzz_in - Dxy*Dxy
+    I2 = Dxy*Dxy - (localGradUxx_in*localGradUyy_in + localGradUxx_in*localGradUzz_in + localGradUyy_in*localGradUzz_in)
     I3 = localGradUxx_in*localGradUyy_in*localGradUzz_in - Dxy*Dxy*localGradUzz_in
 
     IF (I2.lt.1d-15) THEN
