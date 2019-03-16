@@ -104,7 +104,7 @@ MODULE fene_p_mp_module
     info,ipiv(4)
 
     DOUBLE PRECISION :: Cxx_approx, Cxy_approx, Cyy_approx, Czz_approx, &
-      TauWeConstant, PsiValue, WePsiValue, Dxy, f_of_trC, &
+      tauWeConstant, psiValue, psiTimesDxy, f_of_trC, tempWeCoefficient, &
 ! LAPACK bits:
       temp_matrix(4,4),temp_rhs(4)
 
@@ -238,39 +238,33 @@ MODULE fene_p_mp_module
             psiValue = calculatePsi_FENE_PMP(param_fene_lambdaD, localGradUxx(ij,el), localGradUxy(ij,el), &
               localGradUyx(ij,el), localGradUyy(ij,el), localGradUzz(ij,el))
 
-            WePsiValue = We*psiValue
-
-! TODO The extra terms for FENE P-MP can be simplified and combined in the terms used for OldB/Giesekus.
-! Have not done for now so readability isn't harmed.
-            temp_matrix(1,1) = f_of_trC + Wetime_constant1 - 2d0*We*localGradUxx(ij,el) &
-              + WePsiValue*2d0*localGradUxx(ij,el) !Dxx
-
-            temp_matrix(2,2) = f_of_trC + Wetime_constant1 -  We*(localGradUxx(ij,el) + localGradUyy(ij,el)) &
-              + WePsiValue*(localGradUxx(ij,el) + localGradUyy(ij,el)) !Dxx + Dyy
-
-            temp_matrix(3,3) = f_of_trC + Wetime_constant1 - 2d0*We*localGradUyy(ij,el) &
-              + WePsiValue*2d0*localGradUyy(ij,el) !Dyy
-
-            temp_matrix(4,4) = f_of_trC + Wetime_constant1 - 2d0*We*localGradUzz(ij,el) &
-              + WePsiValue*2d0*localGradUzz(ij,el) !Dzz
 
 ! We make use of both gradU and D = (1/2)*(gradU + gradU') (' = transpose), but they're identical
 ! in all components except the Dxy and Dyx components (and Dxy==Dyx), so we only need to compute 
-! Dxy for use below, all other uses of D will be replaced by the gradU component which is already stored.
+! Dxy for use in the off-diagonal terms. All other uses of D will be replaced by the gradU component
+! which is already stored.
 
-            Dxy = 0.5*(localGradUxy(ij,el) + localGradUyx(ij,el))
+! First compute the diagonal terms of the linear system for the conformation tensor.
+            tempWeCoefficient = We*(psiValue - 1d0);
 
-            temp_matrix(1,2) = -2d0*We*localGradUyx(ij,el) &
-              + 2d0*WePsiValue*Dxy
+            temp_matrix(1,1) = f_of_trC + Wetime_constant1 + 2d0*tempWeCoefficient*localGradUxx(ij,el)
 
-            temp_matrix(2,1) = -We*localGradUxy(ij,el) &
-             + WePsiValue*Dxy
+            temp_matrix(2,2) = f_of_trC + Wetime_constant1 + tempWeCoefficient*(localGradUxx(ij,el) + localGradUyy(ij,el))
 
-            temp_matrix(2,3) = -We*localGradUyx(ij,el) &
-              + WePsiValue*Dxy
+            temp_matrix(3,3) = f_of_trC + Wetime_constant1 + 2d0*tempWeCoefficient*localGradUyy(ij,el)
 
-            temp_matrix(3,2) = -2d0*We*localGradUxy(ij,el) &
-              + 2d0*WePsiValue*Dxy
+            temp_matrix(4,4) = f_of_trC + Wetime_constant1 + 2d0*tempWeCoefficient*localGradUzz(ij,el)
+
+! Now the off-diagonal terms.
+            psiTimesDxy = 0.5*psiValue*(localGradUxy(ij,el) + localGradUyx(ij,el))
+
+            temp_matrix(1,2) = 2d0*We*(psiTimesDxy - localGradUyx(ij,el))
+
+            temp_matrix(2,1) = We*(psiTimesDxy - localGradUxy(ij,el)) 
+
+            temp_matrix(2,3) = We*(psiTimesDxy - localGradUyx(ij,el)) 
+
+            temp_matrix(3,2) = 2d0*We*(psiTimesDxy - localGradUxy(ij,el))
 
 ! Calculate RHS entries
 ! BDFJ:
@@ -335,7 +329,7 @@ MODULE fene_p_mp_module
       localTyyNm1=localTyy
       localTzzNm1=localTzz
 ! Calculate the new value of tau from the conformation tensor that's just been computed (currently stored as temp).
-      TauWeConstant = (1d0 - param_beta)/We
+      tauWeConstant = (1d0 - param_beta)/We
       DO el=1,numelm
         DO ij=0,NP1SQM1
           IF (inflowflag(mapg(ij,el))) THEN 
@@ -345,10 +339,10 @@ MODULE fene_p_mp_module
             localTzz(ij,el) = boundary_stress_zz(i)
           ELSE
             f_of_trC = calculateF_FENE_PMP(param_fene_b, tempCxx(ij,el), tempCyy(ij,el), tempCzz(ij,el))
-            localTxx(ij,el) = TauWeConstant*(f_of_trC*tempCxx(ij,el) - 1d0)
-            localTxy(ij,el) = TauWeConstant*f_of_trC*tempCxy(ij,el)
-            localTyy(ij,el) = TauWeConstant*(f_of_trC*tempCyy(ij,el) - 1d0)
-            localTzz(ij,el) = TauWeConstant*(f_of_trC*tempCzz(ij,el) - 1d0)
+            localTxx(ij,el) = tauWeConstant*(f_of_trC*tempCxx(ij,el) - 1d0)
+            localTxy(ij,el) = tauWeConstant*f_of_trC*tempCxy(ij,el)
+            localTyy(ij,el) = tauWeConstant*(f_of_trC*tempCyy(ij,el) - 1d0)
+            localTzz(ij,el) = tauWeConstant*(f_of_trC*tempCzz(ij,el) - 1d0)
           ENDIF
         ENDDO
       ENDDO
