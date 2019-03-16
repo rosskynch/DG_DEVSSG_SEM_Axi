@@ -242,7 +242,7 @@ MODULE fene_p_mp_module
 
 ! TODO The extra terms for FENE P-MP can be simplified and combined in the terms used for OldB/Giesekus.
 ! Have not done for now so readability isn't harmed.
-            temp_matrix(1,1) = f_of_trC + Wetime_constant1 + 2d0*We*localGradUxx(ij,el) &
+            temp_matrix(1,1) = f_of_trC + Wetime_constant1 - 2d0*We*localGradUxx(ij,el) &
               + WePsiValue*2d0*localGradUxx(ij,el) !Dxx
 
             temp_matrix(2,2) = f_of_trC + Wetime_constant1 -  We*(localGradUxx(ij,el) + localGradUyy(ij,el)) &
