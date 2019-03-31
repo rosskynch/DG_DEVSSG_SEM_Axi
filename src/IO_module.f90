@@ -865,7 +865,7 @@ MODULE IO_module
     CALL output_to_tecplot_finegrid
     CLOSE(tecplot_fine_output_fileid)
     
-    IF ( MOD(param_problem_choice,10).eq.1.or.MOD(param_problem_choice,10).eq.2 ) THEN
+    IF ( MOD(param_problem_choice,10).eq.1.or.MOD(param_problem_choice,10).eq.2.or.param_problem_choice.eq.39 ) THEN
  ! Only required for the general flow past cylinder or sphere or moving mesh
       OPEN(wallsymm_output_fileid,FILE=wallsymm_output_filename,IOSTAT=ierror)
       CALL openreport(wallsymm_output_filename,ierror)
