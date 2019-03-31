@@ -505,7 +505,7 @@ MODULE IO_module
         ENDDO
       ENDDO
       
-    ELSEIF (param_problem_choice.eq.32.or.param_problem_choice.eq.52) THEN ! General Viscoelastic 3-D Axisymmetric (Moving and fixed)
+    ELSEIF (param_problem_choice.eq.32.or.param_problem_choice.eq.39.or.param_problem_choice.eq.52) THEN ! General Viscoelastic 3-D Axisymmetric (Moving and fixed)
     
       write(tecplot_output_fileid,*) 'VARIABLES = "x","y","V_x","V_y","P",', & ! 1 2 3 4 5
       '"GradUxx","GradUyx","GradUxy","GradUyy","GradUzz",', & ! 6 7 8 9 10 ! components of gradient of velocity
@@ -901,7 +901,8 @@ MODULE IO_module
         print*, '-fene_lambdad [double]   | FENE-P-MP parameter (default: 0.0 / OFF)'
         print*, '-prob [integer]    | problem choice - use -prob_help for more info'
         print*, '-output [filename] | output leading filename (3 will be produced), do not include suffix'
-        print*, '-enable_output [integer] | disable file output. 0 = OFF, any other value = ON (default: ON)'
+        print*, '-enable_interim_output [integer] | disable interim file output. 0 = OFF, any other value = ON (default: OFF)'
+        print*, '-enable_final_output [integer] | disable final file output. 0 = OFF, any other value = ON (default: ON)'
         print*, '-deltat [double]   | timestep size (default: 0.001)'
         print*, '-alphaz [double]   | Co-efficient of integral of pressure in conservation of mass equation (default: 0.0 / OFF)'
         print*, '-con_it [double]   | Choose the treatment of the convective term in the constituitive equation. 0 = EX2, 1=semi-iterative (default: 1 / semi-iterative)'
@@ -958,10 +959,10 @@ MODULE IO_module
         tecplot_output_filename = trim(output_filename)//'_tec.dat'
         tecplot_fine_output_filename = trim(output_filename)//'_tec_fine.dat'
         wallsymm_output_filename = trim(output_filename)//'_wallsymm.txt'  
-      ELSEIF (arg_in.eq.'-enable_output') THEN
+      ELSEIF (arg_in.eq.'-enable_interim_output') THEN
         READ(temp,*) temp_int
-        IF(temp_int.eq.0) THEN
-          enable_output_to_file=.false.
+        IF(temp_int.gt.0) THEN
+          enable_output_to_file = .true.
         ENDIF
       ELSEIF (arg_in.eq.'-deltat'.or.arg_in.eq.'-Deltat') THEN      
         READ(temp,*) deltat

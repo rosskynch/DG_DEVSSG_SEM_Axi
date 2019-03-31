@@ -84,11 +84,13 @@ MODULE shared_data
 !
 ! have added jac - dimensions (1:numelm,0:N,0:N) - stores jacobian matrix for each element
 !
-! enable_output_to_file - controls if output to file is allowed from the main program.
+! enable_interim_output_to_file - controls if the interim output to file is allowed from the main program.
+! enable_final_output_to_file - controls if the final output to file is allowed from the main program.
 
   IMPLICIT NONE
   
-  LOGICAL :: enable_output_to_file = .true.
+  LOGICAL :: enable_interim_output_to_file = .false.,&
+    enable_final_output_to_file = .true.
   
   CHARACTER(LEN=256) ::  output_filename='output',&
     tecplot_output_filename = 'output_tec.dat',&

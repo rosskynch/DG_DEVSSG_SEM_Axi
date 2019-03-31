@@ -129,13 +129,10 @@ PROGRAM main
     CALL initialise_devss 
   ENDIF
  
-  
-    
-  
+
 ! Open tecplot output file & write the ICs set.
 ! MODIFIED TO PRINT OUT FOR BOTH MOVING AND NON-MOVING
-! TODO: Add an input parameter to turn this on/off (see at end of time loop too).
-  IF (enable_output_to_file) THEN
+  IF (enable_interim_output_to_file) THEN
     OPEN(tecplot_output_fileid,FILE=tecplot_output_filename,IOSTAT=ierror)
     CALL output_to_tecplot
   ENDIF
@@ -151,31 +148,6 @@ PROGRAM main
   CALL cpu_time(cputime_temp1)
   cputime_initialise=cputime_temp1
   
-! We_loop: DO meh=1,15
-!   We=dfloat(meh)*1d-1
-
-! ! DELETE FROM HERE
-!   DO 
-!     CALL calc_waters_solution
-!     numtimesteps = numtimesteps + 1
-!     IF (param_error) THEN
-!       CALL run_error_analysis
-!     ENDIF
-! 
-!     CALL output_to_screen
-! 
-!     IF (timeN.gt.40d0) then
-!     exit
-!     endif
-!     timeN=(dfloat(numtimesteps))*deltat
-! 
-!     timeNm2 = timeNm1
-!     timeNm1 = timeN
-! 
-!   ENDDO
-!   stop
-! ! DELETE TO HERE
-
   CALL cpu_time(cputime_temp2)
   DO ! Main timestepping loop
       
@@ -279,7 +251,7 @@ PROGRAM main
 ! TODO: Add an input parameter (via CLI or input file) which turns this output on/off.
     printoutcount=printoutcount+1
     printed_to_tecplot = .FALSE.
-    IF (enable_output_to_file.AND.printoutcount.ge.print_threshold) THEN 
+    IF (enable_interim_output_to_file.AND.printoutcount.ge.print_threshold) THEN 
       CALL output_to_tecplot
       printed_to_tecplot = .TRUE.
       printoutcount=0
@@ -288,8 +260,8 @@ PROGRAM main
 ! Check if solution has converged:
     IF (movingmeshflag.eq.0) THEN 
       IF ((stopping_criteria.lt.stopping_tol.and.drag_criteria.lt.stopping_tol) &
-                                      .or.timeN.gt.time_limit) THEN
-      IF (enable_output_to_file.AND..NOT.printed_to_tecplot) THEN
+        .or.timeN.gt.time_limit) THEN
+      IF (enable_interim_output_to_file.AND..NOT.printed_to_tecplot) THEN
         CALL output_to_tecplot
         ENDIF
         EXIT
@@ -297,7 +269,7 @@ PROGRAM main
     ELSEIF (movingmeshflag.eq.1) THEN
       IF ((stopping_criteria.lt.stopping_tol.and.drag_criteria.lt.stopping_tol) &
         .or.timeN.gt.time_limit) THEN
-      IF (enable_output_to_file.AND..NOT.printed_to_tecplot) THEN
+      IF (enable_interim_output_to_file.AND..NOT.printed_to_tecplot) THEN
         CALL output_to_tecplot
       ENDIF
       EXIT
@@ -310,16 +282,6 @@ PROGRAM main
       CALL update_geometry
     ENDIF
     CALL updateSEM   
-
-! REMOVE WHEN SURE:
-!     IF ((stopcheck.lt.1d-8.and.abs((drag-dragNm1)/drag).lt.1d-8).or.timeN.gt.60d0) THEN 
-! ! !       CYCLE We_loop
-!       EXIT
-!     ENDIF
-
-    
-
-    
 
 
 !!! NEEDS REVISING !!!
@@ -337,30 +299,19 @@ PROGRAM main
   
   
   
-! Output final solution in fine form:
-!   IF (movingmeshflag.eq.0) THEN
-  CALL initialise_fine_grid ! setup fine node points
-  CALL create_fine_solution ! generate solution(s) on these points
-  IF(enable_output_to_file) THEN
+! If required, output final solution in both fine and node form:
+  IF(enable_final_output_to_file) THEN
+! If the non-fine tecplot file isn't open yet, then open it.
+    IF(.NOT.enable_interim_output_to_file) THEN
+      OPEN(tecplot_output_fileid,FILE=tecplot_output_filename,IOSTAT=ierror)
+    ENDIF
+    CALL initialise_fine_grid ! setup fine node points
+    CALL create_fine_solution ! generate solution(s) on these points
     CALL final_stage_output ! output to tecplot and along central axis for matlab.
-  ENDIF
-!   ENDIF
-  
-
-  
-!   timeN=2d0*deltat
-!   timeNm1=deltat
-!   timeNm2=0d0
-!   numtimesteps=1
-! ENDDO We_loop
-! Write very last solution to tecplot.
-!   CALL output_to_tecplot
-!   CALL output_to_tecplot_finegrid
-!   CALL output_along_wallsymm
-
-  IF(enable_output_to_file) THEN
     CLOSE(tecplot_output_fileid)
   ENDIF
+  
+  
  
 ! Memory release
   CALL release_pardiso_memory  
