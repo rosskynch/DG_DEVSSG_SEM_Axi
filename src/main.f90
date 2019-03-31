@@ -307,12 +307,13 @@ PROGRAM main
     ENDIF
     CALL initialise_fine_grid ! setup fine node points
     CALL create_fine_solution ! generate solution(s) on these points
+
     CALL final_stage_output ! output to tecplot and along central axis for matlab.
+
     CLOSE(tecplot_output_fileid)
   ENDIF
-  
-  
- 
+
+
 ! Memory release
   CALL release_pardiso_memory  
   CALL deassign_devss_memory

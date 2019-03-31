@@ -961,8 +961,13 @@ MODULE IO_module
         wallsymm_output_filename = trim(output_filename)//'_wallsymm.txt'  
       ELSEIF (arg_in.eq.'-enable_interim_output') THEN
         READ(temp,*) temp_int
-        IF(temp_int.gt.0) THEN
-          enable_output_to_file = .true.
+        IF(temp_int.ne.0) THEN
+          enable_interim_output_to_file = .true.
+        ENDIF
+      ELSEIF (arg_in.eq.'-enable_final_output') THEN
+        READ(temp,*) temp_int
+        IF(temp_int.eq.0) THEN
+          enable_final_output_to_file = .false.
         ENDIF
       ELSEIF (arg_in.eq.'-deltat'.or.arg_in.eq.'-Deltat') THEN      
         READ(temp,*) deltat
