@@ -188,7 +188,10 @@ MODULE fene_p_mp_module
 
               temp_matrix(1,1) = f_of_trC + Wetime_constant1 + 2d0*tempWeCoefficient*localGradUxx(ij,el)
 
-              temp_matrix(2,2) = f_of_trC + Wetime_constant1 + tempWeCoefficient*(localGradUxx(ij,el) + localGradUyy(ij,el))
+              temp_matrix(2,2) = f_of_trC + Wetime_constant1
+              ! Should be:
+              ! + tempWeCoefficient*(localGradUxx(ij,el) + localGradUyy(ij,el))
+              ! but this is zero by mass conservation.
 
               temp_matrix(3,3) = f_of_trC + Wetime_constant1 + 2d0*tempWeCoefficient*localGradUyy(ij,el)
 
