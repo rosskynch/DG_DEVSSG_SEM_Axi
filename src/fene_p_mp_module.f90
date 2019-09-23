@@ -59,15 +59,16 @@ MODULE fene_p_mp_module
 ! tr denotes trace, det denotes determinant, ' denotes transpose.
 
     Dxy = 0.5*(localGradUxy_in + localGradUyx_in)
-    I2 = Dxy*Dxy - (localGradUxx_in*localGradUyy_in + localGradUxx_in*localGradUzz_in + localGradUyy_in*localGradUzz_in)
-    I3 = localGradUxx_in*localGradUyy_in*localGradUzz_in - Dxy*Dxy*localGradUzz_in
 
-    IF (abs(I2).lt.1d-15) THEN
-      calculatePsi_FENE_PMP = 0d0;
-    ELSE
-      extensionRate = 3d0*I3 / I2
-      calculatePsi_FENE_PMP = 0.5*(cosh(lambdaD*extensionRate) - 1d0)
-    ENDIF
+    ! The extensionRate = 3d0*I3 / I2, with
+    ! I2 = Dxy*Dxy - (localGradUxx_in*localGradUyy_in + localGradUxx_in*localGradUzz_in + localGradUyy_in*localGradUzz_in)
+    ! I3 = localGradUxx_in*localGradUyy_in*localGradUzz_in - Dxy*Dxy*localGradUzz_in
+    ! but this can be written as:
+    ! Dzz / ((Dzz*(Dxx + Dyy) / ((Dxx*Dyy - Dxy^2)) - 1)
+    ! which should be more stable.
+    extensionRate = localGradUzz_in / ( localGradUzz_in*(localGradUxx_in + localGradUyy_in)/(localGradUxx_in*localGradUyy_in + Dxy*Dxy) - 1d0)
+      
+    calculatePsi_FENE_PMP = 0.5*(cosh(lambdaD*extensionRate) - 1d0)
     
     RETURN
   END FUNCTION calculatePsi_FENE_PMP
