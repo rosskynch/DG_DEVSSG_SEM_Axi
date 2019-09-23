@@ -40,7 +40,7 @@ MODULE fene_p_mp_module
   DOUBLE PRECISION FUNCTION calculatePsi_FENE_PMP(lambdaD, localGradUxx_in, localGradUxy_in, &
     localGradUyx_in, localGradUyy_in, localGradUzz_in)
     IMPLICIT NONE
-    DOUBLE PRECISION :: Dxy, I2, I3, extensionRate
+    DOUBLE PRECISION :: Dxy, temp1, temp2, extensionRate
     DOUBLE PRECISION, INTENT(IN) :: lambdaD, localGradUxx_in, localGradUxy_in, &
       localGradUyx_in, localGradUyy_in, localGradUzz_in
 ! Psi(e) = (cosh(lamda_d*e) - 1) / 2
@@ -60,16 +60,22 @@ MODULE fene_p_mp_module
 
     Dxy = 0.5*(localGradUxy_in + localGradUyx_in)
 
-    ! The extensionRate = 3d0*I3 / I2, with
-    ! I2 = Dxy*Dxy - (localGradUxx_in*localGradUyy_in + localGradUxx_in*localGradUzz_in + localGradUyy_in*localGradUzz_in)
-    ! I3 = localGradUxx_in*localGradUyy_in*localGradUzz_in - Dxy*Dxy*localGradUzz_in
-    ! but this can be written as:
-    ! Dzz / ((Dzz*(Dxx + Dyy) / ((Dxx*Dyy - Dxy^2)) - 1)
-    ! which should be more stable.
-    extensionRate = localGradUzz_in / ( localGradUzz_in*(localGradUxx_in + localGradUyy_in)/(localGradUxx_in*localGradUyy_in + Dxy*Dxy) - 1d0)
-      
-    calculatePsi_FENE_PMP = 0.5*(cosh(lambdaD*extensionRate) - 1d0)
-    
+    temp1 = localGradUzz_in*(localGradUxx_in + localGradUyy_in)
+    temp2 = (localGradUxx_in*localGradUyy_in + Dxy*Dxy)
+
+    IF ((abs(temp2).lt.1d-15).OR.(abs(temp1-temp2).lt.1d-15)) THEN
+      calculatePsi_FENE_PMP = 0d0;
+    ELSE
+      ! The extensionRate = 3d0*I3 / I2, with
+      ! I2 = Dxy*Dxy - (localGradUxx_in*localGradUyy_in + localGradUxx_in*localGradUzz_in + localGradUyy_in*localGradUzz_in)
+      ! I3 = localGradUxx_in*localGradUyy_in*localGradUzz_in - Dxy*Dxy*localGradUzz_in
+      ! but this can be written as:
+      ! Dzz / ((Dzz*(Dxx + Dyy) / ((Dxx*Dyy - Dxy^2)) - 1)
+      extensionRate = localGradUzz_in / ( temp1 / temp2 - 1d0)
+
+      calculatePsi_FENE_PMP = 0.5*(cosh(lambdaD*extensionRate) - 1d0)
+    ENDIF
+
     RETURN
   END FUNCTION calculatePsi_FENE_PMP
 
