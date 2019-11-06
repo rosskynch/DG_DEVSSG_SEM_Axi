@@ -70,8 +70,8 @@ MODULE fene_p_mp_module
       ! I2 = Dxy*Dxy - (localGradUxx_in*localGradUyy_in + localGradUxx_in*localGradUzz_in + localGradUyy_in*localGradUzz_in)
       ! I3 = localGradUxx_in*localGradUyy_in*localGradUzz_in - Dxy*Dxy*localGradUzz_in
       ! but this can be written as:
-      ! Dzz / ((Dzz*(Dxx + Dyy) / ((Dxx*Dyy - Dxy^2)) - 1)
-      extensionRate = localGradUzz_in / ( temp1 / temp2 - 1d0)
+      ! Dzz / ((Dzz*(Dxx + Dyy) / (Dxx*Dyy - Dxy^2)) - 1)
+      extensionRate = localGradUzz_in / ((temp1 / temp2) - 1d0)
 
       calculatePsi_FENE_PMP = 0.5*(cosh(lambdaD*extensionRate) - 1d0)
     ENDIF
