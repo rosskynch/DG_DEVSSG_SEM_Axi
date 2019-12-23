@@ -40,7 +40,7 @@ MODULE fene_p_mp_module
   DOUBLE PRECISION FUNCTION calculatePsi_FENE_PMP(lambdaD, localGradUxx_in, localGradUxy_in, &
     localGradUyx_in, localGradUyy_in, localGradUzz_in)
     IMPLICIT NONE
-    DOUBLE PRECISION :: Dxy, temp1, temp2, extensionRate
+    DOUBLE PRECISION :: Dxx, Dxy, Dyy, Dzz, temp1, temp2, extensionRate
     DOUBLE PRECISION, INTENT(IN) :: lambdaD, localGradUxx_in, localGradUxy_in, &
       localGradUyx_in, localGradUyy_in, localGradUzz_in
 ! Psi(e) = (cosh(lamda_d*e) - 1) / 2
@@ -58,20 +58,23 @@ MODULE fene_p_mp_module
 !
 ! tr denotes trace, det denotes determinant, ' denotes transpose.
 
+    Dxx = localGradUxx_in
     Dxy = 0.5*(localGradUxy_in + localGradUyx_in)
+    Dyy = localGradUyy_in
+    Dzz = localGradUzz_in
 
-    temp1 = localGradUzz_in*(localGradUxx_in + localGradUyy_in)
-    temp2 = (localGradUxx_in*localGradUyy_in + Dxy*Dxy)
+    temp1 = Dzz*(Dxx + Dyy)
+    temp2 = (Dxx*Dyy + Dxy*Dxy)
 
     IF ((abs(temp2).lt.1d-15).OR.(abs(temp1-temp2).lt.1d-15)) THEN
       calculatePsi_FENE_PMP = 0d0;
     ELSE
       ! The extensionRate = 3d0*I3 / I2, with
-      ! I2 = Dxy*Dxy - (localGradUxx_in*localGradUyy_in + localGradUxx_in*localGradUzz_in + localGradUyy_in*localGradUzz_in)
-      ! I3 = localGradUxx_in*localGradUyy_in*localGradUzz_in - Dxy*Dxy*localGradUzz_in
+      ! I2 = Dxy*Dxy - (Dxx*Dyy + Dxx*Dzz + Dyy*Dzz)
+      ! I3 = Dxx*Dyy*Dzz - Dxy*Dxy*Dzz
       ! but this can be written as:
       ! Dzz / ((Dzz*(Dxx + Dyy) / (Dxx*Dyy - Dxy^2)) - 1)
-      extensionRate = localGradUzz_in / ((temp1 / temp2) - 1d0)
+      extensionRate = Dzz / ((temp1 / temp2) - 1d0)
 
       calculatePsi_FENE_PMP = 0.5*(cosh(lambdaD*extensionRate) - 1d0)
     ENDIF
@@ -82,27 +85,28 @@ MODULE fene_p_mp_module
   DOUBLE PRECISION FUNCTION calculateF_FENE_PMP(bValue, Cxx_in, Cyy_in, Czz_in)
     IMPLICIT NONE
     DOUBLE PRECISION, INTENT(IN) :: bValue, Cxx_in, Cyy_in, Czz_in
-    DOUBLE PRECISION :: trace, denominator
+    DOUBLE PRECISION :: trace, denominator, threshold
 ! F(tr(C)) = 1 / (1 - (tr(C)/b^2))
 !
 ! where b is the square of the maximum extension of the dumbbell (considered in the model).
+!
+! Note we set a threshold on the value of tr(C) to limit the maximum force.
     trace = Cxx_in + Cyy_in + Czz_in
-    IF (abs(trace).lt.1d-15) THEN
+    IF(abs(trace).lt.1d-15) THEN
       calculateF_FENE_PMP = 1d0
       RETURN
     ENDIF
-    
-    denominator = 1d0 - (trace / (bValue*bValue))
-    IF (abs(denominator).lt.1d-15) THEN
-      calculateF_FENE_PMP = 0d0
-      RETURN
-    ENDIF   
 
+    threshold = 0.95*bValue*bValue
+    IF (abs(trace).ge.threshold) THEN
+      trace = threshold
+    ENDIF
+
+    denominator = 1d0 - (trace / (bValue*bValue))
     calculateF_FENE_PMP = 1d0 / denominator
     RETURN
-
   END FUNCTION calculateF_FENE_PMP
-  
+
 
   SUBROUTINE calcStress_weakform_FENE_PMP
     IMPLICIT NONE
