@@ -1,7 +1,7 @@
 MF= Makefile
 FC = ifort 
-FFLAGS = -O3 -axSSE4.1 -openmp -ipo -parallel -free -I$(MKLROOT)/include/ia32  -I$(MKLROOT)/include #-check all -fp-stack-check -traceback -gen-interfaces -warn interfaces  -fstack-protector -debug-parameters all -debug inline-debug-info -fp-model precise -ftrapuv -g #-fpe0 -vec-report -par-report 
-LIBFLAGS = -O3 -axSSE4.1 -openmp -ipo -parallel -free -L$(MKLROOT)/lib/ia32 $(MKLROOT)/lib/ia32/libmkl_blas95.a $(MKLROOT)/lib/ia32/libmkl_lapack95.a -lmkl_intel -lmkl_intel_thread -lmkl_core -liomp5 -lpthread # -lm #not required?
+FFLAGS = -O3 -axSSE4.1 -qopenmp -ipo -parallel -free -I$(MKLROOT)/include/ia32  -I$(MKLROOT)/include #-check all -fp-stack-check -traceback -gen-interfaces -warn interfaces  -fstack-protector -debug-parameters all -debug inline-debug-info -fp-model precise -ftrapuv -g #-fpe0 -vec-report -par-report 
+LIBFLAGS = -O3 -axSSE4.1 -qopenmp -ipo -parallel -free -L$(MKLROOT)/lib/ia32 $(MKLROOT)/lib/ia32/libmkl_blas95.a $(MKLROOT)/lib/ia32/libmkl_lapack95.a -lmkl_intel -lmkl_intel_thread -lmkl_core -liomp5 -lpthread # -lm #not required?
 VPATH = ./src/
 
 EXE = vesemd

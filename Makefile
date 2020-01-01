@@ -1,7 +1,7 @@
 MF= Makefile
 FC = ifort
-FFLAGS = -O3 -axAVX -openmp -ipo -free -I$(MKLROOT)/include/intel64/lp64 -I$(MKLROOT)/include #-check all -fp-stack-check -traceback -gen-interfaces -warn interfaces  -fstack-protector -debug-parameters all -debug inline-debug-info -fp-model precise -ftrapuv -g #-fpe0 -vec-report -par-report -ipo
-LIBFLAGS = -O3 -axAVX -openmp -ipo -free -L$(MKLROOT)/lib/intel64 $(MKLROOT)/lib/intel64/libmkl_blas95_lp64.a $(MKLROOT)/lib/intel64/libmkl_lapack95_lp64.a -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread
+FFLAGS = -O3 -axAVX -qopenmp -ipo -free -I$(MKLROOT)/include/intel64/lp64 -I$(MKLROOT)/include #-check all -fp-stack-check -traceback -gen-interfaces -warn interfaces  -fstack-protector -debug-parameters all -debug inline-debug-info -fp-model precise -ftrapuv -g #-fpe0 -vec-report -par-report -ipo
+LIBFLAGS = -O3 -axAVX -qopenmp -ipo -free -L$(MKLROOT)/lib/intel64 $(MKLROOT)/lib/intel64/libmkl_blas95_lp64.a $(MKLROOT)/lib/intel64/libmkl_lapack95_lp64.a -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread
 VPATH = ./src/
 
 EXE = vesemd
