@@ -64,20 +64,21 @@ MODULE fene_p_mp_module
     Dzz = localGradUzz_in
 
     temp1 = Dzz*(Dxx + Dyy)
-    temp2 = (Dxx*Dyy + Dxy*Dxy)
+    temp2 = (Dxx*Dyy - Dxy*Dxy)! was (Dxx*Dyy + Dxy*Dxy)
 
-    IF ((abs(temp2).lt.1d-15).OR.(abs(temp1-temp2).lt.1d-15)) THEN
-      calculatePsi_FENE_PMP = 0d0;
-    ELSE
+    ! IF commented out as suggested by Tim. The checks on temp1 and temp2 would need to be amended anyway.
+    !IF ((abs(temp2).lt.1d-15).OR.(abs(temp1-temp2).lt.1d-15)) THEN
+    !  calculatePsi_FENE_PMP = 0d0;
+    !ELSE
       ! The extensionRate = 3d0*I3 / I2, with
       ! I2 = Dxy*Dxy - (Dxx*Dyy + Dxx*Dzz + Dyy*Dzz)
       ! I3 = Dxx*Dyy*Dzz - Dxy*Dxy*Dzz
-      ! but this can be written as:
+      ! but I2 / I3  can be written as:
       ! Dzz / ((Dzz*(Dxx + Dyy) / (Dxx*Dyy - Dxy^2)) - 1)
-      extensionRate = Dzz / ((temp1 / temp2) - 1d0)
+      extensionRate = 3d0*Dzz / ((temp1 / temp2) - 1d0)
 
       calculatePsi_FENE_PMP = 0.5*(cosh(lambdaD*extensionRate) - 1d0)
-    ENDIF
+    !ENDIF
 
     RETURN
   END FUNCTION calculatePsi_FENE_PMP
