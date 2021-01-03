@@ -75,7 +75,7 @@ MODULE fene_p_mp_module
       ! I3 = Dxx*Dyy*Dzz - Dxy*Dxy*Dzz
       ! but I2 / I3  can be written as:
       ! Dzz / ((Dzz*(Dxx + Dyy) / (Dxx*Dyy - Dxy^2)) - 1)
-      extensionRate = 3d0*Dzz / ((temp1 / temp2) - 1d0)
+      extensionRate = -3d0*Dzz / ((temp1 / temp2) + 1d0)
 
       calculatePsi_FENE_PMP = 0.5*(cosh(lambdaD*extensionRate) - 1d0)
     !ENDIF
